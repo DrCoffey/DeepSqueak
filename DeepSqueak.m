@@ -534,9 +534,7 @@ guidata(hObject, handles);
 
 % --------------------------------------------------------------------
 function ViewManual_Callback(hObject, eventdata, handles)
-% Sorry
-system(['powershell Unblock-File -Path ''' handles.squeakfolder '\DeepSqueak Manual.chm''']);
-winopen([handles.squeakfolder '\DeepSqueak Manual.chm'])
+system('start https://github.com/DrCoffey/DeepSqueak/wiki');
 
 % --------------------------------------------------------------------
 function AboutDeepSqueak_Callback(hObject, eventdata, handles)
