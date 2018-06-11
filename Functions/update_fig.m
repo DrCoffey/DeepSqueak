@@ -1,6 +1,9 @@
 function update_fig(hObject, eventdata, handles)
 % Update the display
-
+if isempty(handles.calls)
+    errordlg('No calls in file')
+    return
+end
 audio =  handles.calls(handles.currentcall).Audio;
 if ~isa(audio,'double')
     audio = double(audio) / (double(intmax(class(audio)))+1);
@@ -15,8 +18,8 @@ else % long calls
     windowsize = round(handles.calls(handles.currentcall).Rate * 0.01);
     noverlap = round(handles.calls(handles.currentcall).Rate * 0.005);
     nfft = round(handles.calls(handles.currentcall).Rate * 0.01);
-end  
-  
+end
+
 [s, fr, ti] = spectrogram(audio,windowsize,noverlap,nfft,handles.calls(handles.currentcall).Rate,'yaxis');
 
 x1=find(ti>=handles.calls(handles.currentcall).RelBox(1),1);
@@ -49,7 +52,7 @@ else
     set(handles.status,'String','Rejected')
 end
 
-% Box Creation 
+% Box Creation
 if handles.calls(handles.currentcall).Accept==1
     set(handles.box,'Position',handles.calls(handles.currentcall).RelBox,'EdgeColor','g')
 else
@@ -82,7 +85,7 @@ set(handles.duration,'String',['Duration: ' num2str(stats.DeltaTime*1000,'%.0f')
 set(handles.sinuosity,'String',['Sinuosity: ' num2str(stats.Sinuosity,'%.4f')]);
 set(handles.powertext,'String',['Avg. Power: ' num2str(handles.calls(handles.currentcall).Power)])
 set(handles.freq,'String',['Frequency: ' num2str(stats.PrincipalFreq,'%.1f') ' KHz']);
- 
+
 % Waveform
 cla(handles.axes3)
 hold(handles.axes3,'on')
@@ -97,9 +100,9 @@ x = 1:length(stats.Entropy);
 z = zeros(size(x));
 col = double(stats.Entropy < 1-handles.settings.EntropyThreshold);  % This is the color, vary with x in this case.
 surface(handles.axes3,[x;x],[y;y],[z;z],[col;col],...
-        'facecol','r',...
-        'edgecol','interp',...
-        'linew',2);
+    'facecol','r',...
+    'edgecol','interp',...
+    'linew',2);
 set(handles.axes3,'YTickLabel',[]);
 set(handles.axes3,'XTickLabel',[]);
 set(handles.axes3,'XTick',[]);
@@ -124,9 +127,9 @@ handles.axes5.XAxis.Color = 'w';
 handles.axes5.XAxis.TickLength = [0.035 1]; % Update display with time in file
 
 if handles.calls(handles.currentcall).Accept==1
-line([handles.CallTime(handles.currentcall,1) handles.CallTime(handles.currentcall,1)],[0 1],'LineWidth',3,'Color','g','Parent', handles.axes5);
+    line([handles.CallTime(handles.currentcall,1) handles.CallTime(handles.currentcall,1)],[0 1],'LineWidth',3,'Color','g','Parent', handles.axes5);
 else
-line([handles.CallTime(handles.currentcall,1) handles.CallTime(handles.currentcall,1)],[0 1],'LineWidth',3,'Color','r','Parent', handles.axes5);
+    line([handles.CallTime(handles.currentcall,1) handles.CallTime(handles.currentcall,1)],[0 1],'LineWidth',3,'Color','r','Parent', handles.axes5);
 end
 text((max(handles.CallTime(handles.currentcall,1))),1.2,[num2str(stats.BeginTime,'%.1f') ' s'],'Color','W', 'HorizontalAlignment', 'center','Parent',handles.axes5)
 guidata(hObject, handles);

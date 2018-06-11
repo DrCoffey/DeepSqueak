@@ -83,11 +83,12 @@ for j = 1:length(audioselections)
     for k=1:length(networkselections)
         handles.AudioFile=[handles.audiofiles(CurrentAudioFile).folder '\' handles.audiofiles(CurrentAudioFile).name];
         % cd(handles.settings.detectionfolder);
-        handles.NeuralNetwork=load([handles.networkfiles(networkselections(k)).folder '\' handles.networkfiles(networkselections(k)).name]);%get currently selected option from menu
+        networkname = handles.networkfiles(networkselections(k)).name;
+        handles.NeuralNetwork=load([handles.networkfiles(networkselections(k)).folder '\' networkname]);%get currently selected option from menu
         if k==1
-            Calls1=SqueakDetect(handles.AudioFile,handles.NeuralNetwork,handles.audiofiles(CurrentAudioFile).name,Settings(:,k),0,0,j,length(audioselections));
+            Calls1=SqueakDetect(handles.AudioFile,handles.NeuralNetwork,handles.audiofiles(CurrentAudioFile).name,Settings(:,k),0,0,j,length(audioselections),networkname);
         elseif k==2
-            Calls2=SqueakDetect(handles.AudioFile,handles.NeuralNetwork,handles.audiofiles(CurrentAudioFile).name,Settings(:,k),0,0,j,length(audioselections));
+            Calls2=SqueakDetect(handles.AudioFile,handles.NeuralNetwork,handles.audiofiles(CurrentAudioFile).name,Settings(:,k),0,0,j,length(audioselections),networkname);
         end
     end
     
@@ -103,8 +104,12 @@ for j = 1:length(audioselections)
     end
     
     if length(networkselections)==1
+        if ~isempty(Calls1)
         Calls=Calls1;
         save(fname,'Calls','-v7.3');
+        else
+             disp(['No calls detected in: ' strtok(handles.audiofiles(CurrentAudioFile).name)]);
+        end           
     end
     
     if length(networkselections)==2

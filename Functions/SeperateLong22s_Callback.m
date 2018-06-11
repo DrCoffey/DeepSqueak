@@ -1,12 +1,13 @@
-function SeperateLong22s_Callback(hObject, eventdata, handles)
-
-[trainingdata, trainingpath] = uigetfile([handles.settings.detectionfolder '\*.mat'],'Select Detection File','MultiSelect', 'off');
-[audiodata, audiopath] = uigetfile({'*.wav;*.flac;*.UVD' 'Audio File';'*.wav' 'WAV(*.wav)'; '*.flac' 'FLAC (*.flac)'; '*.UVD' 'Ultravox File (*.UVD)'},['Select Corresponding Audio File for ' trainingdata],handles.settings.audiofolder);
-info = audioinfo([audiopath audiodata]);
-
-hc = waitbar(0,'Loading File');
-
-load([trainingpath trainingdata],'Calls');
+function Calls = SeperateLong22s_Callback(hObject, eventdata, handles, inputfile, Calls)
+%% Get if clicked through menu, or using the long call network
+if nargin == 3
+    [trainingdata, trainingpath] = uigetfile([handles.settings.detectionfolder '\*.mat'],'Select Detection File','MultiSelect', 'off');
+    [audiodata, audiopath] = uigetfile({'*.wav;*.flac;*.UVD' 'Audio File';'*.wav' 'WAV(*.wav)'; '*.flac' 'FLAC (*.flac)'; '*.UVD' 'Ultravox File (*.UVD)'},['Select Corresponding Audio File for ' trainingdata],handles.settings.audiofolder);
+    inputfile = [audiopath audiodata];
+    hc = waitbar(0,'Loading File');
+    load([trainingpath trainingdata],'Calls');
+end
+info = audioinfo(inputfile);
 
 newBoxes = [];
 newScores = [];
@@ -15,18 +16,18 @@ newAccept = [];
 
 for i=1:length(Calls)
     
-    
-    waitbar(i/length(Calls),hc,'Splitting Calls'); 
-
+    if nargin == 3
+        waitbar(i/length(Calls),hc,'Splitting Calls');
+    end
     
     
     WindL=round((Calls(i).Box(1)-(Calls(i).Box(3)))*(info.SampleRate));
-    if WindL<=0
+    if WindL<=1
         pad=abs(WindL);
         WindL = 1;
     end
     WindR=round((Calls(i).Box(1)+Calls(i).Box(3)+(Calls(i).Box(3)))*(info.SampleRate));
-    audio = audioread([audiopath audiodata],[WindL WindR]);
+    audio = audioread(inputfile,[WindL WindR]);
     if WindL==1;
         pad=zeros(pad,1);
         audio=[pad
@@ -103,7 +104,7 @@ overlapRatio = bboxOverlapRatio(newBoxes, newBoxes);
 n = size(overlapRatio,1);
 overlapRatio(1:n+1:n^2) = 0;
 g = graph(overlapRatio);
-componentIndices = conncomp(g); 
+componentIndices = conncomp(g);
 
 xmin = accumarray(componentIndices', xmin, [], @min);
 ymin = accumarray(componentIndices', ymin, [], @min);
@@ -118,36 +119,52 @@ merged_accept = accumarray(componentIndices', newAccept, [], @max);
 
 
 % Re Make Call Structure
-for i=1:length(merged_boxes)
-waitbar(i/length(merged_boxes),hc,'Remaking Structure'); 
-
-WindL=round((merged_boxes(i,1)-(merged_boxes(i,3)))*(info.SampleRate));
-if WindL<=1
-    pad=abs(WindL);
-    WindL = 1;
+for i=1:size(merged_boxes,1)
+    if nargin == 3
+    waitbar(i/length(merged_boxes),hc,'Remaking Structure');
+    end
+    
+    WindL=round((merged_boxes(i,1)-(merged_boxes(i,3)))*(info.SampleRate));
+    if WindL<=1
+        pad=abs(WindL);
+        WindL = 1;
+    end
+    WindR=round((merged_boxes(i,1)+merged_boxes(i,3)+(merged_boxes(i,3)))*(info.SampleRate));
+    a = audioread(inputfile,[WindL WindR],'native');
+    if WindL==1;
+        pad=zeros(pad,1);
+        a=[pad
+            a];
+    end
+    
+    % Final Structure
+    NewCalls(i).Rate=info.SampleRate;
+    NewCalls(i).Box=merged_boxes(i,:);
+    NewCalls(i).RelBox=[merged_boxes(i,3) merged_boxes(i,2) merged_boxes(i,3) merged_boxes(i,4)];
+    NewCalls(i).Score=merged_scores(i);
+    NewCalls(i).Audio=a;
+    NewCalls(i).Type=categorical({'USV'});
+    NewCalls(i).Power=merged_power(i);
+    NewCalls(i).Accept=merged_accept(i);
+    
+    %% Autoreject calls with low tonality
+    EntropyThreshold = 0.3;
+    AmplitudeThreshold = 0.15;
+    stats = CalculateStats(I,windowsize,noverlap,nfft,NewCalls(i).Rate,NewCalls(i).Box,EntropyThreshold,AmplitudeThreshold,0);
+    if (stats.SignalToNoise > .4) & stats.DeltaTime > .2;
+        NewCalls(i).Accept=1;
+    else
+        NewCalls(i).Accept=0;
+    end
+    
 end
-WindR=round((merged_boxes(i,1)+merged_boxes(i,3)+(merged_boxes(i,3)))*(info.SampleRate));
-a = audioread([audiopath audiodata],[WindL WindR],'native');
-if WindL==1;
-   pad=zeros(pad,1);
-   a=[pad 
-       a];
-end
+Calls = NewCalls([NewCalls.Accept] == 1);
 
-% Final Structure
-Calls(i).Rate=info.SampleRate;
-Calls(i).Box=merged_boxes(i,:);
-Calls(i).RelBox=[merged_boxes(i,3) merged_boxes(i,2) merged_boxes(i,3) merged_boxes(i,4)];
-Calls(i).Score=merged_scores(i);
-Calls(i).Audio=a;
-Calls(i).Type=categorical({'USV'});
-Calls(i).Power=merged_power(i);
-Calls(i).Accept=merged_accept(i);
+if nargin == 3
+    [FileName,PathName,FilterIndex] = uiputfile([handles.settings.detectionfolder '/*.mat'],'Save Merged Detections');
+    waitbar(i/length(merged_boxes),hc,'Saving...');
+    save([PathName,FileName],'Calls','-v7.3');
+    update_folders(hObject, eventdata, handles);
+    handles = guidata(hObject);  % Get newest version of handles
+    close(hc);
 end
-
-[FileName,PathName,FilterIndex] = uiputfile([handles.settings.detectionfolder '/*.mat'],'Save Merged Detections');
-waitbar(i/length(merged_boxes),hc,'Saving...'); 
-save([PathName,FileName],'Calls','-v7.3');
-update_folders(hObject, eventdata, handles);
-handles = guidata(hObject);  % Get newest version of handles
-close(hc);

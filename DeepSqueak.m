@@ -36,8 +36,8 @@ function DeepSqueak_OpeningFcn(hObject, eventdata, handles, varargin)
 disp '                                                                                                                                 .---.'
 disp '                                                                                                                                /  .  \  '
 disp '                                                                                                       ) _     _               |\_/|   |'
-disp '                                                                                                      ( (^)-~-(^)              |   |   |' 
-disp '    ._______________________________________________________________________________________________,-.\_( 0 0 )__,-.__________|___|__,|'          
+disp '                                                                                                      ( (^)-~-(^)              |   |   |'
+disp '    ._______________________________________________________________________________________________,-.\_( 0 0 )__,-.__________|___|__,|'
 disp '   /  .-.                                                                                           ''M''   \   /   ''M''                  |'
 disp '  |  /   \                                                                                                 >o<                         |'
 disp '  | |\_.  |                                                                                                                            |  '
@@ -58,6 +58,10 @@ disp '  |       |                                                               
 disp '  \       |____________________________________________________________________________________________________________________________/'
 disp '   \     /'
 disp '    `---'''
+disp '  '
+disp '  '
+disp '  '
+disp ' DeepSqueak version 1.0.2'
 
 % Set Handles
 hFig = hObject;
@@ -120,7 +124,7 @@ varargout{1} = handles.output;
 % --- Executes on button press in PlayCall.
 function PlayCall_Callback(hObject, eventdata, handles)
 % Play the sound within the boxs
-   audio =  handles.calls(handles.currentcall).Audio;
+audio =  handles.calls(handles.currentcall).Audio;
 if ~isa(audio,'double')
     audio = double(audio) / (double(intmax(class(audio)))+1);
 end
@@ -283,7 +287,7 @@ handles.cmapname=handles.cmapname(get(hObject,'Value'));
 switch handles.cmapname{1,1}
     case 'magma'
         handles.cmap=magma;
-    case 'inferno' 
+    case 'inferno'
         handles.cmap=inferno;
     case 'viridis'
         handles.cmap=viridis;
@@ -459,13 +463,15 @@ dlg_title = 'Change Playback Rate';
 num_lines=1; options.Resize='off'; options.WindowStyle='modal'; options.Interpreter='tex';
 defaultans = {num2str(handles.settings.playback_rate)};
 rate = inputdlg(prompt,dlg_title,num_lines,defaultans);
+if isempty(rate); return; end
+
 [newrate,~,errmsg] = sscanf(rate{1},'%f',1);
 disp(errmsg);
 if ~isempty(newrate)
-handles.settings.playback_rate = newrate;
-settings = handles.settings;
-save([handles.squeakfolder '/settings.mat'],'-struct','settings')
-update_folders(hObject, eventdata, handles);
+    handles.settings.playback_rate = newrate;
+    settings = handles.settings;
+    save([handles.squeakfolder '/settings.mat'],'-struct','settings')
+    update_folders(hObject, eventdata, handles);
 end
 guidata(hObject, handles);
 
@@ -477,21 +483,23 @@ dlg_title = 'New Display Range (KHz):';
 num_lines=[1 50]; options.Resize='off'; options.WindowStyle='modal'; options.Interpreter='tex';
 defaultans = {num2str(handles.settings.LowFreq),num2str(handles.settings.HighFreq)};
 dispRange = inputdlg(prompt,dlg_title,num_lines,defaultans);
+if isempty(dispRange); return; end
+
 [LowFreq,~,errmsg] = sscanf(dispRange{1},'%f',1);
 disp(errmsg);
 [HighFreq,~,errmsg] = sscanf(dispRange{2},'%f',1);
 disp(errmsg);
 if ~isempty(LowFreq) && ~isempty(HighFreq)
-if HighFreq > LowFreq
-handles.settings.LowFreq = LowFreq;
-handles.settings.HighFreq = HighFreq;
-settings = handles.settings;
-save([handles.squeakfolder '/settings.mat'],'-struct','settings')
-update_folders(hObject, eventdata, handles);
-update_fig(hObject, eventdata, handles);
-else
-errordlg('High cutoff must be greater than low cutoff.')
-end
+    if HighFreq > LowFreq
+        handles.settings.LowFreq = LowFreq;
+        handles.settings.HighFreq = HighFreq;
+        settings = handles.settings;
+        save([handles.squeakfolder '/settings.mat'],'-struct','settings')
+        update_folders(hObject, eventdata, handles);
+        update_fig(hObject, eventdata, handles);
+    else
+        errordlg('High cutoff must be greater than low cutoff.')
+    end
 end
 guidata(hObject, handles);
 
@@ -512,6 +520,7 @@ dlg_title = 'New Contour Threshold:';
 num_lines=[1 50]; options.Resize='off'; options.WindowStyle='modal'; options.Interpreter='tex';
 defaultans = {num2str(handles.settings.EntropyThreshold),num2str(handles.settings.AmplitudeThreshold)};
 threshold = inputdlg(prompt,dlg_title,num_lines,defaultans);
+if isempty(threshold); return; end
 
 [Tonality,~,errmsg] = sscanf(threshold{1},'%f',1);
 disp(errmsg);
@@ -519,16 +528,16 @@ disp(errmsg);
 disp(errmsg);
 
 if ~isempty(Tonality) && ~isempty(Amplitude)
-handles.settings.EntropyThreshold = Tonality;
-handles.settings.AmplitudeThreshold = Amplitude;
-settings = handles.settings;
-save([handles.squeakfolder '/settings.mat'],'-struct','settings')
-update_folders(hObject, eventdata, handles);
-try
-    update_fig(hObject, eventdata, handles);
-catch
-    disp('Could not update figure. Is a call loaded?')
-end
+    handles.settings.EntropyThreshold = Tonality;
+    handles.settings.AmplitudeThreshold = Amplitude;
+    settings = handles.settings;
+    save([handles.squeakfolder '/settings.mat'],'-struct','settings')
+    update_folders(hObject, eventdata, handles);
+    try
+        update_fig(hObject, eventdata, handles);
+    catch
+        disp('Could not update figure. Is a call loaded?')
+    end
 end
 guidata(hObject, handles);
 
@@ -543,7 +552,8 @@ message = [
     {'DeepSqueak Version 1.0'}
     {'\copyright 2018'}
     ];
-d = dialog('Position',[300 350 250  300],'Name',title,'WindowStyle','Normal');
+d = dialog('Position',[300 350 250  300],'Name',title,'WindowStyle','Normal','Visible', 'off');
+movegui(d,'center');
 tx = axes(d,'Units','Normalized','Position',[.2 .7 .6 .4],'Visible', 'off');
 text(tx,.5,.5,message,'HorizontalAlignment','Center')
 ha = axes(d,'Units','Normalized','Position',[.1 .15 .8 .6]);
@@ -553,6 +563,7 @@ btn = uicontrol('Parent',d,...
     'Position',[100 10 50 25],...
     'String','Ok',...
     'Callback','delete(gcf)');
+set(d,'Visible','on')
 
 
-           
+
