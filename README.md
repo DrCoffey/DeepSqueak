@@ -5,7 +5,11 @@ DeepSqueak 1.0 was designed and tested with MATLAB 2017b.
 To run DeepSqueak, navigate to the main DeepSqueak folder in MATLAB, and type "DeepSqeak" into the command line. 
 DeepSqueak will add itself to the MATLAB path after running.
 
+**For help see the [Wiki](https://github.com/DrCoffey/DeepSqueak/wiki)**
+
 Copyright © 2018 by Russell Marx & Kevin Coffey. All Rights Reserved. 
+
+![screenshot](https://user-images.githubusercontent.com/39605011/40864034-f4f10e60-65a6-11e8-86ef-841aae1713aa.PNG)
 
 DeepSqueak: A Deep Learning Based System for Quantification of Ultrasonic Vocalizations
 Kevin R. Coffey, Russell G. Marx, John F. Neumaier
