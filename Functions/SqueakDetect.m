@@ -208,7 +208,11 @@ if ~isempty(thresholdScores)
     try 
     Calls = Calls([Calls.Power] > powerthresh);
     Calls = Calls([Calls.Accept] == 1);
-    Calls = SeperateLong22s_Callback([],[],[],inputfile,Calls);
+    
+    if contains(networkname,'long','IgnoreCase',true)
+        Calls = SeperateLong22s_Callback([],[],[],inputfile,Calls);
+    end
+    
     catch ME
         disp(ME)
     end
