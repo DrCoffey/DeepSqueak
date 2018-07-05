@@ -61,7 +61,7 @@ disp '    `---'''
 disp '  '
 disp '  '
 disp '  '
-disp ' DeepSqueak version 1.0.2'
+disp ' DeepSqueak version 1.0.3'
 
 % Set Handles
 hFig = hObject;
@@ -564,6 +564,3 @@ btn = uicontrol('Parent',d,...
     'String','Ok',...
     'Callback','delete(gcf)');
 set(d,'Visible','on')
-
-
-
