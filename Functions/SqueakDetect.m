@@ -80,7 +80,12 @@ for i = 1:((time - overlap) / (chunksize - overlap))
     s = mat2gray(s,[low cont]);
     s = s(upper:lower,:);
     try
-        [bboxes, scores, Class] = detect(network, s, 'ExecutionEnvironment','auto'); % Detect!
+        if contains(version,'2018')
+            [bboxes, scores, Class] = detect(network, s*255, 'ExecutionEnvironment','auto'); % Don't know why it needs this
+        else
+            [bboxes, scores, Class] = detect(network, s, 'ExecutionEnvironment','auto'); % Detect!
+        end
+        
         bboxes(:,2)=bboxes(:,2)+upper;
         bboxes(:,1)=bboxes(:,1)+round(c*(pixels*(1-(overlap/chunksize))));
         [bboxes(:,1),idex] = sort(bboxes(:,1),'ascend');
