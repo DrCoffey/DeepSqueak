@@ -20,6 +20,11 @@ for file = fname
     rate = data.sound.samplerate;
     clear Calls
     
+    if exist(audiofile,'file') == 0
+        [audioname, audiopath] = uigetfile({'*.wav;*.flac;*.UVD' 'Audio File';'*.wav' 'WAV(*.wav)'; '*.flac' 'FLAC (*.flac)'; '*.UVD' 'Ultravox File (*.UVD)'},'Select Audio File',handles.settings.audiofolder);
+        audiofile = [audiopath, audioname];
+    end
+        
     for i = 1:length(data.event)
         waitbar(i/length(data.event),hc);
         deltaT = data.event(i).selection(3) - data.event(i).selection(1);
