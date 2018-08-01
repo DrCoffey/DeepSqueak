@@ -20,7 +20,7 @@ while ~finished
         case 'Cancel'
             return
             
-        case 'K-means (fast, less accurate)'
+        case 'K-means (recommended)'
             
             prompt = {'Slope Weight','Sinuosity Weight','Frequency Weight','Duration Weight'};
             dlg_title = 'K-Means';
@@ -134,7 +134,7 @@ while ~finished
             clustAssign = knnsearch(C,data);
             
             
-        case 'ARTwarp (slow, accurate)'
+        case 'ARTwarp'
             art = questdlg('From existing model?','Cluster','Yes','No','No');
             switch art% Load Art Model
                 case 'No'
