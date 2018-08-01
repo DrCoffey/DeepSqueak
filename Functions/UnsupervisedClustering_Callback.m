@@ -120,7 +120,7 @@ while ~finished
                     k = str2num(k{1});
                     [clustAssign, C]= kmeans(data,k,'Distance','sqeuclidean','Replicates',50);
                     [FileName,PathName] = uiputfile('K-Means Model.mat');
-                    if isnumeric(FileName)
+                    if ~isnumeric(FileName)
                         save([PathName FileName],'C');
                     end
                 case 'Yes'
