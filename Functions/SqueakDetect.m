@@ -44,6 +44,7 @@ chunksize=Settings(2);
 overlap=Settings(3);
 sensitivity=Settings(6);
 powerthresh=Settings(7);
+gain=Settings(9);
 
 spectrange = info.SampleRate / 2000; % get range of spectrogram in KHz
 upper = round((spectrange - Settings(4)) * (1 + floor(nfft / 2)) / spectrange); % get upper limit
@@ -79,6 +80,7 @@ for i = 1:((time - overlap) / (chunksize - overlap))
     % s = mat2gray(s,[0 cont]);
     s = mat2gray(s,[low cont]);
     s = s(upper:lower,:);
+    s = s*gain;
     try
         if contains(version,'2018')
             [bboxes, scores, Class] = detect(network, s*255, 'ExecutionEnvironment','auto'); % Don't know why it needs this
