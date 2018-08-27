@@ -79,7 +79,7 @@ if ~(exist(fullfile(handles.squeakfolder, 'settings.mat'), 'file')==2) % Create 
     handles.settings.detectionfolder = [handles.squeakfolder '\Detections\'];
     handles.settings.networkfolder = [handles.squeakfolder '\Networks\'];
     handles.settings.audiofolder = [handles.squeakfolder '\Audio\'];
-    handles.settings.detectionSettings = {'0' '3' '.1' '100' '18' '0.65' '0.5' '1'};
+    handles.settings.detectionSettings = {'0' '3' '.1' '100' '18' '0' '0' '1' '1'};
     handles.settings.playback_rate = 0.05;
     handles.settings.LowFreq = 15;
     handles.settings.HighFreq = 115;
