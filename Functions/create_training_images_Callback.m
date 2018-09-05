@@ -12,12 +12,19 @@ if ischar(trainingdata)
     trainingdata=tmp;
 end
 
-% Spectrogram Settings
-prompt = {'Window Length (s)','Overlap (s)','NFFT (s)','Amplitude Cutoff (3 for 55s, 1 for 22s)', 'High Frequency Cutoff (KHz)', 'Bout Length (s) [Requires Single Files & Audio]'};
+% Get training settings
+prompt = {'Window Length (s)','Overlap (s)','NFFT (s)','Amplitude Cutoff (3 for 55s, 1 for 22s)', 'Bout Length (s) [Requires Single Files & Audio]','Number of augmented duplicates'};
 dlg_title = 'Spectrogram Settings';
 num_lines=[1 40]; options.Resize='off'; options.windStyle='modal'; options.Interpreter='tex';
-spectSettings = str2double(inputdlg(prompt,dlg_title,num_lines,{'0.0032','0.0028','0.0032','1','80','0'},options));
+spectSettings = str2double(inputdlg(prompt,dlg_title,num_lines,{'0.0032','0.0028','0.0032','1','0','3'},options));
 if isempty(spectSettings); return; end
+
+wind = spectSettings(1);
+noverlap = spectSettings(2);
+nfft = spectSettings(3);
+cont = spectSettings(4);
+bout = spectSettings(5);
+repeats = spectSettings(6);
 
 if bout ~= 0
     if length(trainingdata) > 1
@@ -25,15 +32,10 @@ if bout ~= 0
         return
     end
     [audioname, audiopath] = uigetfile({'*.wav;*.flac;*.UVD' 'Audio File';'*.wav' 'WAV(*.wav)'; '*.flac' 'FLAC (*.flac)'; '*.UVD' 'Ultravox File (*.UVD)'},['Select Audio File for ' trainingdata{1}] ,handles.settings.audiofolder);
+    if isnumeric(audioname); return; end
 end
-if isnumeric(audioname); return; end
 
-wind = spectSettings(1);
-noverlap = spectSettings(2);
-nfft = spectSettings(3);
-cont = spectSettings(4);
-cutoff = spectSettings(5)*1000;
-bout = spectSettings(6);
+
 
 h = waitbar(0,'Initializing');
 
@@ -46,6 +48,11 @@ for k = 1:length(trainingdata)
     
     % Remove Rejects
     Calls = Calls([Calls.Accept] == 1);
+    
+    % Find max call frequency for cutoff
+    CallBoxes = reshape([Calls.Box],4,[]);
+    maxFR = max(CallBoxes(:,2) + CallBoxes(:,4));
+    cutoff = min([Calls.Rate, maxFR*2000]) / 2;
     
     if bout ~= 0
         %% Calculate Groups of Calls
@@ -68,7 +75,8 @@ for k = 1:length(trainingdata)
         
         for i = 1:length(unique(bins))
             CurrentSet = Calls(bins==i);
-            Boxes =reshape([CurrentSet.Box],4,length([CurrentSet.Box])/4)';
+            Boxes =reshape([CurrentSet.Box],4,[])';
+            
             Start = min(Boxes(:,1));
             Finish = max(Boxes(:,1) + Boxes(:,3));
             
@@ -82,47 +90,57 @@ for k = 1:length(trainingdata)
             end
             windR = Finish + mean(Boxes(:,3));
             Audio=audioread([audiopath audioname],round([windL windR]*rate));
+            Boxes(:,1) = Boxes(:,1)-windL;
             
-            [s, fr, ti] = spectrogram(Audio,round(rate * wind),round(rate * noverlap),round(rate * nfft),rate,'yaxis');
-            x1 = axes2pix(length(ti),ti,Boxes(:,1)-windL);
-            x2 = axes2pix(length(ti),ti,Boxes(:,3));
-            y1 = axes2pix(length(fr),fr./1000,Boxes(:,2));
-            y2 = axes2pix(length(fr),fr./1000,Boxes(:,4));
-            maxfreq = find(fr<cutoff,1,'last');
-            fr = fr(1:maxfreq);
-            s = s(1:maxfreq,:);
-            box = round([x1 (length(fr)-y1-y2) x2 y2]);
+            %               [s, fr, ti] = spectrogram(Audio,round(rate * wind),round(rate * noverlap),round(rate * nfft),rate,'yaxis');
+            %             x1 = axes2pix(length(ti),ti,Boxes(:,1)-windL);
+            %             x2 = axes2pix(length(ti),ti,Boxes(:,3));
+            %             y1 = axes2pix(length(fr),fr./1000,Boxes(:,2));
+            %             y2 = axes2pix(length(fr),fr./1000,Boxes(:,4));
+            %             maxfreq = find(fr<cutoff,1,'last');
+            %             fr = fr(1:maxfreq);
+            %             s = s(1:maxfreq,:);
+            %             box = round([x1 (length(fr)-y1-y2) x2 y2]);
+            %
+            %             im = mat2gray(flipud(abs(s)),[0 cont]);
+            %
             
-            im = mat2gray(flipud(abs(s)),[0 cont]);
-            
-            
+            for j = 1:repeats
+                IMname = [handles.squeakfolder '\Training\Images\' filename '\' num2str(c) '_' num2str(j) '.png'];
+                [~,box] = CreateTrainingData(...
+                    Audio,...
+                    rate,...
+                    Boxes,...
+                    1,...
+                    wind,noverlap,nfft,cont,cutoff,IMname);
+                    TTable = [TTable;{IMname, box}];
+
+            end
             waitbar(i/length(unique(bins)),h,['Processing File ' num2str(k) ' of '  num2str(length(trainingdata))]);
             c=c+1;
             
-            imwrite(im,[handles.squeakfolder '\Training\Images\' filename '\' num2str(c) '.png'],'BitDepth',16)
-            TTable = [TTable;{['Training\Images\' filename '\' num2str(c) '.png'] box}];
             
         end
         
     elseif bout == 0
         for i = 1:length(Calls)
-            [s, fr, ti] = spectrogram(Calls(i).Audio,round(Calls(i).Rate * wind),round(Calls(i).Rate * noverlap),round(Calls(i).Rate * nfft),Calls(i).Rate,'yaxis');
-            x1 = axes2pix(length(ti),ti,Calls(i).RelBox(1));
-            x2 = axes2pix(length(ti),ti,Calls(i).RelBox(3));
-            y1 = axes2pix(length(fr),fr./1000,Calls(i).RelBox(2));
-            y2 = axes2pix(length(fr),fr./1000,Calls(i).RelBox(4));
-            maxfreq = find(fr<cutoff,1,'last');
-            fr = fr(1:maxfreq);
-            s = s(1:maxfreq,:);
-            if Calls(i).Accept == 1;
-                box = round([x1 (length(fr)-y1-y2) x2 y2]);
-            else
-                box = [];
+            c=c+1;
+            
+            % Augment audio by adding write noise, and change the amplitude
+            for j = 1:repeats
+                IMname = [handles.squeakfolder '\Training\Images\' filename '\' num2str(c) '_' num2str(j) '.png'];
+                [~,box] = CreateTrainingData(...
+                    Calls(i).Audio,...
+                    Calls(i).Rate,...
+                    Calls(i).RelBox,...
+                    Calls(i).Accept,...
+                    wind,noverlap,nfft,cont,cutoff,IMname);
+                
+%                 imwrite(im,filename,'BitDepth',8)
+                TTable = [TTable;{IMname, box}];
             end
-            s=flipud(abs(s));
-            im = mat2gray(s,[prctile(s(:),7.5) cont]);
-            imwrite(im,[handles.squeakfolder '\Training\Images\' filename '\' num2str(c) '.png'],'BitDepth',16)
-            TTable = [TTable;{['Training\Images\' filename '\' num2str(c) '.png'] box}];
+            
+            waitbar(i/length(Calls),h,['Processing File ' num2str(k) ' of '  num2str(length(trainingdata))]);
         end
     end
     save(['Training\' filename '.mat'],'TTable','wind','noverlap','nfft','cont');
@@ -130,3 +148,41 @@ for k = 1:length(trainingdata)
 end
 close(h)
 handles = guidata(hObject);  % Get newest version of handles
+
+end
+
+
+% Create training images and boxes
+function [im,box] = CreateTrainingData(audio,rate,RelBox,Accept,wind,noverlap,nfft,cont,cutoff,filename)
+
+AmplitudeRange = [.15, 1.2];
+NoiseRange = [35, 60];
+AmplitudeFactor = range(AmplitudeRange).*rand() + AmplitudeRange(1);
+NoiseFactor = range(NoiseRange).*rand() + NoiseRange(1);
+
+[s, fr, ti] = spectrogram(AmplitudeFactor .* awgn(audio,NoiseFactor),...
+    round(rate * wind),...
+    round(rate * noverlap),...
+    round(rate * nfft),...
+    rate,...
+    'yaxis');
+
+x1 = axes2pix(length(ti),ti,RelBox(:,1));
+x2 = axes2pix(length(ti),ti,RelBox(:,3));
+y1 = axes2pix(length(fr),fr./1000,RelBox(:,2));
+y2 = axes2pix(length(fr),fr./1000,RelBox(:,4));
+maxfreq = find(fr<cutoff,1,'last');
+fr = fr(1:maxfreq);
+s = s(1:maxfreq,:);
+if Accept == 1;
+    box = round([x1 (length(fr)-y1-y2) x2 y2]);
+else
+    box = [];
+end
+
+s=flipud(abs(s));
+im = mat2gray(s,[prctile(s(:),7.5) cont]);
+imwrite(im,filename,'BitDepth',8)
+
+end
+
