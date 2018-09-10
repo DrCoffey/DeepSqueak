@@ -13,10 +13,11 @@ if ischar(trainingdata)
 end
 
 % Get training settings
-prompt = {'Window Length (s)','Overlap (s)','NFFT (s)','Amplitude Cutoff (3 for 55s, 1 for 22s)', 'Bout Length (s) [Requires Single Files & Audio]','Number of augmented duplicates'};
+prompt = {'Window Length (s)','Overlap (s)','NFFT (s)','Amplitude Cutoff (3 for 55s, 1 for 22s)', 'Bout Length (s) [Requires Single Files & Audio]',...
+    'Number of augmented duplicates','Minimum amplitude augmentation','Maximum amplitude augmentation'};
 dlg_title = 'Spectrogram Settings';
 num_lines=[1 40]; options.Resize='off'; options.windStyle='modal'; options.Interpreter='tex';
-spectSettings = str2double(inputdlg(prompt,dlg_title,num_lines,{'0.0032','0.0028','0.0032','1','0','3'},options));
+spectSettings = str2double(inputdlg(prompt,dlg_title,num_lines,{'0.0032','0.0028','0.0032','1','0','3','0.25','1.2'},options));
 if isempty(spectSettings); return; end
 
 wind = spectSettings(1);
@@ -25,6 +26,7 @@ nfft = spectSettings(3);
 cont = spectSettings(4);
 bout = spectSettings(5);
 repeats = spectSettings(6);
+AmplitudeRange = [spectSettings(7), spectSettings(8)];
 
 if bout ~= 0
     if length(trainingdata) > 1
@@ -112,7 +114,7 @@ for k = 1:length(trainingdata)
                     rate,...
                     Boxes,...
                     1,...
-                    wind,noverlap,nfft,cont,cutoff,IMname);
+                    wind,noverlap,nfft,cont,cutoff,IMname,AmplitudeRange);
                     TTable = [TTable;{IMname, box}];
 
             end
@@ -134,7 +136,7 @@ for k = 1:length(trainingdata)
                     Calls(i).Rate,...
                     Calls(i).RelBox,...
                     Calls(i).Accept,...
-                    wind,noverlap,nfft,cont,cutoff,IMname);
+                    wind,noverlap,nfft,cont,cutoff,IMname,AmplitudeRange);
                 
 %                 imwrite(im,filename,'BitDepth',8)
                 TTable = [TTable;{IMname, box}];
@@ -153,9 +155,9 @@ end
 
 
 % Create training images and boxes
-function [im,box] = CreateTrainingData(audio,rate,RelBox,Accept,wind,noverlap,nfft,cont,cutoff,filename)
+function [im,box] = CreateTrainingData(audio,rate,RelBox,Accept,wind,noverlap,nfft,cont,cutoff,filename,AmplitudeRange)
 
-AmplitudeRange = [.15, 1.2];
+% AmplitudeRange = [.5, 1.25];
 NoiseRange = [35, 60];
 AmplitudeFactor = range(AmplitudeRange).*rand() + AmplitudeRange(1);
 NoiseFactor = range(NoiseRange).*rand() + NoiseRange(1);
