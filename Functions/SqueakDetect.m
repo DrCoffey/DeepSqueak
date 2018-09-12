@@ -79,11 +79,11 @@ for i = 1:((time - overlap) / (chunksize - overlap))
     end
     % s = mat2gray(s,[0 cont]);
     s = mat2gray(s,[low cont]);
-    s = s(upper:lower,:);
-    s = s*gain;
+    s = s(upper:lower,:).*gain;
+    s = s - prctile(s,5,2); % Subtract the 5th percentile to remove noise bands
     try
         if contains(version,'2018')
-            [bboxes, scores, Class] = detect(network, s*255, 'ExecutionEnvironment','auto'); % Don't know why it needs this
+            [bboxes, scores, Class] = detect(network, im2uint8(s), 'ExecutionEnvironment','auto'); % Matlab 2018 doesn't auto-convert to uint8
         else
             [bboxes, scores, Class] = detect(network, s, 'ExecutionEnvironment','auto'); % Detect!
         end
