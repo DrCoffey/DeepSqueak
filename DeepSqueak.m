@@ -61,7 +61,7 @@ disp '    `---'''
 disp '  '
 disp '  '
 disp '  '
-disp ' DeepSqueak version 1.0.4.1'
+disp ' DeepSqueak version 1.0.5'
 
 % Set Handles
 hFig = hObject;
