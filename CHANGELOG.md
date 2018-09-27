@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.1.1 2018-9-27
+Added the ability to accept or reject calls based on score, power, and tonality, in batches.
+
+Added tonality slider, so users can easily adjust tonality.
+ - Changed default tonality to 0.3, made amplitude threshold 0 by default
+ 
+The gradient display now only displays the verticle gradient, which better represents how tonality is calculated.
+ 
+Updating the display is now significantly faster, because the data in the existing figures is updated rather than being redrawn.
+
+ 
 ## 1.0.5 2018-9-12
 Added a new rat call detection network
  - Trained with the new options in 1.0.4.1
