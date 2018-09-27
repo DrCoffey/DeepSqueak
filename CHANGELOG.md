@@ -10,6 +10,7 @@ The gradient display now only displays the verticle gradient, which better repre
  
 Updating the display is now significantly faster, because the data in the existing figures is updated rather than being redrawn.
 
+During detection, boxes are padded slightly, to make contour detection better.
  
 ## 1.0.5 2018-9-12
 Added a new rat call detection network
