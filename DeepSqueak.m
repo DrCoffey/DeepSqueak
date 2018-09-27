@@ -61,7 +61,7 @@ disp '    `---'''
 disp '  '
 disp '  '
 disp '  '
-disp ' DeepSqueak version 1.0.5'
+disp ' DeepSqueak version 1.1.0'
 
 % Set Handles
 hFig = hObject;
@@ -115,6 +115,7 @@ set(handles.axes1,'XTick',[]);
 set(handles.axes1,'YTick',[]);
 update_folders(hObject, eventdata, handles);
 handles = guidata(hObject);  % Get newest version of handles
+set(handles.TonalitySlider,'Value',handles.settings.EntropyThreshold); 
 guidata(hObject, handles);
 
 function varargout = DeepSqueak_OutputFcn(hObject, eventdata, handles)
@@ -564,3 +565,26 @@ btn = uicontrol('Parent',d,...
     'String','Ok',...
     'Callback','delete(gcf)');
 set(d,'Visible','on')
+
+
+% --- Executes on slider movement.
+function TonalitySlider_Callback(hObject, eventdata, handles)
+handles.settings.EntropyThreshold=(get(hObject,'Value'));
+settings = handles.settings;
+save([handles.squeakfolder '/settings.mat'],'-struct','settings')
+update_fig(hObject, eventdata, handles);
+
+
+% --- Executes during object creation, after setting all properties.
+function TonalitySlider_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to TonalitySlider (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+
