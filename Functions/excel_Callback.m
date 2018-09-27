@@ -26,26 +26,13 @@ for j = 1:length(selections) % Do this for each file
         
         if (tmp.Calls(i).Accept==1) | strcmp(includereject,'Yes');
             
-            % Set spectrogram settings
-            windowsize = round(tmp.Calls(i).Rate * 0.0032);
-            noverlap = round(tmp.Calls(i).Rate * 0.0028);
-            nfft = round(tmp.Calls(i).Rate * 0.0032);
+
+            % Get spectrogram data
+            [I,windowsize,noverlap,nfft,rate,box] = CreateSpectrogram(tmp.Calls(i));
             
-
-            audio = tmp.Calls(i).Audio;
-            if ~isa(audio,'double')
-                audio = double(audio) / (double(intmax(class(audio)))+1);
-            end
-
-            [s, fr, ti] = spectrogram(audio,windowsize,noverlap,nfft,tmp.Calls(i).Rate,'yaxis');
-            x1=find(ti>=tmp.Calls(i).RelBox(1),1);
-            x2=find(ti>=(tmp.Calls(i).RelBox(1)+tmp.Calls(i).RelBox(3)),1);
-            y1=find(fr./1000>=round(tmp.Calls(i).RelBox(2)),1);
-            y2=find(fr./1000>=round(tmp.Calls(i).RelBox(2)+tmp.Calls(i).RelBox(4)),1);
-            I=abs(s(y1:y2,x1:x2));
             
             % Calculate statistics
-            stats = CalculateStats(I,windowsize,noverlap,nfft,tmp.Calls(i).Rate,tmp.Calls(i).Box,handles.settings.EntropyThreshold,handles.settings.AmplitudeThreshold);
+            stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.settings.EntropyThreshold,handles.settings.AmplitudeThreshold);
             
             
             ID = i;

@@ -11,7 +11,7 @@ stats.FilteredImage = gx + gy;
 stats.Entropy = geomean(I,1) ./ mean(I,1);
 
 % Ridge Detection
-[mx,ridgeFreq] = max((stats.FilteredImage));
+[mx,ridgeFreq] = max((I));
 
 greaterthannoise=smooth(stats.Entropy,5)' < 1-EntropyThreshold & (mx>(max(mx*AmplitudeThreshold))); % Select points greater than 0.2 time max
 iter = 0;

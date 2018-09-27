@@ -1,33 +1,16 @@
 function update_fig(hObject, eventdata, handles)
 % Update the display
+if ~isfield(handles,'calls') 
+    return
+end
+    
 if isempty(handles.calls)
     errordlg('No calls in file')
     return
 end
-audio =  handles.calls(handles.currentcall).Audio;
-if ~isa(audio,'double')
-    audio = double(audio) / (double(intmax(class(audio)))+1);
-end
 
-%Make Spectrogram and box
-if (handles.calls(handles.currentcall).RelBox(3) < .4 ) || handles.calls(handles.currentcall).RelBox(2) > 25 && (handles.calls(handles.currentcall).RelBox(3) < .4 )% Spect settings for short calls
-    windowsize = round(handles.calls(handles.currentcall).Rate * 0.0032);
-    noverlap = round(handles.calls(handles.currentcall).Rate * 0.0028);
-    nfft = round(handles.calls(handles.currentcall).Rate * 0.0032);
-else % long calls
-    windowsize = round(handles.calls(handles.currentcall).Rate * 0.01);
-    noverlap = round(handles.calls(handles.currentcall).Rate * 0.005);
-    nfft = round(handles.calls(handles.currentcall).Rate * 0.01);
-end
-
-[s, fr, ti] = spectrogram(audio,windowsize,noverlap,nfft,handles.calls(handles.currentcall).Rate,'yaxis');
-
-x1=find(ti>=handles.calls(handles.currentcall).RelBox(1),1);
-x2=find(ti>=(handles.calls(handles.currentcall).RelBox(1)+handles.calls(handles.currentcall).RelBox(3)),1);
-y1=find(fr./1000>=round(handles.calls(handles.currentcall).RelBox(2)),1);
-y2=find(fr./1000>=round(handles.calls(handles.currentcall).RelBox(2)+handles.calls(handles.currentcall).RelBox(4)),1);
-I=abs(s(y1:y2,x1:x2)); % Get the part of the spectrogram within the box
-FR=(fr(y1:y2));
+% Get spectrogram data
+[I,windowsize,noverlap,nfft,rate,box,s,fr,ti,audio,AudioRange] = CreateSpectrogram(handles.calls(handles.currentcall));
 
 % Plot Spectrogram
 set(handles.axes1,'YDir', 'normal','YColor',[1 1 1],'XColor',[1 1 1],'Clim',[0 2*mean(max(I))]);
@@ -37,8 +20,9 @@ set(handles.axes1,'Xlim',[handles.spect.XData(1) handles.spect.XData(end)])
 
 set(handles.axes1,'ylim',[handles.settings.LowFreq handles.settings.HighFreq]);
 % xlim([min(ti) max(ti)]);
+stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.settings.EntropyThreshold,handles.settings.AmplitudeThreshold);
 
-stats = CalculateStats(I,windowsize,noverlap,nfft,handles.calls(handles.currentcall).Rate,handles.calls(handles.currentcall).Box,handles.settings.EntropyThreshold,handles.settings.AmplitudeThreshold);
+% stats = CalculateStats(I,windowsize,noverlap,nfft,handles.calls(handles.currentcall).Rate,handles.calls(handles.currentcall).Box,handles.settings.EntropyThreshold,handles.settings.AmplitudeThreshold);
 handles.calls(handles.currentcall).Power=stats.MaxPower;
 
 % Set Text
@@ -84,15 +68,15 @@ set(handles.slope,'String',['Slope: ' num2str(stats.Slope,'%.3f') ' KHz/s']);
 set(handles.duration,'String',['Duration: ' num2str(stats.DeltaTime*1000,'%.0f') ' ms']);
 set(handles.sinuosity,'String',['Sinuosity: ' num2str(stats.Sinuosity,'%.4f')]);
 set(handles.powertext,'String',['Avg. Power: ' num2str(handles.calls(handles.currentcall).Power)])
+set(handles.tonalitytext,'String',['Avg. Tonality: ' num2str(stats.SignalToNoise,'%.4f')]);
 set(handles.freq,'String',['Frequency: ' num2str(stats.PrincipalFreq,'%.1f') ' KHz']);
 
 % Waveform
 cla(handles.axes3)
 hold(handles.axes3,'on')
-lef=(length(audio)/length(s(1,:)))*x1;
-rig=(length(audio)/length(s(1,:)))*x2;
-PlotAudio = audio(round(lef:rig));
-plot(handles.axes3,length(stats.Entropy) * ((1:length(PlotAudio)) / length(PlotAudio)),(.5*PlotAudio/max(PlotAudio)-.5),'Color',[.5 .5 .1]);
+PlotAudio = audio(AudioRange(1):AudioRange(2));
+plot(handles.axes3,length(stats.Entropy) * ((1:length(PlotAudio)) / length(PlotAudio)),(.5*PlotAudio/max(PlotAudio)-.5),'Color',[.1 .75 .75]);
+
 
 % SNR
 y = 0-stats.Entropy;

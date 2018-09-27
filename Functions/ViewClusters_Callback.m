@@ -58,14 +58,12 @@ for j = 1:length(trainingdata)  % For Each File
                 audio = double(audio) / (double(intmax(class(audio)))+1);
             end
             
-            [s, fr, ti] = spectrogram(audio,wind,noverlap,nfft,Calls(i).Rate,'yaxis');
-            x1 = axes2pix(length(ti),ti,Calls(i).RelBox(1));
-            x2 = axes2pix(length(ti),ti,Calls(i).RelBox(3)) + x1;
-            y1 = axes2pix(length(fr),fr./1000,Calls(i).RelBox(2));
-            y2 = axes2pix(length(fr),fr./1000,Calls(i).RelBox(4)) + y1;
-            I=abs(s(round(y1:y2),round(x1:x2))); % Get the pixels in the box
+            % Get spectrogram data
+            [I,~,noverlap,nfft,rate,box] = CreateSpectrogram(Calls(i));
+            
+            
             im = mat2gray(flipud(I),[0 max(max(I))/4]); % Set max brightness to 1/4 of max
-            stats = CalculateStats(I,wind,noverlap,nfft,Calls(i).Rate,Calls(i).Box,handles.settings.EntropyThreshold,handles.settings.AmplitudeThreshold);
+            stats = CalculateStats(I,wind,noverlap,nfft,rate,box,handles.settings.EntropyThreshold,handles.settings.AmplitudeThreshold);
             
             
             spectrange = Calls(i).Rate / 2000; % get frequency range of spectrogram in KHz
