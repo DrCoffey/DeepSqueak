@@ -47,14 +47,17 @@ powerthresh=Settings(7);
 gain=Settings(9);
 
 spectrange = info.SampleRate / 2000; % get range of spectrogram in KHz
-upper = round((spectrange - Settings(4)) * (1 + floor(nfft / 2)) / spectrange); % get upper limit
-lower = round((spectrange - Settings(5)) * (1 + floor(nfft / 2)) / spectrange); % get upper limit
+upper_freq = round((spectrange - Settings(4)) * (1 + floor(nfft / 2)) / spectrange); % get upper limit
+lower_freq = round((spectrange - Settings(5)) * (1 + floor(nfft / 2)) / spectrange); % get upper limit
 
 
 % Detect Calls
 h = waitbar(0,'Initializing');
 for i = 1:((time - overlap) / (chunksize - overlap))
     tic
+    
+    % Extract the audio chunk
+    % For the first audio chunk, set the first sample to 1
     if i==1
         windL=1;
         windR=chunksize*info.SampleRate;
@@ -62,25 +65,35 @@ for i = 1:((time - overlap) / (chunksize - overlap))
         windL=windR  - (overlap*info.SampleRate);
         windR=windL + (chunksize*info.SampleRate);
     end
-    % a = gpuArray(audioread(inputfile,[windL windR]));
+    
+    % Read the audio
     a = (audioread(inputfile,[windL windR]));
     if wind > length(a)
         errordlg(['For this network, audio chucks must be at least ' num2str(networkfile.wind) ' seconds long.']);
         return
     end
+    % Create the spectrogram
     s = spectrogram((a),wind,noverlap,nfft,info.SampleRate,'yaxis');
     pixels = length(s);
-    % G = gpuArray(s);
-    % s = mat2gray(flipud(abs(s)),[0 cont]);
-    
     s=flipud(abs(s));
+
+    
+    % Use a moving average, to scale the spectrogram
+    current_low_percentile = prctile(s(:),7.5);
     if i==1
-        low=prctile(s(:),7.5);
+        low=current_low_percentile;
+    else
+        low = (low + 0.1 * current_low_percentile) / 1.1;
     end
-    % s = mat2gray(s,[0 cont]);
     s = mat2gray(s,[low cont]);
-    s = s(upper:lower,:).*gain;
-    s = s - prctile(s,5,2); % Subtract the 5th percentile to remove noise bands
+    
+    % Apply gain setting
+    s = s(upper_freq:lower_freq,:).*gain;
+    
+    % Subtract the 5th percentile to remove horizontal noise bands
+    s = s - prctile(s,5,2); 
+    
+    % Detect
     try
         if contains(version,'2018')
             [bboxes, scores, Class] = detect(network, im2uint8(s), 'ExecutionEnvironment','auto'); % Matlab 2018 doesn't auto-convert to uint8
@@ -88,14 +101,16 @@ for i = 1:((time - overlap) / (chunksize - overlap))
             [bboxes, scores, Class] = detect(network, s, 'ExecutionEnvironment','auto'); % Detect!
         end
         
-        bboxes(:,2)=bboxes(:,2)+upper;
+        % bboxes start in pixels. Make this relative to position in file
+        bboxes(:,2)=bboxes(:,2)+upper_freq;
         bboxes(:,1)=bboxes(:,1)+round(c*(pixels*(1-(overlap/chunksize))));
-        [bboxes(:,1),idex] = sort(bboxes(:,1),'ascend');
-        bboxes(:,2)=bboxes(idex,2);
-        bboxes(:,3)=bboxes(idex,3);
-        bboxes(:,4)=bboxes(idex,4);
-        scores=scores(idex);
-        Class=Class(idex);
+        [bboxes,index] = sortrows(bboxes);
+%         [bboxes(:,1),index] = sort(bboxes(:,1),'ascend');
+%         bboxes(:,2)=bboxes(index,2);
+%         bboxes(:,3)=bboxes(index,3);
+%         bboxes(:,4)=bboxes(index,4);
+        scores=scores(index);
+        Class=Class(index);
         AllBoxes=[AllBoxes
             bboxes(Class == 'USV',:)];
         AllScores=[AllScores
@@ -131,7 +146,7 @@ xmax = accumarray(componentIndices', xmax, [], @max);
 ymax = accumarray(componentIndices', ymax, [], @max);
 merged_scores = accumarray(componentIndices', AllScores, [], @max);
 merged_boxes = [xmin ymin xmax-xmin+1 ymax-ymin+1];
-[z1 z2 z3]=unique(componentIndices);
+[~, z2]=unique(componentIndices);
 merged_Class = AllClass(z2);
 
 %% Create Output Structure
@@ -167,14 +182,29 @@ if ~isempty(thresholdScores)
         [sn,fr,ti] = spectrogram(a,wind,noverlap,nfft,info.SampleRate,'yaxis');
         ffr=flipud(fr);
         
-        
-        % Final Structure
-        Calls(i).Rate=info.SampleRate;
-        Calls(i).Box=[ti(thresholdBoxes(i,3)) + WindL/250000,...
+        box = [ti(thresholdBoxes(i,3)) + WindL/250000,...
             ((ffr(thresholdBoxes(i,2)+thresholdBoxes(i,4))))/1000,...
             ti(thresholdBoxes(i,3)),...
             fr(thresholdBoxes(i,4))/1000];
-        Calls(i).RelBox=[ti(thresholdBoxes(i,3)) ((ffr(thresholdBoxes(i,2)+thresholdBoxes(i,4))))/1000 ti(thresholdBoxes(i,3)) fr(thresholdBoxes(i,4))/1000];
+        % Relative box
+        relbox = [ti(thresholdBoxes(i,3)) ((ffr(thresholdBoxes(i,2)+thresholdBoxes(i,4))))/1000 ti(thresholdBoxes(i,3)) fr(thresholdBoxes(i,4))/1000];
+    
+        % Make the box a little bitter
+        expansionfactor = .2;
+        box(1) =  box(1) - (relbox(3) * expansionfactor);
+        relbox(1) = relbox(1) - (relbox(3) * expansionfactor);
+        box(2) =  box(2) - (relbox(4) * expansionfactor);
+        relbox(2) = relbox(2) - (relbox(4) * expansionfactor);
+        box(3) =  box(3) + (relbox(3) * expansionfactor * 2);
+        relbox(3) = relbox(3) + (relbox(3) * expansionfactor * 2);
+        box(4) =  box(4) + (relbox(4) * expansionfactor * 2);
+        relbox(4) = relbox(4) + (relbox(4) * expansionfactor * 2);
+        
+        
+        % Final Structure
+        Calls(i).Rate=info.SampleRate;
+        Calls(i).Box=box;
+        Calls(i).RelBox=relbox;
         Calls(i).Score=thresholdScores(i,:);
         Calls(i).Audio=a;
         Calls(i).Type=merged_Class(i);

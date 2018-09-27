@@ -1,4 +1,5 @@
 function update_fig(hObject, eventdata, handles)
+% profile on
 % Update the display
 if ~isfield(handles,'calls') 
     return
@@ -14,7 +15,7 @@ end
 
 % Plot Spectrogram
 set(handles.axes1,'YDir', 'normal','YColor',[1 1 1],'XColor',[1 1 1],'Clim',[0 2*mean(max(I))]);
-colormap(handles.axes1,handles.cmap);
+% colormap(handles.axes1,handles.cmap);
 set(handles.spect,'CData',imgaussfilt(abs(s)),'XData',ti,'YData',fr/1000);
 set(handles.axes1,'Xlim',[handles.spect.XData(1) handles.spect.XData(end)])
 
@@ -44,26 +45,26 @@ else
 end
 
 % Blur Box
-imagesc(flipud(stats.FilteredImage),'Parent', handles.axes4);
-set(handles.axes4,'Color',[.1 .1 .1],'YColor',[1 1 1],'XColor',[1 1 1],'Box','off','Clim',[.2*min(min(stats.FilteredImage)) .2*max(max(stats.FilteredImage))]);
+% imagesc(flipud(stats.FilteredImage),'Parent', handles.axes4);
+set(handles.filtered_image_plot,'CData',flipud(stats.FilteredImage))
+set(handles.axes4,'Color',[.1 .1 .1],'YColor',[1 1 1],'XColor',[1 1 1],'Box','off','Clim',[.2*min(min(stats.FilteredImage)) .2*max(max(stats.FilteredImage))],'XLim',[1 size(stats.FilteredImage,2)],'YLim',[1 size(stats.FilteredImage,1)]);
 colormap(handles.axes4,handles.cmap);
-% colormap(handles.axes4,'gray');
 set(handles.axes4,'YTickLabel',[]);
 set(handles.axes4,'XTickLabel',[]);
 set(handles.axes4,'XTick',[]);
 set(handles.axes4,'YTick',[]);
 
-
 % plot Ridge Detection
-scatter(stats.ridgeTime,stats.ridgeFreq_smooth,'LineWidth',1.5,'Parent',handles.axes7);
-set(handles.axes7,'Color',[.1 .1 .1],'YColor',[1 1 1],'XColor',[1 1 1],'Box','off','Xlim',[1 length(stats.FilteredImage(1,:))],'Ylim',[1 length(stats.FilteredImage(:,1))]);
-set(handles.axes7,'YTickLabel',[]);
-set(handles.axes7,'XTickLabel',[]);
-set(handles.axes7,'XTick',[]);
-set(handles.axes7,'YTick',[]);
-hl = lsline(handles.axes7);
-set(hl,'LineStyle','--','Color','y');
+set(handles.ContourScatter,'XData',stats.ridgeTime','YData',stats.ridgeFreq_smooth);
+set(handles.axes7,'Xlim',[1 length(stats.FilteredImage(1,:))],'Ylim',[1 length(stats.FilteredImage(:,1))]);
 
+
+% Delete everything except the scatter
+delete(handles.axes7.Children(1:end-1));
+ContourLine = lsline(handles.axes7);
+set(ContourLine,'LineStyle','--','Color','y');
+
+% Update text
 set(handles.slope,'String',['Slope: ' num2str(stats.Slope,'%.3f') ' KHz/s']);
 set(handles.duration,'String',['Duration: ' num2str(stats.DeltaTime*1000,'%.0f') ' ms']);
 set(handles.sinuosity,'String',['Sinuosity: ' num2str(stats.Sinuosity,'%.4f')]);
@@ -95,26 +96,17 @@ set(handles.axes3,'Color',[.1 .1 .1],'YColor',[1 1 1],'XColor',[1 1 1],'Box','of
 hold(handles.axes3,'off')
 
 % Plot Call Position
-cla(handles.axes5)
-line([0 max(handles.CallTime(:,1))],[0 0],'LineWidth',1,'Color','w','Parent', handles.axes5);
-line([0 max(handles.CallTime(:,1))],[1 1],'LineWidth',1,'Color','w','Parent', handles.axes5);
-set(handles.axes5,'XLim',[0 max(handles.CallTime(:,1))]);
-set(handles.axes5,'YLim',[0 1]);
-
-set(handles.axes5,'Color',[.1 .1 .1],'YColor',[.1 .1 .1],'XColor',[.1 .1 .1],'Box','off','Clim',[0 1]);
-set(handles.axes5,'YTickLabel',[]);
-set(handles.axes5,'XTickLabel',[]);
-set(handles.axes5,'XTick',unique(sort(handles.CallTime(:,1))));
-set(handles.axes5,'YTick',[]);
-handles.axes5.XAxis.Color = 'w';
-
 handles.axes5.XAxis.TickLength = [0.035 1]; % Update display with time in file
 
 if handles.calls(handles.currentcall).Accept==1
-    line([handles.CallTime(handles.currentcall,1) handles.CallTime(handles.currentcall,1)],[0 1],'LineWidth',3,'Color','g','Parent', handles.axes5);
+    set(handles.CurrentCallLinePosition,'XData',[handles.CallTime(handles.currentcall,1) handles.CallTime(handles.currentcall,1)],'Color','g');
 else
-    line([handles.CallTime(handles.currentcall,1) handles.CallTime(handles.currentcall,1)],[0 1],'LineWidth',3,'Color','r','Parent', handles.axes5);
+    set(handles.CurrentCallLinePosition,'XData',[handles.CallTime(handles.currentcall,1) handles.CallTime(handles.currentcall,1)],'Color','r');
+
 end
-text((max(handles.CallTime(handles.currentcall,1))),1.2,[num2str(stats.BeginTime,'%.1f') ' s'],'Color','W', 'HorizontalAlignment', 'center','Parent',handles.axes5)
+set(handles.CurrentCallLineLext,'Position',[(max(handles.CallTime(handles.currentcall,1))),1.2,0],'String',[num2str(stats.BeginTime,'%.1f') ' s']);
 guidata(hObject, handles);
+
+% profview
+% profile off
 end

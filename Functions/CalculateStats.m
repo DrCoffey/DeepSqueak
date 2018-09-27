@@ -6,8 +6,8 @@ end
 spectrange = SampleRate / 2000; % get frequency range of spectrogram in KHz
 FreqScale = spectrange / (1 + floor(nfft / 2)); % size of frequency pixels
 TimeScale = (windowsize - noverlap) / SampleRate; % size of time pixels
-[gx, gy] = imgradientxy(I);
-stats.FilteredImage = gx + gy;
+[~, gy] = imgradientxy(I);
+stats.FilteredImage =  gy;
 stats.Entropy = geomean(I,1) ./ mean(I,1);
 
 % Ridge Detection
