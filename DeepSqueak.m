@@ -61,7 +61,7 @@ disp '    `---'''
 disp '  '
 disp '  '
 disp '  '
-disp ' DeepSqueak version 1.1.0'
+disp ' DeepSqueak version 1.1.1'
 
 % Set Handles
 hFig = hObject;
@@ -83,8 +83,8 @@ if ~(exist(fullfile(handles.squeakfolder, 'settings.mat'), 'file')==2) % Create 
     handles.settings.playback_rate = 0.05;
     handles.settings.LowFreq = 15;
     handles.settings.HighFreq = 115;
-    handles.settings.AmplitudeThreshold = 0.15;
-    handles.settings.EntropyThreshold = 0.4;
+    handles.settings.AmplitudeThreshold = 0;
+    handles.settings.EntropyThreshold = 0.3;
     handles.settings.labels = {'FF','FM','Trill','Split',' ',' ',' ',' ',' ',' '};
     settings = handles.settings;
     save([handles.squeakfolder '/settings.mat'],'-struct','settings')
@@ -117,6 +117,22 @@ update_folders(hObject, eventdata, handles);
 handles = guidata(hObject);  % Get newest version of handles
 set(handles.TonalitySlider,'Value',handles.settings.EntropyThreshold); 
 guidata(hObject, handles);
+
+% Make the other figures black
+set(handles.axes4,'Color',[0 0 0],'YColor',[1 1 1],'XColor',[1 1 1],'Box','off','Clim',[0,1]);
+set(handles.axes4,'XTickLabel',[]);
+set(handles.axes4,'XTick',[]);
+set(handles.axes4,'YTick',[]);
+
+set(handles.axes7,'Color',[0 0 0],'YColor',[1 1 1],'XColor',[1 1 1],'Box','off','Clim',[0,1]);
+set(handles.axes7,'XTickLabel',[]);
+set(handles.axes7,'XTick',[]);
+set(handles.axes7,'YTick',[]);
+
+set(handles.axes3,'Color',[0 0 0],'YColor',[1 1 1],'XColor',[1 1 1],'Box','off','Clim',[0,1]);
+set(handles.axes3,'XTickLabel',[]);
+set(handles.axes3,'XTick',[]);
+set(handles.axes3,'YTick',[]);
 
 function varargout = DeepSqueak_OutputFcn(hObject, eventdata, handles)
 
@@ -323,6 +339,8 @@ switch handles.cmapname{1,1}
     case 'pink'
         handles.cmap=pink;
 end
+colormap(handles.axes1,handles.cmap);
+colormap(handles.axes4,handles.cmap);
 update_fig(hObject, eventdata, handles);
 guidata(hObject, handles);
 
