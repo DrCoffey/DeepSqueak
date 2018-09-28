@@ -2,6 +2,10 @@
 ## 1.1.2 2018-9-28
 Users can now set the time scale on the spectrogram to a constant value, in the "Update Display Range" menu.
 
+Added amplitude (power) to k-means clustering. Each call is split into chunks, and the power from each chunk is put into k-means.
+
+K-means clustering breaks the contours into chunks, which are are now equally spaced in time, rather than removing gaps in time. 
+
 ## 1.1.1 2018-9-27
 Added the ability to accept or reject calls based on score, power, and tonality, in batches.
 
