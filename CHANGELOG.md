@@ -1,4 +1,6 @@
 # Changelog
+## 1.1.2 2018-9-28
+Users can now set the time scale on the spectrogram to a constant value, in the "Update Display Range" menu.
 
 ## 1.1.1 2018-9-27
 Added the ability to accept or reject calls based on score, power, and tonality, in batches.
