@@ -61,7 +61,7 @@ disp '    `---'''
 disp '  '
 disp '  '
 disp '  '
-disp ' DeepSqueak version 1.1.1'
+disp ' DeepSqueak version 1.1.2'
 
 % Set Handles
 hFig = hObject;
@@ -86,6 +86,7 @@ if ~(exist(fullfile(handles.squeakfolder, 'settings.mat'), 'file')==2) % Create 
     handles.settings.AmplitudeThreshold = 0;
     handles.settings.EntropyThreshold = 0.3;
     handles.settings.labels = {'FF','FM','Trill','Split',' ',' ',' ',' ',' ',' '};
+    handles.settings.DisplayTimePadding = 0;
     settings = handles.settings;
     save([handles.squeakfolder '/settings.mat'],'-struct','settings')
     disp('Settings not found. New settings file created.')
@@ -359,7 +360,7 @@ end
 % --- Executes on button press in rectangle.
 function rectangle_Callback(hObject, eventdata, handles)
 % Re-draw the box
-fcn = makeConstrainToRectFcn('imrect',get(handles.axes1,'XLim'),get(handles.axes1,'YLim')); %constrain to edges
+fcn = makeConstrainToRectFcn('imrect',[handles.spect.XData(1),handles.spect.XData(end)],[handles.spect.YData(1),handles.spect.YData(end)]); %constrain to edges of window
 newbox=imrect(handles.axes1,'PositionConstraintFcn',fcn);
 handles.pos=getPosition(newbox);
 difference = handles.pos - handles.calls(handles.currentcall).RelBox;
@@ -496,11 +497,11 @@ guidata(hObject, handles);
 
 % --------------------------------------------------------------------
 function Change_Display_Range_Callback(hObject, eventdata, handles)
-% Change the y axis in the spectrogram viewer
-prompt = {'Low Frequency:', 'High Frequency (KHz):'};
-dlg_title = 'New Display Range (KHz):';
-num_lines=[1 50]; options.Resize='off'; options.WindowStyle='modal'; options.Interpreter='tex';
-defaultans = {num2str(handles.settings.LowFreq),num2str(handles.settings.HighFreq)};
+% Change the x and y axis in the spectrogram viewer
+prompt = {'Low Frequency (KHz):', 'High Frequency (KHz):', 'Time Padding (s) (Set to 0 to autoscale)'};
+dlg_title = 'New Display Range:';
+num_lines=[1 80]; options.Resize='off'; options.WindowStyle='modal'; options.Interpreter='tex';
+defaultans = {num2str(handles.settings.LowFreq),num2str(handles.settings.HighFreq),num2str(handles.settings.DisplayTimePadding)};
 dispRange = inputdlg(prompt,dlg_title,num_lines,defaultans);
 if isempty(dispRange); return; end
 
@@ -508,14 +509,18 @@ if isempty(dispRange); return; end
 disp(errmsg);
 [HighFreq,~,errmsg] = sscanf(dispRange{2},'%f',1);
 disp(errmsg);
-if ~isempty(LowFreq) && ~isempty(HighFreq)
+[DisplayTimePadding,~,errmsg] = sscanf(dispRange{3},'%f',1);
+disp(errmsg);
+if ~isempty(LowFreq) && ~isempty(HighFreq) && ~isempty(DisplayTimePadding)
     if HighFreq > LowFreq
         handles.settings.LowFreq = LowFreq;
         handles.settings.HighFreq = HighFreq;
+        handles.settings.DisplayTimePadding = DisplayTimePadding;
         settings = handles.settings;
         save([handles.squeakfolder '/settings.mat'],'-struct','settings')
         update_folders(hObject, eventdata, handles);
         update_fig(hObject, eventdata, handles);
+        
     else
         errordlg('High cutoff must be greater than low cutoff.')
     end
