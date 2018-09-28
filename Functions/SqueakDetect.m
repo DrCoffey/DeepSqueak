@@ -1,5 +1,7 @@
 function  Calls=SqueakDetect(inputfile,networkfile,fname,Settings,include_date,savefile,currentFile,totalFiles,networkname)
 % Find Squeaks
+h = waitbar(0,'Initializing');
+
 if ~exist('include_date');
     include_date = 1;
 end
@@ -52,7 +54,6 @@ lower_freq = round((spectrange - Settings(5)) * (1 + floor(nfft / 2)) / spectran
 
 
 % Detect Calls
-h = waitbar(0,'Initializing');
 for i = 1:((time - overlap) / (chunksize - overlap))
     tic
     
@@ -190,15 +191,15 @@ if ~isempty(thresholdScores)
         relbox = [ti(thresholdBoxes(i,3)) ((ffr(thresholdBoxes(i,2)+thresholdBoxes(i,4))))/1000 ti(thresholdBoxes(i,3)) fr(thresholdBoxes(i,4))/1000];
     
         % Make the box a little bitter
-        expansionfactor = .2;
-        box(1) =  box(1) - (relbox(3) * expansionfactor);
-        relbox(1) = relbox(1) - (relbox(3) * expansionfactor);
-        box(2) =  box(2) - (relbox(4) * expansionfactor);
-        relbox(2) = relbox(2) - (relbox(4) * expansionfactor);
-        box(3) =  box(3) + (relbox(3) * expansionfactor * 2);
-        relbox(3) = relbox(3) + (relbox(3) * expansionfactor * 2);
-        box(4) =  box(4) + (relbox(4) * expansionfactor * 2);
-        relbox(4) = relbox(4) + (relbox(4) * expansionfactor * 2);
+        expansionfactor = [0.15,0.25];
+        box(1) =  box(1) - (relbox(3) * expansionfactor(1));
+        relbox(1) = relbox(1) - (relbox(3) * expansionfactor(1));
+        box(2) =  box(2) - (relbox(4) * expansionfactor(2));
+        relbox(2) = relbox(2) - (relbox(4) * expansionfactor(2));
+        box(3) =  box(3) + (relbox(3) * expansionfactor(1) * 2);
+        relbox(3) = relbox(3) + (relbox(3) * expansionfactor(1) * 2);
+        box(4) =  box(4) + (relbox(4) * expansionfactor(2) * 2);
+        relbox(4) = relbox(4) + (relbox(4) * expansionfactor(2) * 2);
         
         
         % Final Structure

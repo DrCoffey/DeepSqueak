@@ -19,7 +19,7 @@ while sum(greaterthannoise)<5
     iter = iter+1;
     if iter > 5;
         if verbose
-        disp('Could not detect contour');
+            disp('Could not detect contour');
         end
         greaterthannoise = [1 1];
         break;
@@ -62,7 +62,8 @@ catch
 end
 
 % Max Power
-stats.MaxPower = mean(max(I(:,stats.ridgeTime)));%max(max(I,[],2));
+stats.MaxPower = mean(mx(stats.ridgeTime));
+stats.Power = mx(stats.ridgeTime);
 
 % Time Stats
 stats.BeginTime = Box(1) + min(stats.ridgeTime)*TimeScale;
