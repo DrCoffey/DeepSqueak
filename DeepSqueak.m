@@ -61,7 +61,7 @@ disp '    `---'''
 disp '  '
 disp '  '
 disp '  '
-disp ' DeepSqueak version 1.1.2'
+disp ' DeepSqueak version 1.1.3'
 
 % Set Handles
 hFig = hObject;
@@ -417,8 +417,8 @@ for i = 1:length(handles.calls)
     end
 end
 a  = cell2table(raventable);
-handles.v_call = get(handles.popupmenuDetectionFiles,'Value');
-current_detection_file = handles.detectionfiles(handles.v_call).name;
+handles.current_file_id = get(handles.popupmenuDetectionFiles,'Value');
+current_detection_file = handles.detectionfiles(handles.current_file_id).name;
 ravenname=[strtok(current_detection_file,'.') '_Raven.txt'];
 [FileName,PathName] = uiputfile(ravenname,'Save Raven Truth Table (.txt)');
 writetable(a,[PathName FileName],'delimiter','\t','WriteVariableNames',false);
