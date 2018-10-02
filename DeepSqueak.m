@@ -61,7 +61,7 @@ disp '    `---'''
 disp '  '
 disp '  '
 disp '  '
-disp ' DeepSqueak version 1.1.3'
+disp ' DeepSqueak version 1.1.2'
 
 % Set Handles
 hFig = hObject;
@@ -107,8 +107,11 @@ end
 if ~(exist(fullfile(handles.squeakfolder,'DeepSqueak.fig'), 'file')==2)
     errordlg('"DeepSqueak.fig" not found');
 end
+
+% Add DeepSqueak to the path
 addpath(handles.squeakfolder);
-addpath([handles.squeakfolder '\Functions']); % Add DeepSqueak to the path
+addpath([handles.squeakfolder '\Functions']); 
+addpath([handles.squeakfolder '\Colormaps']); 
 
 % Cool Background Image
 imshow(handles.background, 'Parent', handles.axes1);
