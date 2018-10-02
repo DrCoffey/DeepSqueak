@@ -5,8 +5,8 @@ function Batch_Reject_by_Threshold_Callback(hObject, eventdata, handles)
 % Set the current call in the settings figure
 
 
-if isfield(handles,'v_call')
-    currentfile = handles.v_call;
+if isfield(handles,'current_file_id')
+    currentfile = handles.current_file_id;
 else
     currentfile = 1;
 end
@@ -74,7 +74,7 @@ for currentfile =selections % Do this for each file
     save([handles.detectionfiles(currentfile).folder '\' handles.detectionfiles(currentfile).name],'Calls','-v7.3');
     
     %update the display
-    if isfield(handles,'v_call') && currentfile == handles.v_call
+    if isfield(handles,'current_file_id') && currentfile == handles.current_file_id
         handles.calls = Calls;
     end
     waitbar(find(selections == currentfile) ./ length(selections), h, ['Processing file ' num2str(find(selections == currentfile)) ' of ' num2str(length(selections))]);

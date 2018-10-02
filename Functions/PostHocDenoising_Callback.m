@@ -65,32 +65,11 @@ for j = 1:length(selections) % Do this for each file
     end
     save([handles.detectionfiles(currentfile).folder '\' handles.detectionfiles(currentfile).name],'Calls','-v7.3');
 end
+close(h)
 
 %% Update display
 if isfield(handles,'current_detection_file')
-    waitbar(1, h,'Loading...');
-    tmp=load([handles.detectionfiles(handles.v_call).folder '\' handles.detectionfiles(handles.v_call).name]);%get currently selected option from menu
-    handles.calls=tmp.Calls;
-    handles.currentcall=1;
-    handles.CallTime=[];
-    
-    handles.spect = imagesc([],[],handles.background,'Parent', handles.axes1);
-    cb=colorbar(handles.axes1);
-    cb.Label.String = 'Power';
-    cb.Color = [1 1 1];
-    cb.FontSize = 12;
-    ylabel(handles.axes1,'Frequency (kHZ)','Color','w');
-    xlabel(handles.axes1,'Time (s)','Color','w');
-    handles.box=rectangle('Position',[1 1 1 1],'Curvature',0.2,'EdgeColor','g',...
-        'LineWidth',3,'Parent', handles.axes1);
-    
-    for i=1:length([handles.calls(:).Rate])
-        waitbar(i/length(handles.calls),h,'Loading Calls Please wait...');
-        handles.CallTime(i,1)=handles.calls(i).Box(1);
-    end
-    update_fig(hObject, eventdata, handles);
+    loadcalls_Callback(hObject, eventdata, handles,handles.current_file_id)
 end
 
-close(h)
-guidata(hObject, handles);
 end
