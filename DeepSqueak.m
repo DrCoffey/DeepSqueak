@@ -111,7 +111,7 @@ end
 % Add DeepSqueak to the path
 addpath(handles.squeakfolder);
 addpath([handles.squeakfolder '\Functions']); 
-addpath([handles.squeakfolder '\Colormaps']); 
+addpath([handles.squeakfolder '\Functions\Colormaps']); 
 
 % Cool Background Image
 imshow(handles.background, 'Parent', handles.axes1);
