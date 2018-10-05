@@ -190,16 +190,19 @@ if ~isempty(thresholdScores)
         % Relative box
         relbox = [ti(thresholdBoxes(i,3)) ((ffr(thresholdBoxes(i,2)+thresholdBoxes(i,4))))/1000 ti(thresholdBoxes(i,3)) fr(thresholdBoxes(i,4))/1000];
     
-        % Make the box a little bitter
+        % Make the box a little bigger
         expansionfactor = [0.15,0.25];
-        box(1) =  box(1) - (relbox(3) * expansionfactor(1));
-        relbox(1) = relbox(1) - (relbox(3) * expansionfactor(1));
-        box(2) =  box(2) - (relbox(4) * expansionfactor(2));
-        relbox(2) = relbox(2) - (relbox(4) * expansionfactor(2));
-        box(3) =  box(3) + (relbox(3) * expansionfactor(1) * 2);
-        relbox(3) = relbox(3) + (relbox(3) * expansionfactor(1) * 2);
-        box(4) =  box(4) + (relbox(4) * expansionfactor(2) * 2);
-        relbox(4) = relbox(4) + (relbox(4) * expansionfactor(2) * 2);
+        time_pad = min(relbox(3) * expansionfactor(1),ti(end-1)-relbox(3));
+        freq_pad = relbox(4) * expansionfactor(2);
+        
+        box(1) =    box(1) - time_pad;
+        relbox(1) = relbox(1) - time_pad;
+        box(2)   =  max(ti(1),box(2) - freq_pad);
+        relbox(2) = max(ti(1),relbox(2) - freq_pad);
+        box(3)   =  box(3) + time_pad * 2;
+        relbox(3) = relbox(3) + time_pad * 2;
+        box(4) =   min((ffr(1)/1000)-box(2),box(4) + freq_pad * 2);
+        relbox(4) =min((ffr(1)/1000)-box(2), relbox(4) + freq_pad * 2);
         
         
         % Final Structure
