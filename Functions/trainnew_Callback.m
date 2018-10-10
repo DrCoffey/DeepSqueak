@@ -1,5 +1,5 @@
 function trainnew_Callback(hObject, eventdata, handles)
-
+%% Train a new neural network
 cd(handles.squeakfolder);
 waitfor(msgbox('Select Image Tables'))
 [trainingdata trainingpath] = uigetfile(['Training\*.mat'],'Select Training File(s) for Training ','MultiSelect', 'on');
@@ -40,4 +40,8 @@ nfft = max(AllSettings(:,3));
 cont = max(AllSettings(:,4));
 
 save([PathName,FileName],'detector','layers','options','wind','noverlap','nfft','cont');
+
+% Update the menu
+update_folders(hObject, eventdata, handles);
+guidata(hObject, handles);
 end
