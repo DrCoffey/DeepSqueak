@@ -54,7 +54,7 @@ for k = 1:length(trainingdata)
     % Find max call frequency for cutoff
     CallBoxes = reshape([Calls.Box],4,[]);
     maxFR = max(CallBoxes(:,2) + CallBoxes(:,4));
-    cutoff = min([Calls.Rate, maxFR*2000]) / 2;
+    %cutoff = min([Calls.Rate, maxFR*2000]) / 2;
     
     if bout ~= 0
         %% Calculate Groups of Calls
@@ -114,7 +114,7 @@ for k = 1:length(trainingdata)
                     rate,...
                     Boxes,...
                     1,...
-                    wind,noverlap,nfft,cont,cutoff,IMname,AmplitudeRange);
+                    wind,noverlap,nfft,cont,rate/2,IMname,AmplitudeRange);
                     TTable = [TTable;{IMname, box}];
 
             end
@@ -136,7 +136,7 @@ for k = 1:length(trainingdata)
                     Calls(i).Rate,...
                     Calls(i).RelBox,...
                     Calls(i).Accept,...
-                    wind,noverlap,nfft,cont,cutoff,IMname,AmplitudeRange);
+                    wind,noverlap,nfft,cont,Calls(i).Rate/2,IMname,AmplitudeRange);
                 
 %                 imwrite(im,filename,'BitDepth',8)
                 TTable = [TTable;{IMname, box}];
