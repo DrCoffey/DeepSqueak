@@ -1,4 +1,10 @@
 # Changelog
+## 1.1.3 2018-10-23
+Added k-means optimization into unsupervised clustering, using the knee method. When using k-means, their is now an option to enter the number of means, or try many different means and select the one at the knee point.
+
+Improved data preperation for unsupervised clustering. Now, paramaters include duration, slope, and frequency. Each each call is split into eight chunks, and each parameter is calculated for each chunk. Users can define the paramater weights to optimize cluster quality.
+
+
 ## 1.1.2 2018-9-28
 Users can now set the time scale on the spectrogram to a constant value, in the "Update Display Range" menu.
 
