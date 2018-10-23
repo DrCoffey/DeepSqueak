@@ -6,148 +6,86 @@ function UnsupervisedClustering_Callback(hObject, eventdata, handles)
 
 [FileName,PathName] = uiputfile('Extracted Contours.mat','Save contours for faster loading');
 if FileName ~= 0
-    save([PathName FileName],'ClusteringData');
+    save(fullfile(PathName,FileName),'ClusteringData','-v7.3');
 end
 
 clustAssign = zeros(size(ClusteringData,1),1);
 
 finished = 0; % Repeated until
 while ~finished
-    choice = questdlg('Choose clustering method:','Cluster','ARTwarp','K-means (recommended)','Cancel','Cancel');
-    
+    choice = questdlg('Choose clustering method:','Cluster','ARTwarp','K-means (recommended)','Cancel','K-means (recommended)');
     
     switch choice
         case 'Cancel'
             return
             
         case 'K-means (recommended)'
+            hb = waitbar(.5,'Preparing Data');
+            % FREQ 15 Chunks
+            %             data = cellfun(@(x) imresize(x-mean(x),[20 1]),ClusteringData(:,4),'UniformOutput',0);
+            %             data = [data{:}]';
             
-            prompt = {'Slope Weight','Sinuosity Weight','Frequency Weight','Duration Weight','Power Weight'};
-            dlg_title = 'K-Means';
-            num_lines = [1 50];
-            defaultans = {'1','1','1','1','1'};
-            settings = inputdlg(prompt,dlg_title,num_lines,defaultans);
-            if isempty(settings)
-                return
-            end
-            
-            SlopeW = sscanf(settings{1},'%f',1);
-            SinuosityW = sscanf(settings{2},'%f',1);
-            FreqW = sscanf(settings{3},'%f',1);
-            DurationW = sscanf(settings{4},'%f',1);
-            PowerW = sscanf(settings{5},'%f',1);
-
-            hb = waitbar(0,'Preparing Data');
-            %% Prepare Data by breaking each line into chunks, and calculating the slope, sinuosity, and frequency of each chunk.
-            SlopeChunks = 6; % Number of chunks
-            Slope = NaN(size(ClusteringData,1),SlopeChunks);
-            
-            SinuosityChunks = 2; % Number of chunks
-            Sinuosity =  NaN(size(ClusteringData,1),SinuosityChunks);
-            
-            FrequencyChunks = 6; % Number of chunks
-            Freq = NaN(size(ClusteringData,1),FrequencyChunks);
-            
-            PowerChunks = 6; % Number of chunks
-            Power = NaN(size(ClusteringData,1),PowerChunks);
-            
-            for i = 1:size(ClusteringData,1)
-                if mod(i,50) == 1;
-                    waitbar(i/size(ClusteringData,1),hb)
-                end
-                
-                    
-                    xFreq = ClusteringData{i,4}'; % Frequency of current line
-                    xTime = ClusteringData{i,5} * 1000; % Time of current line
-                    xPower =  ClusteringData{i,8};
-                    % Make sure each chunk has at least 2 points
-                    if length(xFreq) < 2*SinuosityChunks
-                        xFreq = imresize(xFreq,[1 2*SinuosityChunks]);
-                        xTime = imresize(xTime,[1 2*SinuosityChunks]);
-                        xPower = imresize(xPower,[1 2*SinuosityChunks]);
-                    end
-                    
-                    
-                    %% Slope and Freq
-                    chunk = discretize(xTime,SlopeChunks);  % Break into chunks
-                    for j = 1:SlopeChunks
-                        if nnz(chunk==j) > 2
-                        X = [ones(length(xFreq(chunk==j)),1), xTime(chunk==j)' - mean(xTime(chunk==j))];
-                        ls = X \ (xFreq(chunk==j)');
-                        Slope(i,j) = ls(2);
-                        Freq(i,j) = ls(1);
-                        end
-                    end
-                    
-                    %% Sinuosity
-                    tmpSinuosity = [];
-                    chunk = discretize(1:length(xTime),SinuosityChunks);  % Break into chunks
-                    for j = 1:SinuosityChunks
-                        totleng = [];
-                        D = pdist([xTime(chunk==j)' xFreq(chunk==j)'],'Euclidean');
-                        Z = squareform(D);
-                        leng=Z(1,end);
-                        c=0;
-                        for ll=2:length(Z)
-                            c=c+1;
-                            totleng(c)=Z(ll-1,ll);
-                        end
-                        Sinuosity(i,j) = sum(totleng)/leng;
-                    end
-                    
-                    %% Power
-                    Power(i,:) = accumarray(discretize(xTime,PowerChunks)',xPower,[],@mean,NaN);
-
-
-            end
-            Duration = cell2mat(ClusteringData(:,3));
-            
-            %% Normalize data
-            Slope = fillmissing(Slope,'linear');
-            Slope =  SlopeW .* normalize(Slope);
-            
-            Sinuosity = fillmissing(Sinuosity,'linear');
-            Sinuosity =  SinuosityW .* normalize(Sinuosity);
-            
-            Freq = fillmissing(Freq,'linear');
-            Freq =  FreqW .* normalize(Freq);
-            
-            Power = fillmissing(Power,'constant',0);
-            Power =  Power .* normalize(Power);
-            
-            Duration = fillmissing(Duration,'linear');
-            Duration =  DurationW .* normalize(Duration);
-            
+            % Parameterized data
+            nrm = @(x) ((x - mean(x,1)) ./ std(x,1));
+            ReshapedX=cell2mat(cellfun(@(x) imresize(x',[1 9]) ,ClusteringData(:,4),'UniformOutput',0));
+            slope = diff(ReshapedX,1,2);
+            slope = nrm(slope);
+            freq=cell2mat(cellfun(@(x) imresize(x',[1 8]) ,ClusteringData(:,4),'UniformOutput',0));
+            freq = nrm(freq);
+            duration = repmat(cell2mat(ClusteringData(:,3)),[1 8]);
+            duration = nrm(duration);
+ 
             close(hb)
-%             
-% 
-%             
-%             Slope = SlopeW .* ((Slope - nanmean(Slope)) ./ nanstd(Slope));
-%             Sinuosity = SinuosityW .* ((Sinuosity - nanmean(Sinuosity)) ./ nanstd(Sinuosity));
-%             Freq = FreqW .* ((Freq - nanmean(Freq)) ./ nanstd(Freq));
-%             Duration = DurationW .* ((Duration - nanmean(Duration)) ./ nanstd(Duration));
-            
-            data = [Slope, Sinuosity, Freq, Duration,Power]; % Concatenate data for clustering
-            
             FromExisting = questdlg('From existing model?','Cluster','Yes','No','No');
-            switch FromExisting% Load Model
+            switch FromExisting % Load Model
                 case 'No'
-                    k = inputdlg({'Choose number of k-means:'},'Cluster with k-means',1,{'15'});
-                    if isempty(k)
-                        return
+                    % Get parameter weights
+                    clusterParameters= inputdlg({'Shape weight','Frequency weight','Duration weight'},'Choose cluster parameters:',1,{'1','1','1'});
+                    if isempty(clusterParameters); return; end
+                    slope_weight = num2str(clusterParameters{1});
+                    freq_weight = num2str(clusterParameters{2});
+                    duration_weight = num2str(clusterParameters{3});
+
+                    data = [
+                        freq     .*  freq_weight,...
+                        slope    .*  slope_weight,...
+                        duration .*  duration_weight,...
+                        ];
+                    
+                    optimize = questdlg('Optimize Cluster Number?','Cluster Optimization','Elbow Optimized','User Defined','Elbow Optimized');
+                    
+                    switch optimize
+                        case 'Elbow Optimized'
+                            opt_options = inputdlg({'Max Clusters','Replicates'},'Cluster Optimization',[1 50; 1 50],{'100','3'});
+                            if isempty(opt_options)
+                                return
+                            end
+                            [clustAssign,C]=kmeans_opt(data,str2num(opt_options{1}),0,str2num(opt_options{2}));
+                        case 'User Defined'
+                            k = inputdlg({'Choose number of k-means:'},'Cluster with k-means',1,{'15'});
+                            if isempty(k)
+                                return
+                            end
+                            k = str2num(k{1});
+                            [clustAssign, C]= kmeans(data,k,'Distance','sqeuclidean','Replicates',10);
                     end
-                    k = str2num(k{1});
-                    [clustAssign, C]= kmeans(data,k,'Distance','sqeuclidean','Replicates',50);
+                    
                 case 'Yes'
-                    [FileName,PathName] = uigetfile('*.mat');
-                    load([PathName FileName],'C');
+                    [FileName,PathName] = uigetfile(fullfile(handles.squeakfolder,'Clustering Models','*.mat'));
+                    load(fullfile(PathName,FileName),'C','freq_weight','slope_weight','duration_weight');
+                    data = [
+                        freq     .*  freq_weight,...
+                        slope    .*  slope_weight,...
+                        duration .*  duration_weight,...
+                        ];
+                    
+                    
                     if exist('C') ~= 1
                         warndlg('K-means model could not be found. Is this file a trained k-means model?')
                         continue
                     end
             end
             clustAssign = knnsearch(C,data);
-            
             
         case 'ARTwarp'
             FromExisting = questdlg('From existing model?','Cluster','Yes','No','No');
@@ -168,10 +106,10 @@ while ~finished
                     catch ME
                         disp(ME)
                     end
-                  
+                    
                 case 'Yes'
-                    [FileName,PathName] = uigetfile('*.mat');
-                    load([PathName FileName],'ARTnet','settings');
+                    [FileName,PathName] = uigetfile(fullfile(handles.squeakfolder,'Clustering Models','*.mat'));
+                    load(fullfile(PathName,FileName),'ARTnet','settings');
                     if exist('ARTnet') ~= 1
                         warndlg('ARTnet model could not be found. Is this file a trained ARTwarp2 model?')
                         continue
@@ -183,28 +121,36 @@ while ~finished
     
     %% Assign Names
     [clusterName, rejected, finished] = clusteringGUI(clustAssign, ClusteringData);
-    if finished == 2
-        return
-    end
-    
 
+    
     
 end
 %% Update Files
-    % Save the clustering model
+% Save the clustering model
+if FromExisting(1) == 'N';
     switch choice
         case 'K-means (recommended)'
-            [FileName,PathName] = uiputfile('K-Means Model.mat');
+            [FileName,PathName] = uiputfile(fullfile(handles.squeakfolder,'Clustering Models','K-Means Model.mat'),'Save clustering model');
             if ~isnumeric(FileName)
-                save([PathName FileName],'C');
+                save(fullfile(PathName,FileName),'C','freq_weight','slope_weight','duration_weight');
             end
         case 'ARTwarp'
-            [FileName,PathName] = uiputfile('ARTwarp Model.mat');
-                save([PathName FileName],'ARTnet','settings');
+            [FileName,PathName] = uiputfile(fullfile(handles.squeakfolder,'Clustering Models','ARTwarp Model.mat'),'Save clustering model');
+            if ~isnumeric(FileName)
+                save(fullfile(PathName,FileName),'ARTnet','settings');
+            end
     end
-    
-UpdateCluster(ClusteringData, clustAssign, clusterName, rejected)
+end
 
+
+% Save the clusters
+saveChoice =  questdlg('Update files with new clusters?','Save clusters','Yes','No','No');
+switch saveChoice
+    case 'Yes'
+        UpdateCluster(ClusteringData, clustAssign, clusterName, rejected)
+    case 'No'
+        return
+end
 end
 
 
@@ -213,8 +159,8 @@ function [ClusteringData, trainingdata, trainingpath]= CreateClusteringData(hObj
 % For each file selected, create a cell array with the image, and contour
 % of calls where Calls.Accept == 1
 cd(handles.squeakfolder);
-[trainingdata trainingpath] = uigetfile([handles.settings.detectionfolder '\*.mat'],'Select Detection File(s) for Clustering ','MultiSelect', 'on');
-if isnumeric(trainingdata)    
+[trainingdata trainingpath] = uigetfile(fullfile(handles.settings.detectionfolder,'*.mat'),'Select Detection File(s) for Clustering or extracted contours','MultiSelect', 'on');
+if isnumeric(trainingdata)
     return
 end
 
@@ -224,16 +170,19 @@ if ischar(trainingdata)==1
     clear trainingdata
     trainingdata=tmp;
 end
-h = waitbar(0,'Initializing');
+h = waitbar(.5,'Gathering File Info');
 c=0;
 
 ClusteringData = {};
 
 %% For Each File
-for j = 1:length(trainingdata)  
+for j = 1:length(trainingdata)
     FileInfo = who('-file',[trainingpath trainingdata{j}]);
     if ismember('ClusteringData',FileInfo)
+        close(h)
+        h = waitbar(.5,'Loading Contours From File');
         load([trainingpath trainingdata{j}],'ClusteringData');
+        close(h)
         return
     end
     load([trainingpath trainingdata{j}],'Calls');
@@ -248,7 +197,7 @@ for j = 1:length(trainingdata)
             nfft = round(.0032 * call.Rate);
             
             c=c+1;
-      
+            
             [I,~,noverlap,nfft,rate,box] = CreateSpectrogram(call);
             im = mat2gray(flipud(I),[0 max(max(I))/4]); % Set max brightness to 1/4 of max
             
@@ -270,9 +219,9 @@ for j = 1:length(trainingdata)
                 {xTime} % Freq points
                 {[trainingpath trainingdata{j}]} % File path
                 {i} % Call ID in file
-                {stats.Power} 
+                {stats.Power}
                 {call.RelBox(4)}
-                ]'; 
+                ]';
         end
     end
 end
@@ -298,8 +247,8 @@ for j = 1:length(files)  % For Each File
         end
     end
     Calls = Calls(1:length([Calls.Rate]));
-    [path name] = fileparts(files{j});
-    save([path '\' name],'Calls','-v7.3');
+    [path, name] = fileparts(files{j});
+    save(fullfile(path,name),'Calls','-v7.3');
 end
 close(h)
 end
