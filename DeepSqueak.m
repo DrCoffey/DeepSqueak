@@ -61,7 +61,6 @@ disp '    `---'''
 disp '  '
 disp '  '
 disp '  '
-disp ' DeepSqueak version 1.1.2'
 
 % Set Handles
 hFig = hObject;
@@ -70,15 +69,24 @@ set ( hFig, 'Color', [.1 .1 .1] );
 handles.output = hObject;
 [handles.squeakfolder] = fileparts(mfilename('fullpath'));
 cd(handles.squeakfolder);
+
+% Display version
+try
+    fid = fopen(fullfile(handles.squeakfolder,'CHANGELOG.md'));
+    txt = textscan(fid,'%s');
+    disp(['DeepSqueak version ' txt{1}{4}]);
+    fclose(fid);
+end
+
 handles.cmap ='inferno';
 handles.cmapname = {'inferno'};
 handles.spect = imagesc(1,1,1,'Parent', handles.axes1);
 
-% Check for missing files
-if ~(exist(fullfile(handles.squeakfolder, 'settings.mat'), 'file')==2) % Create settings if it doesn't exist
-    handles.settings.detectionfolder = [handles.squeakfolder '\Detections\'];
-    handles.settings.networkfolder = [handles.squeakfolder '\Networks\'];
-    handles.settings.audiofolder = [handles.squeakfolder '\Audio\'];
+% Check for missing files, create setting file if it doens't exist
+if ~(exist(fullfile(handles.squeakfolder, 'settings.mat'), 'file')==2)
+    handles.settings.detectionfolder = fullfile(handles.squeakfolder, 'Detections\');
+    handles.settings.networkfolder = fullfile(handles.squeakfolder, 'Networks\');
+    handles.settings.audiofolder = fullfile(handles.squeakfolder, 'Audio\');
     handles.settings.detectionSettings = {'0' '3' '.1' '100' '18' '0' '0' '1' '1'};
     handles.settings.playback_rate = 0.05;
     handles.settings.LowFreq = 15;
@@ -88,7 +96,7 @@ if ~(exist(fullfile(handles.squeakfolder, 'settings.mat'), 'file')==2) % Create 
     handles.settings.labels = {'FF','FM','Trill','Split',' ',' ',' ',' ',' ',' '};
     handles.settings.DisplayTimePadding = 0;
     settings = handles.settings;
-    save([handles.squeakfolder '/settings.mat'],'-struct','settings')
+    save(fullfile(handles.squeakfolder, 'settings.mat'),'-struct','settings')
     disp('Settings not found. New settings file created.')
 end
 
@@ -110,8 +118,8 @@ end
 
 % Add DeepSqueak to the path
 addpath(handles.squeakfolder);
-addpath([handles.squeakfolder '\Functions']); 
-addpath([handles.squeakfolder '\Functions\Colormaps']); 
+addpath(fullfile(handles.squeakfolder, 'Functions')); 
+addpath(fullfile(handles.squeakfolder, 'Functions','Colormaps')); 
 
 % Cool Background Image
 imshow(handles.background, 'Parent', handles.axes1);
