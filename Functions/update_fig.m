@@ -18,9 +18,9 @@ set(handles.axes1,'YDir', 'normal','YColor',[1 1 1],'XColor',[1 1 1],'Clim',[0 2
 % colormap(handles.axes1,handles.cmap);
 set(handles.spect,'CData',imgaussfilt(abs(s)),'XData',ti,'YData',fr/1000);
 
-if handles.settings.DisplayTimePadding
+if handles.settings.DisplayTimePadding ~=0;
     meantime = handles.calls(handles.currentcall).RelBox(1) + handles.calls(handles.currentcall).RelBox(3)/2;
-    set(handles.axes1,'Xlim',[meantime-.1,meantime+.1],'color','k')
+    set(handles.axes1,'Xlim',[meantime-(handles.settings.DisplayTimePadding/2),meantime+(handles.settings.DisplayTimePadding/2)],'color','k')
 else
     set(handles.axes1,'Xlim',[handles.spect.XData(1) handles.spect.XData(end)])
 end
