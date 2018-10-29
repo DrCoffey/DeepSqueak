@@ -100,7 +100,7 @@ if ~(exist(fullfile(handles.squeakfolder, 'settings.mat'), 'file')==2)
     disp('Settings not found. New settings file created.')
 end
 
-if ~(exist(fullfile(handles.squeakfolder,'Background.png'), 'file')==2)
+if ~(exist(fullfile(handles.squeakfolder,'Background.jpg'), 'file')==2)
     disp('Background image not found')
     background = zeros(280);
     fonts = listTrueTypeFonts;
@@ -110,7 +110,7 @@ if ~(exist(fullfile(handles.squeakfolder,'Background.png'), 'file')==2)
     background = insertText(background,[10 220],'DeepSqueak','Font',char(datasample(fonts,1)),'FontSize',30);
     handles.background = background;
 else
-    handles.background=imread('Background.png');
+    handles.background=imread('Background.jpg');
 end
 if ~(exist(fullfile(handles.squeakfolder,'DeepSqueak.fig'), 'file')==2)
     errordlg('"DeepSqueak.fig" not found');
