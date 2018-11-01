@@ -1,4 +1,13 @@
 # Changelog
+
+## 1.1.4 2018-11-1
+Switched most file saving to "fullfile" function, rather than concatinating strings.
+
+Made detection files smaller by saving the audio as the native format, rather than double.
+
+Saved files now include metadata such as detection time, settings, audio file path, and detection network.
+
+
 ## 1.1.3 2018-10-23
 Added k-means optimization into unsupervised clustering, using the knee method. When using k-means, their is now an option to enter the number of means, or try many different means and select the one at the knee point.
 

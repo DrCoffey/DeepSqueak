@@ -32,7 +32,8 @@ h = waitbar(0,'Initializing');
 for j = 1:length(selections) % Do this for each file
     currentfile = selections(j);
     lastwarn(''); % Skip files if variable: 'Calls' doesn't exist
-    tmp=load([handles.detectionfiles(currentfile).folder '\' handles.detectionfiles(currentfile).name],'Calls');
+    fname = fullfile(handles.detectionfiles(currentfile).folder,handles.detectionfiles(currentfile).name);
+    tmp=load(fname,'Calls');
     if ~isempty(lastwarn)
         disp([handles.detectionfiles(currentfile).name ' is not a Call file, skipping...'])
         continue
@@ -63,7 +64,7 @@ for j = 1:length(selections) % Do this for each file
             Calls(i).Accept = 0;
         end
     end
-    save([handles.detectionfiles(currentfile).folder '\' handles.detectionfiles(currentfile).name],'Calls','-v7.3');
+    save(fname,'Calls','-append');
 end
 close(h)
 

@@ -83,10 +83,11 @@ for j = 1:length(audioselections)
     for k=1:length(networkselections)
         h = waitbar(0,'Loading neural network...');
 
-        AudioFile=[handles.audiofiles(CurrentAudioFile).folder '\' handles.audiofiles(CurrentAudioFile).name];
+        AudioFile = fullfile(handles.audiofiles(CurrentAudioFile).folder,handles.audiofiles(CurrentAudioFile).name);
         % cd(handles.settings.detectionfolder);
         networkname = handles.networkfiles(networkselections(k)).name;
-        NeuralNetwork=load([handles.networkfiles(networkselections(k)).folder '\' networkname]);%get currently selected option from menu
+        networkpath = fullfile(handles.networkfiles(networkselections(k)).folder,networkname);
+        NeuralNetwork=load(networkpath);%get currently selected option from menu
         close(h);
         if k==1
             Calls1=SqueakDetect(AudioFile,NeuralNetwork,handles.audiofiles(CurrentAudioFile).name,Settings(:,k),0,0,j,length(audioselections),networkname);
@@ -95,39 +96,44 @@ for j = 1:length(audioselections)
         end
     end
     
-    h = waitbar(1,'Saving...');
-
     
-    % Save the file
-    if Settings(8) % if append date
-        t=datestr(datetime('now'),'mmm-DD-YYYY HH_MM PM');
-        fname = [handles.settings.detectionfolder '\' strtok(handles.audiofiles(CurrentAudioFile).name,'.') ' ' t];
+    %% Save the file
+    h = waitbar(1,'Saving...');
+    
+    [~,audioname] = fileparts(AudioFile);
+    detectiontime=datestr(datetime('now'),'mmm-DD-YYYY HH_MM PM');
+    
+    % Append date to filename
+    if Settings(8)
+        fname = fullfile(handles.settings.detectionfolder,[audioname ' ' detectiontime '.mat']);
     else
-        fname = [handles.settings.detectionfolder '\' strtok(handles.audiofiles(CurrentAudioFile).name,'.')];
+        fname = fullfile(handles.settings.detectionfolder,audioname);
     end
     
     if length(networkselections)==1
         if ~isempty(Calls1)
-        Calls=Calls1;
-        save(fname,'Calls','-v7.3');
+            Calls=Calls1;
         else
-             disp(['No calls detected in: ' strtok(handles.audiofiles(CurrentAudioFile).name)]);
+            disp(['No calls detected in: ' audioname]);
+            continue
         end           
     end
     
     if length(networkselections)==2
         if ~isempty(Calls1) &  ~isempty(Calls2)
-            Automerge_Callback(Calls1,Calls2,AudioFile,strtok(handles.audiofiles(CurrentAudioFile).name,'.'))
+            Calls = Automerge_Callback(Calls1,Calls2,AudioFile);
         elseif ~isempty(Calls1)
             Calls=Calls1;
-            save(fname,'Calls','-v7.3');
         elseif ~isempty(Calls2)
             Calls=Calls2;
-            save(fname,'Calls','-v7.3');
         else
-            disp(['No calls detected in: ' strtok(handles.audiofiles(CurrentAudioFile).name)]);
+            disp(['No calls detected in: ' audioname]);
+            continue
         end
     end
+    
+    save(fname,'Calls','settings','AudioFile','detectiontime','networkpath','-v7.3','-mat');
+    
     delete(h)
 end
 update_folders(hObject, eventdata, handles);

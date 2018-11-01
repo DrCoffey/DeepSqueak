@@ -5,6 +5,9 @@ rate = call.Rate;
 box = call.Box;
 
 audio =  call.Audio;
+if ~isa(audio,'double')
+    audio = double(audio) / (double(intmax(class(audio)))+1);
+end
 
 
 %% Make Spectrogram and box

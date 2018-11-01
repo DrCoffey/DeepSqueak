@@ -210,7 +210,7 @@ if ~isempty(thresholdScores)
         Calls(i).Box=box;
         Calls(i).RelBox=relbox;
         Calls(i).Score=thresholdScores(i,:);
-        Calls(i).Audio=a;
+        Calls(i).Audio=CallAudio;
         Calls(i).Type=merged_Class(i);
         
         % Power

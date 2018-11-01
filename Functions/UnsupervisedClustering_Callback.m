@@ -248,7 +248,7 @@ for j = 1:length(files)  % For Each File
     end
     Calls = Calls(1:length([Calls.Rate]));
     [path, name] = fileparts(files{j});
-    save(fullfile(path,name),'Calls','-v7.3');
+    save(fullfile(path,name),'Calls','-append');
 end
 close(h)
 end
