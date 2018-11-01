@@ -100,8 +100,7 @@ for j = 1:length(files)  % For Each File
         end
     end
     Calls = Calls(1:length([Calls.Rate]));
-    [path name] = fileparts(files{j});
-    save(fullfile(path,name),'Calls','-append');
+    save(files{j},'Calls','-append');
 end
 close(h)
 end
