@@ -61,7 +61,6 @@ disp '    `---'''
 disp '  '
 disp '  '
 disp '  '
-
 % Set Handles
 hFig = hObject;
 handles.hFig=hFig;
@@ -509,7 +508,7 @@ guidata(hObject, handles);
 % --------------------------------------------------------------------
 function Change_Display_Range_Callback(hObject, eventdata, handles)
 % Change the x and y axis in the spectrogram viewer
-prompt = {'Low Frequency (KHz):', 'High Frequency (KHz):', 'Fixed Display Range (s) (Set to 0 to autoscale)'};
+prompt = {'Low Frequency (KHz):', 'High Frequency (KHz):', 'Time Padding (s) (Set to 0 to autoscale)'};
 dlg_title = 'New Display Range:';
 num_lines=[1 80]; options.Resize='off'; options.WindowStyle='modal'; options.Interpreter='tex';
 defaultans = {num2str(handles.settings.LowFreq),num2str(handles.settings.HighFreq),num2str(handles.settings.DisplayTimePadding)};
@@ -619,6 +618,3 @@ function TonalitySlider_CreateFcn(hObject, eventdata, handles)
 if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor',[.9 .9 .9]);
 end
-
-
-

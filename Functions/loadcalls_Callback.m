@@ -1,14 +1,25 @@
 % --- Executes on button press in LOAD CALLS.
-function loadcalls_Callback(hObject, eventdata, handles,call_file_number)
+function loadcalls_Callback(hObject, eventdata, handles,call_file_number,nothing)
 h = waitbar(0,'Loading Calls Please wait...');
 update_folders(hObject, eventdata, handles);
 handles = guidata(hObject);
+handles.calls = [];
+handles.calls.Type = {'Real Time'};
+handles.calls.Score = 1;
+handles.calls.Rate = 44100;
+handles.calls.Box = [.02,1,.02,10];
+handles.calls.RelBox = [.02,1,.02,10];
+handles.calls.Accept = 1;
+handles.calls.Audio = rand(1,10000);
+
+if nargin < 5
 if nargin == 3 % if "Load Calls" button pressed
     handles.current_file_id = get(handles.popupmenuDetectionFiles,'Value');
 end
 handles.current_detection_file = handles.detectionfiles(handles.current_file_id).name;
 tmp=load([handles.detectionfiles(handles.current_file_id).folder '\' handles.detectionfiles(handles.current_file_id).name],'Calls');%get currently selected option from menu
 handles.calls=tmp.Calls;
+end
 handles.currentcall=1;
 handles.CallTime=[];
 
