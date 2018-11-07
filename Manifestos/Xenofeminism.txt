@@ -1,0 +1,468 @@
+License: GNU Free Documentation License
+Source: http://www.laboriacuboniks.net/
+
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+     __  __                 __                _       _               
+     \ \/ /___ _ __   ___  / _| ___ _ __ ___ (_)_ __ (_)___ _ __ ___  
+      \  // _ \ '_ \ / _ \| |_ / _ \ '_ ` _ \| | '_ \| / __| '_ ` _ \ 
+      /  \  __/ | | | (_) |  _|  __/ | | | | | | | | | \__ \ | | | | |
+     /_/\_\___|_| |_|\___/|_|  \___|_| |_| |_|_|_| |_|_|___/_| |_| |_|
+
+-=-=-=-= A POLITICS FOR ALIENATION =-=-=-=-=-=-=-= Laboria Cuboniks =-=-=-=
+
+
+
+ZERO
+
+
+0x00 Ours is a world in vertigo. It is a world that swarms with 
+technological mediation, interlacing our daily lives with abstraction, 
+virtuality, and complexity. XF constructs a feminism adapted to these 
+realities: a feminism of unprecedented cunning, scale, and vision; a future 
+in which the realization of gender justice and feminist emancipation 
+contribute to a universalist politics assembled from the needs of every 
+human, cutting across race, ability, economic standing, and geographical 
+position.  No more futureless repetition on the treadmill of capital, no more 
+submission to the drudgery of labour, productive and reproductive alike, no 
+more reification of the given masked as critique.  Our future requires 
+depetrification.  XF is not a bid for revolution, but a wager on the long 
+game of history, demanding imagination, dexterity and persistence. 
+
+
+0x01 XF seizes alienation as an impetus to generate new worlds.  We are all 
+alienated -- but have we ever been otherwise? It is through, and not 
+despite, our alienated condition that we can free ourselves from the muck of 
+immediacy.  Freedom is not a given -- and it's certainly not given by anything 
+'natural'.  The construction of freedom involves not less but more 
+alienation; alienation is the labour of freedom's construction.  Nothing 
+should be accepted as fixed, permanent, or 'given' -- neither material 
+conditions nor social forms.  XF mutates, navigates and probes every horizon.  
+Anyone who's been deemed 'unnatural' in the face of reigning biological 
+norms, anyone who's experienced injustices wrought in the name of natural 
+order, will realize that the glorification of 'nature' has nothing to offer 
+us -- the queer and trans among us, the differently-abled, as well as those who 
+have suffered discrimination due to pregnancy or duties connected to 
+child-rearing.  XF is vehemently anti-naturalist.  Essentialist naturalism 
+reeks of theology -- the sooner it is exorcised, the better. 
+
+
+0x02 Why is there so little explicit, organized effort to repurpose 
+technologies for progressive gender political ends? XF seeks to 
+strategically deploy existing technologies to re-engineer the world.  Serious 
+risks are built into these tools; they are prone to imbalance, abuse, and 
+exploitation of the weak.  Rather than pretending to risk nothing, XF 
+advocates the necessary assembly of techno-political interfaces responsive 
+to these risks.  Technology isn't inherently progressive.  Its uses are fused 
+with culture in a positive feedback loop that makes linear sequencing, 
+prediction, and absolute caution impossible.  Technoscientific innovation 
+must be linked to a collective theoretical and political thinking in which 
+women, queers, and the gender non-conforming play an unparalleled role. 
+
+ 
+0x03 The real emancipatory potential of technology remains unrealized.  Fed 
+by the market, its rapid growth is offset by bloat, and elegant innovation 
+is surrendered to the buyer, whose stagnant world it decorates.  Beyond the 
+noisy clutter of commodified cruft, the ultimate task lies in engineering 
+technologies to combat unequal access to reproductive and pharmacological 
+tools, environmental cataclysm, economic instability, as well as dangerous 
+forms of unpaid/underpaid labour.  Gender inequality still characterizes the 
+fields in which our technologies are conceived, built, and legislated for, 
+while female workers in electronics (to name just one industry) perform some 
+of the worst paid, monotonous and debilitating labour.  Such injustice 
+demands structural, machinic and ideological correction. 
+
+
+0x04 Xenofeminism is a rationalism.  To claim that reason or rationality is 
+'by nature' a patriarchal enterprise is to concede defeat.  It is true that 
+the canonical 'history of thought' is dominated by men, and it is male hands 
+we see throttling existing institutions of science and technology.  But this 
+is precisely why feminism must be a rationalism -- because of this miserable 
+imbalance, and not despite it.  There is no 'feminine' rationality, nor is 
+there a 'masculine' one.  Science is not an expression but a suspension of 
+gender.  If today it is dominated by masculine egos, then it is at odds with 
+itself -- and this contradiction can be leveraged.  Reason, like information, 
+wants to be free, and patriarchy cannot give it freedom.  Rationalism must 
+itself be a feminism.  XF marks the point where these claims intersect in a 
+two-way dependency.  It names reason as an engine of feminist emancipation, 
+and declares the right of everyone to speak as no one in particular. 
+
+
+INTERRUPT
+
+
+0x05 The excess of modesty in feminist agendas of recent decades is not 
+proportionate to the monstrous complexity of our reality, a reality 
+crosshatched with fibre-optic cables, radio and microwaves, oil and gas 
+pipelines, aerial and shipping routes, and the unrelenting, simultaneous 
+execution of millions of communication protocols with every passing 
+millisecond.  Systematic thinking and structural analysis have largely fallen 
+by the wayside in favour of admirable, but insufficient struggles, bound to 
+fixed localities and fragmented insurrections.  Whilst capitalism is 
+understood as a complex and ever-expanding totality, many would-be emancipat-
+tory anti-capitalist projects remain profoundly fearful of transitioning to
+the universal, resisting big-picture speculative politics by condemning them
+as necessarily oppressive vectors.  Such a false guarantee treats universals
+as absolute, generating a debilitating disjuncture between the thing we seek
+to depose and the strategies we advance to depose it. 
+
+
+0x06 Global complexity opens us to urgent cognitive and ethical demands.  
+These are Promethean responsibilities that cannot pass unaddressed.  Much of 
+twenty-first century feminism -- from the remnants of postmodern identity 
+politics to large swathes of contemporary ecofeminism -- struggles to 
+adequately address these challenges in a manner capable of producing 
+substantial and enduring change.  Xenofeminism endeavours to face up to these 
+obligations as collective agents capable of transitioning between multiple 
+levels of political, material and conceptual organization. 
+
+
+0x07 We are adamantly synthetic, unsatisfied by analysis alone.  XF urges 
+constructive oscillation between description and prescription to mobilize 
+the recursive potential of contemporary technologies upon gender, sexuality 
+and disparities of power.  Given that there are a range of gendered 
+challenges specifically relating to life in a digital age -- from sexual 
+harassment via social media, to doxxing, privacy, and the protection of 
+online images -- the situation requires a feminism at ease with computation.  
+Today, it is imperative that we develop an ideological infrastructure that 
+both supports and facilitates feminist interventions within connective, 
+networked elements of the contemporary world.  Xenofeminism is about more 
+than digital self-defence and freedom from patriarchal networks.  We want to 
+cultivate the exercise of positive freedom -- freedom-to rather than simply 
+freedom-from -- and urge feminists to equip themselves with the skills to 
+redeploy existing technologies and invent novel cognitive and material tools 
+in the service of common ends. 
+ 
+
+0x08 The radical opportunities afforded by developing (and alienating) forms 
+of technological mediation should no longer be put to use in the exclusive 
+interests of capital, which, by design, only benefits the few.  There are 
+incessantly proliferating tools to be annexed, and although no one can claim 
+their comprehensive accessibility, digital tools have never been more widely 
+available or more sensitive to appropriation than they are today.  This is 
+not an elision of the fact that a large amount of the world's poor is 
+adversely affected by the expanding technological industry (from factory 
+workers labouring under abominable conditions to the Ghanaian villages that 
+have become a repository for the e-waste of the global powers) but an 
+explicit acknowledgement of these conditions as a target for elimination.  
+Just as the invention of the stock market was also the invention of the 
+crash, Xenofeminism knows that technological innovation must equally 
+anticipate its systemic condition responsively. 
+
+
+TRAP
+
+
+0x09 XF rejects illusion and melancholy as political inhibitors.  Illusion, 
+as the blind presumption that the weak can prevail over the strong with no 
+strategic coordination, leads to unfulfilled promises and unmarshalled 
+drives.  This is a politics that, in wanting so much, ends up building so 
+little.  Without the labour of large-scale, collective social organisation, 
+declaring one's desire for global change is nothing more than wishful 
+thinking.  On the other hand, melancholy -- so endemic to the left -- teaches 
+us that emancipation is an extinct species to be wept over and that blips of 
+negation are the best we can hope for.  At its worst, such an attitude 
+generates nothing but political lassitude, and at its best, installs an 
+atmosphere of pervasive despair which too often degenerates into factionalism
+and petty moralizing.  The malady of melancholia only compounds political
+inertia, and -- under the guise of being realistic -- relinquishes all 
+hope of calibrating the world otherwise.   It is against such maladies that 
+XF innoculates. 
+
+
+0x0A We take politics that exclusively valorize the local in the guise of 
+subverting currents of global abstraction, to be insufficient.  To secede 
+from or disavow capitalist machinery will not make it disappear.  Likewise, 
+suggestions to pull the lever on the emergency brake of embedded velocities, 
+the call to slow down and scale back, is a possibility available only to the 
+few -- a violent particularity of exclusivity -- ultimately entailing catas-
+trophe for the many.  Refusing to think beyond the microcommunity, to foster 
+connections between fractured insurgencies, to consider how emancipatory 
+tactics can be scaled up for universal implementation, is to remain 
+satisfied with temporary and defensive gestures.  XF is an affirmative 
+creature on the offensive, fiercely insisting on the possibility of 
+large-scale social change for all of our alien kin. 
+
+
+0x0B A sense of the world's volatility and artificiality seems to have faded 
+from contemporary queer and feminist politics, in favour of a plural but 
+static constellation of gender identities, in whose bleak light equations of 
+the good and the natural are stubbornly restored.  While having (perhaps) 
+admirably expanded thresholds of 'tolerance', too often we are told to seek 
+solace in unfreedom, staking claims on being 'born' this way, as if offering 
+an excuse with nature's blessing.  All the while, the heteronormative centre 
+chugs on.  XF challenges this centrifugal referent, knowing full well that 
+sex and gender are exemplary of the fulcrum between norm and fact, between 
+freedom and compulsion.  To tilt the fulcrum in the direction of nature is a 
+defensive concession at best, and a retreat from what makes trans and queer 
+politics more than just a lobby: that it is an arduous assertion of freedom 
+against an order that seemed immutable.  Like every myth of the given, a 
+stable foundation is fabulated for a real world of chaos, violence, and 
+doubt.  The 'given' is sequestered into the private realm as a certainty, 
+whilst retreating on fronts of public consequences.  When the possibility of 
+transition became real and known, the tomb under Nature's shrine cracked, 
+and new histories -- bristling with futures -- escaped the old order of 'sex'.
+The disciplinary grid of gender is in no small part an attempt to mend that 
+shattered foundation, and tame the lives that escaped it.  The time has now 
+come to tear down this shrine entirely, and not bow down before it in a 
+piteous apology for what little autonomy has been won. 
+
+
+0x0C If 'cyberspace' once offered the promise of escaping the strictures of 
+essentialist identity categories, the climate of contemporary social media 
+has swung forcefully in the other direction, and has become a theatre where 
+these prostrations to identity are performed.  With these curatorial 
+practices come puritanical rituals of moral maintenance, and these stages 
+are too often overrun with the disavowed pleasures of accusation, shaming, 
+and denunciation.  Valuable platforms for connection, organization, and 
+skill-sharing become clogged with obstacles to productive debate positioned 
+as if they are debate.  These puritanical politics of shame -- which fetishize 
+oppression as if it were a blessing, and cloud the waters in moralistic 
+frenzies -- leave us cold.  We want neither clean hands nor beautiful souls, 
+neither virtue nor terror.  We want superior forms of corruption. 
+
+
+0x0D What this shows is that the task of engineering platforms for social 
+emancipation and organization cannot ignore the cultural and semiotic 
+mutations these platforms afford.  What requires reengineering are the 
+memetic parasites arousing and coordinating behaviours in ways occluded by 
+their hosts' self-image; failing this, memes like 'anonymity', 'ethics', 
+'social justice' and 'privilege-checking' host social dynamisms at odds with 
+the often-commendable intentions with which they're taken up.  The task of 
+collective self-mastery requires a hyperstitional manipulation of desire's 
+puppet-strings, and deployment of semiotic operators over a terrain of 
+highly networked cultural systems.  The will will always be corrupted by the 
+memes in which it traffics, but nothing prevents us from instrumentalizing 
+this fact, and calibrating it in view of the ends it desires. 
+
+
+PARITY
+
+
+0x0E Xenofeminism is gender-abolitionist.  'Gender abolitionism' is not code 
+for the eradication of what are currently considered 'gendered' traits from 
+the human population.  Under patriarchy, such a project could only spell 
+disaster -- the notion of what is 'gendered' sticks disproportionately to the 
+feminine.  But even if this balance were redressed, we have no interest in 
+seeing the sexuate diversity of the world reduced.  Let a hundred sexes 
+bloom! 'Gender abolitionism' is shorthand for the ambition to construct a 
+society where traits currently assembled under the rubric of gender, no 
+longer furnish a grid for the asymmetric operation of power.  'Race 
+abolitionism' expands into a similar formula -- that the struggle must continue 
+until currently racialized characteristics are no more a basis of 
+discrimination than than the color of one's eyes.  Ultimately, every 
+emancipatory abolitionism must incline towards the horizon of class 
+abolitionism, since it is in capitalism where we encounter oppression in its 
+transparent, denaturalized form: you're not exploited or oppressed because 
+you are a wage labourer or poor; you are a labourer or poor because you are 
+exploited. 
+
+
+0x0F Xenofeminism understands that the viability of emancipatory 
+abolitionist projects -- the abolition of class, gender, and race -- hinges on a 
+profound reworking of the universal.  The universal must be grasped as 
+generic, which is to say, intersectional.  Intersectionality is not the 
+morcellation of collectives into a static fuzz of cross-referenced 
+identities, but a political orientation that slices through every 
+particular, refusing the crass pigeonholing of bodies.  This is not a 
+universal that can be imposed from above, but built from the bottom up  --  
+or, better, laterally, opening new lines of transit across an uneven 
+landscape.  This non-absolute, generic universality must guard against the 
+facile tendency of conflation with bloated, unmarked particulars -- namely 
+Eurocentric universalism -- whereby the male is mistaken for the sexless, the 
+white for raceless, the cis for the real, and so on.  Absent such a 
+universal, the abolition of class will remain a bourgeois fantasy, the 
+abolition of race will remain a tacit white-supremacism, and the abolition 
+of gender will remain a thinly veiled misogyny, even -- especially -- when 
+prosecuted by avowed feminists themselves.  (The absurd and reckless 
+spectacle of so many self-proclaimed 'gender abolitionists'' campaign 
+against trans women is proof enough of this. )
+
+
+0x10 From the postmoderns, we have learnt to burn the facades of the false 
+universal and dispel such confusions; from the moderns, we have learnt to 
+sift new universals from the ashes of the false.  Xenofeminism seeks to 
+construct a coalitional politics, a politics without the infection of 
+purity.  Wielding the universal requires thoughtful qualification and precise 
+self-reflection so as to become a ready-to-hand tool for multiple political 
+bodies and something that can be appropriated against the numerous 
+oppressions that transect with gender and sexuality.  The universal is no 
+blueprint, and rather than dictate its uses in advance, we propose XF as a 
+platform.  The very process of construction is therefore understood to be a 
+negentropic, iterative, and continual refashioning.  Xenofeminism seeks to be 
+a mutable architecture that, like open source software, remains available 
+for perpetual modification and enhancement following the navigational 
+impulse of militant ethical reasoning.  Open, however, does not mean 
+undirected.  The most durable systems in the world owe their stability to the 
+way they train order to emerge as an 'invisible hand' from apparent 
+spontaneity; or exploit the inertia of investment and sedimentation.  We 
+should not hesitate to learn from our adversaries or the successes and 
+failures of history.  With this in mind, XF seeks ways to seed an order that 
+is equitable and just, injecting it into the geometry of freedoms these 
+platforms afford. 
+
+
+ADJUST
+
+
+0x11 Our lot is cast with technoscience, where nothing is so sacred that it 
+cannot be reengineered and transformed so as to widen our aperture of 
+freedom, extending to gender and the human.  To say that nothing is sacred, 
+that nothing is transcendent or protected from the will to know, to tinker 
+and to hack, is to say that nothing is supernatural.  'Nature' -- understood 
+here, as the unbounded arena of science -- is all there is.  And so, in tearing 
+down melancholy and illusion; the unambitious and the non-scaleable; the 
+libidinized puritanism of certain online cultures, and Nature as an 
+un-remakeable given, we find that our normative anti-naturalism has pushed 
+us towards an unflinching ontological naturalism.  There is nothing, we 
+claim, that cannot be studied scientifically and manipulated 
+technologically. 
+
+
+0x12 This does not mean that the distinction between the ontological and the 
+normative, between fact and value, is simply cut and dried.  The vectors of 
+normative anti-naturalism and ontological naturalism span many ambivalent 
+battlefields.  The project of untangling what ought to be from what is, of 
+dissociating freedom from fact, will from knowledge, is, indeed, an infinite 
+task.  There are many lacunae where desire confronts us with the brutality of 
+fact, where beauty is indissociable from truth.  Poetry, sex, technology and 
+pain are incandescent with this tension we have traced.  But give up on the 
+task of revision, release the reins and slacken that tension, and these 
+filaments instantly dim. 
+ 
+
+CARRY
+
+
+0x13 The potential of early, text-based internet culture for countering 
+repressive gender regimes, generating solidarity among marginalised groups, 
+and creating new spaces for experimentation that ignited cyberfeminism in 
+the nineties has clearly waned in the twenty-first century.  The dominance of 
+the visual in today's online interfaces has reinstated familiar modes of 
+identity policing, power relations and gender norms in self-representation.  
+But this does not mean that cyberfeminist sensibilities belong to the past.  
+Sorting the subversive possibilities from the oppressive ones latent in 
+today's web requires a feminism sensitive to the insidious return of old 
+power structures, yet savvy enough to know how to exploit the potential.  
+Digital technologies are not separable from the material realities that 
+underwrite them; they are connected so that each can be used to alter the 
+other towards different ends.  Rather than arguing for the primacy of the 
+virtual over the material, or the material over the virtual, xenofeminism 
+grasps points of power and powerlessness in both, to unfold this knowledge 
+as effective interventions in our jointly composed reality. 
+ 
+
+0x14 Intervention in more obviously material hegemonies is just as crucial 
+as intervention in digital and cultural ones.  Changes to the built 
+environment harbour some of the most significant possibilities in the 
+reconfiguration of the horizons of women and queers.  As the embodiment of 
+ideological constellations, the production of space and the decisions we 
+make for its organization are ultimately articulations about 'us' and 
+reciprocally, how a 'we' can be articulated.  With the potential to 
+foreclose, restrict, or open up future social conditions, xenofeminists must 
+become attuned to the language of architecture as a vocabulary for 
+collective choreo-graphy -- the coordinated writing of space. 
+
+
+0x15 From the street to the home, domestic space too must not escape our 
+tentacles.  So profoundly ingrained, domestic space has been deemed 
+impossible to disembed, where the home as norm has been conflated with home 
+as fact, as an un-remakeable given.  Stultifying 'domestic realism' has no 
+home on our horizon.  Let us set sights on augmented homes of shared 
+laboratories, of communal media and technical facilities.  The home is ripe 
+for spatial transformation as an integral component in any process of 
+feminist futurity.  But this cannot stop at the garden gates.  We see too well 
+that reinventions of family structure and domestic life are currently only 
+possible at the cost of either withdrawing from the economic sphere -- the way 
+of the commune -- or bearing its burdens manyfold -- the way of the single parent.  
+If we want to break the inertia that has kept the moribund figure of the 
+nuclear family unit in place, which has stubbornly worked to isolate women 
+from the public sphere, and men from the lives of their children, while 
+penalizing those who stray from it, we must overhaul the material 
+infrastructure and break the economic cycles that lock it in place.  The task 
+before us is twofold, and our vision necessarily stereoscopic: we must 
+engineer an economy that liberates reproductive labour and family life, 
+while building models of familiality free from the deadening grind of wage 
+labour. 
+
+
+0x16 From the home to the body, the articulation of a proactive politics for 
+biotechnical intervention and hormones presses.  Hormones hack into gender 
+systems possessing political scope extending beyond the aesthetic 
+calibration of individual bodies.  Thought structurally, the distribution of 
+hormones -- who or what this distribution prioritizes or pathologizes -- is of 
+paramount import.  The rise of the internet and the hydra of black market 
+pharmacies it let loose -- together with a publicly accessible archive of 
+endocrinological knowhow -- was instrumental in wresting control of the 
+hormonal economy away from 'gatekeeping' institutions seeking to mitigate 
+threats to established distributions of the sexual.  To trade in the rule of 
+bureaucrats for the market is, however, not a victory in itself.  These tides 
+need to rise higher.  We ask whether the idiom of 'gender hacking' is 
+extensible into a long-range strategy, a strategy for wetware akin to what 
+hacker culture has already done for software -- constructing an entire universe 
+of free and open source platforms that is the closest thing to a practicable 
+communism many of us have ever seen.  Without the foolhardy endangerment of 
+lives, can we stitch together the embryonic promises held before us by 
+pharmaceutical 3D printing ('Reactionware'), grassroots telemedical abortion 
+clinics, gender hacktivist and DIY-HRT forums, and so on, to assemble a 
+platform for free and open source medicine?
+
+
+0x17 From the global to the local, from the cloud to our bodies, 
+xenofeminism avows the responsibility in constructing new institutions of 
+technomaterialist hegemonic proportions.  Like engineers who must conceive of 
+a total structure as well as the molecular parts from which it is 
+constructed, XF emphasises the importance of the mesopolitical sphere 
+against the limited effectiveness of local gestures, creation of autonomous 
+zones, and sheer horizontalism, just as it stands against transcendent, or 
+top-down impositions of values and norms.  The mesopolitical arena of 
+xenofeminism's universalist ambitions comprehends itself as a mobile and 
+intricate network of transits between these polarities.  As pragmatists, we 
+invite contamination as a mutational driver between such frontiers. 
+
+
+OVERFLOW
+
+
+0x18 XF asserts that adapting our behaviour for an era of Promethean 
+complexity is a labour requiring patience, but a ferocious patience at odds 
+with 'waiting'.  Calibrating a political hegemony or insurgent memeplex not 
+only implies the creation of material infra-structures to make the values it 
+articulates explicit, but places demands on us as subjects.  How are we to 
+become hosts of this new world? How do we build a better semiotic 
+parasite -- one that arouses the desires we want to desire, that orchestrates 
+not an autophagic orgy of indignity or rage, but an emancipatory and 
+egalitarian community buttressed by new forms of unselfish solidarity and 
+collective self-mastery?
+
+
+0x19 Is xenofeminism a programme? Not if this means anything so crude as a 
+recipe, or a single-purpose tool by which a determinate problem is solved.  
+We prefer to think like the schemer or lisper, who seeks to construct a new 
+language in which the problem at hand is immersed, so that solutions for it, 
+and for any number of related problems, might unfurl with ease.  Xenofeminism 
+is a platform, an incipient ambition to construct a new language for sexual 
+politics -- a language that seizes its own methods as materials to be reworked, 
+and incrementally bootstraps itself into existence.  We understand that the 
+problems we face are systemic and interlocking, and that any chance of 
+global success depends on infecting myriad skills and contexts with the 
+logic of XF.  Ours is a transformation of seeping, directed subsumption 
+rather than rapid overthrow; it is a transformation of deliberate 
+construction, seeking to submerge the white-supremacist capitalist 
+patriarchy in a sea of procedures that soften its shell and dismantle its 
+defenses, so as to build a new world from the scraps. 
+
+
+0x1A Xenofeminism indexes the desire to construct an alien future with a 
+triumphant X on a mobile map.  This X does not mark a destination.  It is the 
+insertion of a topological-keyframe for the formation of a new logic.  In 
+affirming a future untethered to the repetition of the present, we militate 
+for ampliative capacities, for spaces of freedom with a richer geometry than 
+the aisle, the assembly line, and the feed.  We need new affordances of 
+perception and action unblinkered by naturalised identities.  In the name of 
+feminism, 'Nature' shall no longer be a refuge of injustice, or a basis for 
+any political justification whatsoever!
+
+
+If nature is unjust, change nature!
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
