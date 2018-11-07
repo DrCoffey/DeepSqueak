@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.5 2018-11-7
+Probably fixed unix compatibility by changes slashes to ones that one on both windows and unix.
+
+Fixed error in export to excel, when filenames were cut off when the name contained periods.
+
+Added manifestos.
+
 ## 1.1.4 2018-11-1
 Switched most file saving to "fullfile" function, rather than concatinating strings.
 
