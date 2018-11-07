@@ -17,8 +17,8 @@ for j = 1:length(selections) % Do this for each file
     currentfile = selections(j);
     tmp=load([handles.detectionfiles(currentfile).folder '/' handles.detectionfiles(currentfile).name]);%get currently selected option from menu
     current_detection_file = handles.detectionfiles(currentfile).name;
-    excelname=[strtok(current_detection_file,'.') '_Stats.xlsx'];
-    FileName = excelname;
+    [~,FileName]=fileparts(current_detection_file);
+    FileName = [FileName '_Stats.xlsx'];
     
     exceltable = [{'ID'} {'Label'} {'Accepted'} {'Score'}  {'Begin Time (s)'} {'End Time (s)'} {'Call Length (s)'} {'Principal Frequency (KHz)'} {'Low Freq (KHz)'} {'High Freq (KHz)'} {'Delta Freq (KHz)'} {'Frequency Standard Deviation (KHz)'} {'Slope (KHz / s)'} {'Sinuosity'} {'Max Power'} {'Tonality'}];
     for i = 1:length(tmp.Calls) % Do this for each call
