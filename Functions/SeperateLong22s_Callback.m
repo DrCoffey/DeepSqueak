@@ -1,7 +1,7 @@
 function Calls = SeperateLong22s_Callback(hObject, eventdata, handles, inputfile, Calls)
 %% Get if clicked through menu, or using the long call network
 if nargin == 3
-    [trainingdata, trainingpath] = uigetfile([handles.settings.detectionfolder '\*.mat'],'Select Detection File','MultiSelect', 'off');
+    [trainingdata, trainingpath] = uigetfile([handles.settings.detectionfolder '/*.mat'],'Select Detection File','MultiSelect', 'off');
     [audiodata, audiopath] = uigetfile({'*.wav;*.flac;*.UVD' 'Audio File';'*.wav' 'WAV(*.wav)'; '*.flac' 'FLAC (*.flac)'; '*.UVD' 'Ultravox File (*.UVD)'},['Select Corresponding Audio File for ' trainingdata],handles.settings.audiofolder);
     inputfile = [audiopath audiodata];
     hc = waitbar(0,'Loading File');

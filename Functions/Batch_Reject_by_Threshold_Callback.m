@@ -34,7 +34,7 @@ h = waitbar(0,'Initializing');
 for currentfile =selections % Do this for each file
     % Load the file, skip files if variable: 'Calls' doesn't exist
     lastwarn('');
-    load([handles.detectionfiles(currentfile).folder '\' handles.detectionfiles(currentfile).name],'Calls');
+    load([handles.detectionfiles(currentfile).folder '/' handles.detectionfiles(currentfile).name],'Calls');
     if ~isempty(lastwarn)
         disp([handles.detectionfiles(currentfile).name ' is not a Call file, skipping...'])
         continue
@@ -71,7 +71,7 @@ for currentfile =selections % Do this for each file
     Calls.Accept(reject) = false;
     
     Calls = table2struct(Calls);
-    save([handles.detectionfiles(currentfile).folder '\' handles.detectionfiles(currentfile).name],'Calls','-v7.3');
+    save([handles.detectionfiles(currentfile).folder '/' handles.detectionfiles(currentfile).name],'Calls','-v7.3');
     
     %update the display
     if isfield(handles,'current_file_id') && currentfile == handles.current_file_id

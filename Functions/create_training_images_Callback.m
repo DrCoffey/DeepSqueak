@@ -3,7 +3,7 @@ function create_training_images_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 cd(handles.squeakfolder);
-[trainingdata trainingpath] = uigetfile([char(handles.settings.detectionfolder) '\*.mat'],'Select Detection File for Training ','MultiSelect', 'on');
+[trainingdata trainingpath] = uigetfile([char(handles.settings.detectionfolder) '/*.mat'],'Select Detection File for Training ','MultiSelect', 'on');
 if isnumeric(trainingdata); return; end
 
 if ischar(trainingdata)
@@ -46,7 +46,8 @@ for k = 1:length(trainingdata)
     TTable = table({},{},'VariableNames',{'imageFilename','USV'});
     load([trainingpath trainingdata{k}]);
     [p, filename] = fileparts(trainingdata{k});
-    mkdir(['Training\Images\' filename])
+    fname = fullfile(handles.squeakfolder,'Training','Images',filename);
+    mkdir(fname);
     
     % Remove Rejects
     Calls = Calls([Calls.Accept] == 1);
@@ -108,7 +109,7 @@ for k = 1:length(trainingdata)
             %
             
             for j = 1:repeats
-                IMname = [handles.squeakfolder '\Training\Images\' filename '\' num2str(c) '_' num2str(j) '.png'];
+                IMname = fullfile(fname,[num2str(c) '_' num2str(j) '.png']);
                 [~,box] = CreateTrainingData(...
                     Audio,...
                     rate,...
@@ -130,7 +131,7 @@ for k = 1:length(trainingdata)
             
             % Augment audio by adding write noise, and change the amplitude
             for j = 1:repeats
-                IMname = [handles.squeakfolder '\Training\Images\' filename '\' num2str(c) '_' num2str(j) '.png'];
+                IMname = fullfile(fname,[num2str(c) '_' num2str(j) '.png']);
                 [~,box] = CreateTrainingData(...
                     Calls(i).Audio,...
                     Calls(i).Rate,...
@@ -145,7 +146,7 @@ for k = 1:length(trainingdata)
             waitbar(i/length(Calls),h,['Processing File ' num2str(k) ' of '  num2str(length(trainingdata))]);
         end
     end
-    save(['Training\' filename '.mat'],'TTable','wind','noverlap','nfft','cont');
+    save([fname '.mat'],'TTable','wind','noverlap','nfft','cont');
     disp(['Created ' num2str(height(TTable)) ' Training Images']);
 end
 close(h)
