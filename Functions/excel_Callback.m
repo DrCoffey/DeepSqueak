@@ -15,7 +15,7 @@ if isnumeric(PathName); return; end
 hc = waitbar(0,'Initializing');
 for j = 1:length(selections) % Do this for each file
     currentfile = selections(j);
-    tmp=load([handles.detectionfiles(currentfile).folder '\' handles.detectionfiles(currentfile).name]);%get currently selected option from menu
+    tmp=load([handles.detectionfiles(currentfile).folder '/' handles.detectionfiles(currentfile).name]);%get currently selected option from menu
     current_detection_file = handles.detectionfiles(currentfile).name;
     excelname=[strtok(current_detection_file,'.') '_Stats.xlsx'];
     FileName = excelname;
@@ -43,15 +43,15 @@ for j = 1:length(selections) % Do this for each file
         end
         
     end
-    % xlswrite([PathName '\' FileName],exceltable)
+    % xlswrite([PathName '/' FileName],exceltable)
     t = cell2table(exceltable);
     clear exceltable
     
-    if exist([PathName '\' FileName], 'file')==2
-        delete([PathName '\' FileName]);
+    if exist([PathName '/' FileName], 'file')==2
+        delete([PathName '/' FileName]);
     end
 
-    writetable(t,[PathName '\' FileName],'WriteVariableNames',0');
+    writetable(t,[PathName '/' FileName],'WriteVariableNames',0');
     
 end
 close(hc);

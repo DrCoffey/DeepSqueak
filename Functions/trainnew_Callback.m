@@ -2,7 +2,7 @@ function trainnew_Callback(hObject, eventdata, handles)
 %% Train a new neural network
 cd(handles.squeakfolder);
 waitfor(msgbox('Select Image Tables'))
-[trainingdata trainingpath] = uigetfile(['Training\*.mat'],'Select Training File(s) for Training ','MultiSelect', 'on');
+[trainingdata trainingpath] = uigetfile(['Training/*.mat'],'Select Training File(s) for Training ','MultiSelect', 'on');
 TrainingTables = [];
 if ischar(trainingdata)==1
    tmp{1}=trainingdata;

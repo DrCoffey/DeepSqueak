@@ -84,9 +84,9 @@ handles.spect = imagesc(1,1,1,'Parent', handles.axes1);
 
 % Check for missing files, create setting file if it doens't exist
 if ~(exist(fullfile(handles.squeakfolder, 'settings.mat'), 'file')==2)
-    handles.settings.detectionfolder = fullfile(handles.squeakfolder, 'Detections\');
-    handles.settings.networkfolder = fullfile(handles.squeakfolder, 'Networks\');
-    handles.settings.audiofolder = fullfile(handles.squeakfolder, 'Audio\');
+    handles.settings.detectionfolder = fullfile(handles.squeakfolder, 'Detections/');
+    handles.settings.networkfolder = fullfile(handles.squeakfolder, 'Networks/');
+    handles.settings.audiofolder = fullfile(handles.squeakfolder, 'Audio/');
     handles.settings.detectionSettings = {'0' '3' '.1' '100' '18' '0' '0' '1' '1'};
     handles.settings.playback_rate = 0.05;
     handles.settings.LowFreq = 15;

@@ -1,7 +1,7 @@
 % Updates folders and config file
 function update_folders(hObject, eventdata, handles)
 % Reads current config file
-% handles.config=importdata([handles.squeakfolder '\config.xlsx']);
+% handles.config=importdata([handles.squeakfolder '/config.xlsx']);
 handles.settings = load([handles.squeakfolder '/settings.mat']);
 
 % Update Networks
@@ -11,7 +11,7 @@ if isempty(handles.settings.networkfolder)
 elseif exist(handles.settings.networkfolder,'dir')==0
     set(handles.neuralnetworkspopup,'String','Invalid Folder');
 else
-    handles.networkfiles=dir([handles.settings.networkfolder '\*.mat*']);
+    handles.networkfiles=dir([handles.settings.networkfolder '/*.mat*']);
     handles.networkfilesnames = {handles.networkfiles.name};
     if isempty(handles.networkfilesnames)
         set(handles.neuralnetworkspopup,'String','No Networks in Folder');
@@ -34,7 +34,7 @@ if isempty(handles.settings.audiofolder)
 elseif exist(handles.settings.audiofolder,'dir')==0
     set(handles.AudioFilespopup,'String','Invalid Folder');
 else
-    handles.audiofiles=[dir([handles.settings.audiofolder '\*.wav*']); dir([handles.settings.audiofolder '\*.UVD*']); dir([handles.settings.audiofolder '\*.flac*'])];
+    handles.audiofiles=[dir([handles.settings.audiofolder '/*.wav*']); dir([handles.settings.audiofolder '/*.UVD*']); dir([handles.settings.audiofolder '/*.flac*'])];
     handles.audiofilesnames = {handles.audiofiles.name};
     if isempty(handles.audiofilesnames)
         set(handles.AudioFilespopup,'String','No Audio in Folder');
@@ -56,7 +56,7 @@ if isempty(handles.settings.detectionfolder)
 elseif exist(handles.settings.detectionfolder,'dir')==0
     set(handles.popupmenuDetectionFiles,'String','Invalid Folder');
 else
-    handles.detectionfiles=dir([handles.settings.detectionfolder '\*.mat*']);
+    handles.detectionfiles=dir([handles.settings.detectionfolder '/*.mat*']);
     tosort=struct2cell(handles.detectionfiles)';
     tosort=datetime(tosort(:,3));
     [tosort idx] = sortrows(tosort,'descend');

@@ -8,7 +8,7 @@ end
 
 % Load the network
 try
-    load([handles.squeakfolder '\Denoising Networks\CleaningNet.mat'],'DenoiseNet','wind','noverlap','nfft','lowFreq','highFreq','imageSize');
+    load(fullfile(handles.squeakfolder,'Denoising Networks','CleaningNet.mat'),'DenoiseNet','wind','noverlap','nfft','lowFreq','highFreq','imageSize');
 catch
     errordlg(sprintf('Denoising network not found. \nNetwork must be named "CleaningNet.mat" \n In folder: "Denoising Networks"'))
     return

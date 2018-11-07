@@ -11,7 +11,7 @@ function TrainPostHocDenoiser_Callback(hObject, eventdata, handles)
 %% Prepare the data
 % Select files
 cd(handles.squeakfolder);
-[trainingdata, trainingpath] = uigetfile([handles.settings.detectionfolder '\*.mat'],'Select Detection File(s) for Training ','MultiSelect', 'on');
+[trainingdata, trainingpath] = uigetfile([handles.settings.detectionfolder '/*.mat'],'Select Detection File(s) for Training ','MultiSelect', 'on');
 if isnumeric(trainingdata)  % If user cancels
     return
 end
@@ -88,7 +88,6 @@ TrainY = Class(~ismembc(1:length(TrainingImages),(valInd * 2) - 1));
 aug = imageDataAugmenter('RandXScale',[.75 1.5],'RandYScale',[.75 1.5],'RandXTranslation',[-10 10],'RandYTranslation',[-10 10]);
 auimds = augmentedImageSource(imageSize,TrainX,TrainY,'DataAugmentation',aug);
 
-load('\\NEUMAIERDRIVE\LabPeople\Kevin\DeepSqueak Manuscript\Deep Detections\ALL THE MOUSECALLS\3BB89487_FECompStim2014-01-08_0000001.mat')
 layers = [
     imageInputLayer([imageSize 1])
 
@@ -130,8 +129,7 @@ options = trainingOptions('sgdm',...
 DenoiseNet = trainNetwork(auimds,layers,options);
 
 % [FileName,PathName] = uiputfile('CleaningNet.mat','Save Network');
-save([handles.squeakfolder '\Denoising Networks\CleaningNet.mat'],'DenoiseNet','wind','noverlap','nfft','lowFreq','highFreq','imageSize','layers','options');
-
+save(fullfile(handles.squeakfolder,'Denoising Networks','CleaningNet.mat'),'DenoiseNet','wind','noverlap','nfft','lowFreq','highFreq','imageSize','layers','options');
 
 
 end

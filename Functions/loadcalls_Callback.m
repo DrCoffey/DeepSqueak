@@ -7,7 +7,7 @@ if nargin == 3 % if "Load Calls" button pressed
     handles.current_file_id = get(handles.popupmenuDetectionFiles,'Value');
 end
 handles.current_detection_file = handles.detectionfiles(handles.current_file_id).name;
-tmp=load([handles.detectionfiles(handles.current_file_id).folder '\' handles.detectionfiles(handles.current_file_id).name],'Calls');%get currently selected option from menu
+tmp=load([handles.detectionfiles(handles.current_file_id).folder '/' handles.detectionfiles(handles.current_file_id).name],'Calls');%get currently selected option from menu
 handles.calls=tmp.Calls;
 handles.currentcall=1;
 handles.CallTime=[];
