@@ -17,7 +17,7 @@ prompt = {'Window Length (s)','Overlap (s)','NFFT (s)','Amplitude Cutoff (3 for 
     'Number of augmented duplicates','Minimum amplitude augmentation','Maximum amplitude augmentation'};
 dlg_title = 'Spectrogram Settings';
 num_lines=[1 40]; options.Resize='off'; options.windStyle='modal'; options.Interpreter='tex';
-spectSettings = str2double(inputdlg(prompt,dlg_title,num_lines,{'0.0032','0.0028','0.0032','1','0','3','0.25','1.2'},options));
+spectSettings = str2double(inputdlg(prompt,dlg_title,num_lines,{'0.0032','0.0028','0.0032','1','0','2','0.25','1.2'},options));
 if isempty(spectSettings); return; end
 
 wind = spectSettings(1);
@@ -25,7 +25,7 @@ noverlap = spectSettings(2);
 nfft = spectSettings(3);
 cont = spectSettings(4);
 bout = spectSettings(5);
-repeats = spectSettings(6);
+repeats = spectSettings(6)+1;
 AmplitudeRange = [spectSettings(7), spectSettings(8)];
 
 if bout ~= 0
@@ -95,18 +95,6 @@ for k = 1:length(trainingdata)
             Audio=audioread([audiopath audioname],round([windL windR]*rate));
             Boxes(:,1) = Boxes(:,1)-windL;
             
-            %               [s, fr, ti] = spectrogram(Audio,round(rate * wind),round(rate * noverlap),round(rate * nfft),rate,'yaxis');
-            %             x1 = axes2pix(length(ti),ti,Boxes(:,1)-windL);
-            %             x2 = axes2pix(length(ti),ti,Boxes(:,3));
-            %             y1 = axes2pix(length(fr),fr./1000,Boxes(:,2));
-            %             y2 = axes2pix(length(fr),fr./1000,Boxes(:,4));
-            %             maxfreq = find(fr<cutoff,1,'last');
-            %             fr = fr(1:maxfreq);
-            %             s = s(1:maxfreq,:);
-            %             box = round([x1 (length(fr)-y1-y2) x2 y2]);
-            %
-            %             im = mat2gray(flipud(abs(s)),[0 cont]);
-            %
             
             for j = 1:repeats
                 IMname = fullfile(fname,[num2str(c) '_' num2str(j) '.png']);
@@ -115,9 +103,9 @@ for k = 1:length(trainingdata)
                     rate,...
                     Boxes,...
                     1,...
-                    wind,noverlap,nfft,cont,rate/2,IMname,AmplitudeRange);
-                    TTable = [TTable;{IMname, box}];
-
+                    wind,noverlap,nfft,cont,rate/2,IMname,AmplitudeRange,j);
+                TTable = [TTable;{IMname, box}];
+                
             end
             waitbar(i/length(unique(bins)),h,['Processing File ' num2str(k) ' of '  num2str(length(trainingdata))]);
             c=c+1;
@@ -137,16 +125,16 @@ for k = 1:length(trainingdata)
                     Calls(i).Rate,...
                     Calls(i).RelBox,...
                     Calls(i).Accept,...
-                    wind,noverlap,nfft,cont,Calls(i).Rate/2,IMname,AmplitudeRange);
+                    wind,noverlap,nfft,cont,Calls(i).Rate/2,IMname,AmplitudeRange,j);
                 
-%                 imwrite(im,filename,'BitDepth',8)
+                %                 imwrite(im,filename,'BitDepth',8)
                 TTable = [TTable;{IMname, box}];
             end
             
             waitbar(i/length(Calls),h,['Processing File ' num2str(k) ' of '  num2str(length(trainingdata))]);
         end
     end
-    save([fname '.mat'],'TTable','wind','noverlap','nfft','cont');
+    save(fullfile(handles.squeakfolder,'Training',[filename '.mat']),'TTable','wind','noverlap','nfft','cont');
     disp(['Created ' num2str(height(TTable)) ' Training Images']);
 end
 close(h)
@@ -156,20 +144,33 @@ end
 
 
 % Create training images and boxes
-function [im,box] = CreateTrainingData(audio,rate,RelBox,Accept,wind,noverlap,nfft,cont,cutoff,filename,AmplitudeRange)
+function [im,box] = CreateTrainingData(audio,rate,RelBox,Accept,wind,noverlap,nfft,cont,cutoff,filename,AmplitudeRange,replicatenumber)
 
-% AmplitudeRange = [.5, 1.25];
-NoiseRange = [35, 60];
+% Convert audio to double, if it is not already
+if ~isa(audio,'double')
+    audio = double(audio) / (double(intmax(class(audio)))+1);
+end
+
+% Augment by adding white noise, and adjusting the gain.
+NoiseRange = [39, 60];
 AmplitudeFactor = range(AmplitudeRange).*rand() + AmplitudeRange(1);
 NoiseFactor = range(NoiseRange).*rand() + NoiseRange(1);
 
-[s, fr, ti] = spectrogram(AmplitudeFactor .* awgn(audio,NoiseFactor),...
+% The first training image should not be augmented
+if replicatenumber > 1
+    audio = AmplitudeFactor .* awgn(audio,NoiseFactor);
+end
+
+% Make the spectrogram
+[s, fr, ti] = spectrogram(audio,...
     round(rate * wind),...
     round(rate * noverlap),...
     round(rate * nfft),...
     rate,...
     'yaxis');
 
+
+% Find the box within the spectrogram
 x1 = axes2pix(length(ti),ti,RelBox(:,1));
 x2 = axes2pix(length(ti),ti,RelBox(:,3));
 y1 = axes2pix(length(fr),fr./1000,RelBox(:,2));

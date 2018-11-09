@@ -5,6 +5,10 @@ Probably fixed unix compatibility by changes slashes to ones that one on both wi
 
 Fixed error in export to excel, when filenames were cut off when the name contained periods.
 
+When creating training images, augmented duplicates are now created in addition to, rather than instead of the original. 
+ - Reduced the amount of white noise augmentation
+ - Fixed incorrect file path for training tables
+
 Added manifestos.
 
 ## 1.1.4 2018-11-1
