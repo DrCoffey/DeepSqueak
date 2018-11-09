@@ -118,8 +118,9 @@ for i = 1:((time - overlap) / (chunksize - overlap))
             scores(Class == 'USV',:)];
         AllClass=[AllClass
             Class(Class == 'USV',:)];
-    catch
+    catch ME
         warning('Error in Network, Skiping Audio Chunk');
+        disp(ME.message);
     end
     c=c+1;
     t=toc;
