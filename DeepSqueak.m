@@ -146,6 +146,41 @@ set(handles.axes3,'XTickLabel',[]);
 set(handles.axes3,'XTick',[]);
 set(handles.axes3,'YTick',[]);
 
+%% Display error message if running on matlab before 2017b or toolboxes not found
+if verLessThan('matlab','9.3')
+    errordlg(['Warning, DeepSqueak requires MATLAB 2017b or later. It looks like you are use MATLAB ' version('-release')],'upgrade your matlab')
+end
+
+try
+    verLessThan('nnet','1');
+catch
+    warning('Deep Learning Toolbox not found')
+end
+
+try
+    verLessThan('curvefit','1');
+catch
+    warning('Curve Fitting Toolbox not found')
+end
+
+try
+    verLessThan('vision','1');
+catch
+    warning('Computer Vision System Toolbox not found')
+end
+
+try
+    verLessThan('images','1');
+catch
+    warning('Image Processing Toolbox not found')
+end
+
+try
+    verLessThan('distcomp','1');
+catch
+    warning('Parallel Computing Toolbox not found')
+end
+
 function varargout = DeepSqueak_OutputFcn(hObject, eventdata, handles)
 
 varargout{1} = handles.output;
