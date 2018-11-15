@@ -68,7 +68,6 @@ end
 scatter(res_x,D(idx_of_result),50,'MarkerEdgeColor',[1 0 0],...
               'MarkerFaceColor',[1 0 0]);
 title(axes1,['Elbow Location: ' num2str(idx_of_result)]);
-export_fig('Cluster Optimization2.png','-m3');
           
 K=idx_of_result;
 % [r,~]=find(PC>Cutoff); %find the best index
