@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.5.2 2018-11-16
+Changed export audio so that all audio is exported, not just what's in the boxes.
+
+Improved file names in export spectrogram and export audio.
+
 ## 1.1.5.1 2018-11-15
 Fixed bug in kmeans optimization by removing dependency on export_fig
 

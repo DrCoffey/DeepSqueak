@@ -1,8 +1,16 @@
 function esportspect_Callback(hObject, eventdata, handles)
 % Plotting Defferntial Expression
-spectname=['Call_' num2str(handles.currentcall) '.png'];
+
+[~,detectionName] = fileparts(handles.current_detection_file);
+spectname = [detectionName ' Call ' num2str(handles.currentcall) '.png'];
 [FileName,PathName] = uiputfile(spectname,'Save Spectrogram');
 
+% Cancel if cancelled
+if isnumeric(FileName)
+    return
+end
+
+% Get the spectrogram from the display
 I = get(handles.spect,'CData');
 Ydata = get(handles.spect,'Ydata');
 Ylim = get(handles.axes1,'Ylim');
@@ -19,4 +27,3 @@ cmap = feval(handles.cmapname{1},256);
 I2 = gray2ind(I,256);
 imwrite(I2,cmap,fullFileName,'png','BitDepth',8); % Re-change it to colored one 
 
-guidata(hObject, handles);
