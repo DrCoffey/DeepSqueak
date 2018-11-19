@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.6 2018-11-19
+Fixed error in importing files from Ultravox.
+
+Fixed error when simultaneously detecting with multiple networks.
+
 ## 1.1.5.2 2018-11-16
 Changed export audio so that all audio is exported, not just what's in the boxes.
 

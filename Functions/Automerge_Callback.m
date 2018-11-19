@@ -50,11 +50,11 @@ for i=1:size(merged_boxes,1)
     end
     WindR=round((merged_boxes(i,1)+merged_boxes(i,3)+(merged_boxes(i,3)))*(info.SampleRate));
     WindR = min(WindR,info.TotalSamples); % Prevent WindR from being greater than total samples
-        if ~isa(a,'double')
-            tmp_a = a;
-            a = double(tmp_a) / (double(intmax(class(tmp_a)))+1);
-        end    if WindL==1;
-        
+    
+    a = audioread(AudioFile,[WindL WindR],'native');
+
+    
+    if WindL==1;
         pad=zeros(pad,1);
         a=[pad
             a];
