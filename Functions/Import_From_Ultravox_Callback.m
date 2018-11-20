@@ -7,16 +7,17 @@ AudioFile = fullfile(audiopath,audioname);
 
 
 % Convert from unicode to ascii
-fin = fopen([ultravoxPath ultravoxName],'r');
-file = fread(fin);
-file(1:2) = [];
-file(file == 0) = [];
-fin2 = fopen([ultravoxPath 'temp.txt.'],'w');
-fwrite(fin2, file, 'uchar');
+fin = fopen(fullfile(ultravoxPath,ultravoxName),'r');
+chars = fscanf(fin,'%c');
+chars(1:2) = [];
+chars(chars == 0) = [];
+chars = strrep(chars,',','.');
+fin2 = fopen(fullfile(ultravoxPath,'temp.txt'),'w');
+fwrite(fin2, chars, 'uchar');
 fclose('all');
 
 % Read file as a table
-ultravox = readtable([ultravoxPath 'temp.txt'],'Delimiter',';');
+ultravox = readtable(fullfile(ultravoxPath,'temp.txt'),'Delimiter',';','ReadVariableNames',1,'HeaderLines',0);
 
 % The Ultravox table only contains the frequency at max amplitude, so we
 % need to specify the bandwidth.
@@ -28,6 +29,7 @@ info = audioinfo(AudioFile);
 rate = info.SampleRate;
 Calls = struct('Rate',struct,'Box',struct,'RelBox',struct,'Score',struct,'Audio',struct,'Accept',struct,'Type',struct,'Power',struct);
 hc = waitbar(0,'Importing Calls from Ultravox Log');
+
 for i=1:length(ultravox.Call)
     waitbar(i/length(ultravox.Call),hc);
     
