@@ -65,7 +65,7 @@ for j = 1:length(selections) % Do this for each file
             Calls(i).Type = Class;
         end
     end
-    save(fname,'Calls','-append');
+    save(fname,'Calls','-v7.3');
 end
 close(h)
 

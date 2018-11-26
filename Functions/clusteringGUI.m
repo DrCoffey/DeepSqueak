@@ -152,12 +152,13 @@ for i=1:i*j
         ha(i) = axes(d,'Units','Normalized','Position',[pos(i,2),pos(i,1),.13,.09]);
         handle_image(i) = image(colorIM + .5 .* rejected(clustIndex(i)),'parent',ha(i));
         set(handle_image(i), 'ButtonDownFcn',{@clicked,clustIndex(i),i});
-        axis off;
+        axis(ha(i),'off');
     else
         ha(i) = axes(d,'Units','Normalized','Position',[pos(i,2),pos(i,1),.13,.09]);
         handle_image(i) = image(colorIM,'parent',ha(i));
+        set(ha(i),'Visible','off')
         set(get(ha(i),'children'),'Visible','off');
-        axis off;
+        axis(ha(i),'off');
         
     end
 end
@@ -213,6 +214,7 @@ clustIndex = find(clustAssign==clusters(k));
 
 for i=1:length(ha)
     if i <= length(clustIndex) - (page - 1)*length(ha)
+        set(ha(i),'Visible','off')
         set(get(ha(i),'children'),'Visible','on');
         callID = i + (page - 1)*length(ha);
         im = imresize(ClusteringData{clustIndex(callID),1},[60 100]);
@@ -228,8 +230,8 @@ for i=1:length(ha)
             colorIM(:,:,1) = colorIM(:,:,1) + .5;
         end
         set(handle_image(i),'CData',colorIM);
-        axis off;
     else
+        set(ha(i),'Visible','off')
         set(get(ha(i),'children'),'Visible','off');
     end
     

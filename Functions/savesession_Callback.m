@@ -11,11 +11,8 @@ if FileName == 0
 end
 h = waitbar(0.5,'saving');
 
-if strcmp(fullfile(PathName,FileName),fullfile(handles.settings.detectionfolder,handles.SaveFile))
-    save(fullfile(PathName,FileName),'Calls','-append');
-else
-    save(fullfile(PathName,FileName),'Calls','-v7.3');
-end
+
+save(fullfile(PathName,FileName),'Calls','-v7.3');
 
 update_folders(hObject, eventdata, handles);
 guidata(hObject, handles);
