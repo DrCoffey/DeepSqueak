@@ -30,9 +30,13 @@ if strcmp(ext,'.mat')
         G = graph(dist);
         bout = conncomp(G)';
         
+        try
         g = table(begintime, CallClass, repmat(i,length(Calls),1), bout,[Calls.Accept]','VariableNames',{'BeginTime_s_','Label','File','Bout','Accepted'});
         AllCalls = [AllCalls; g];
         waitbar(i/length(filename),h)
+        catch
+        warning('No Accepted Calls in File');
+        end
         
     end
 else
@@ -43,9 +47,13 @@ else
         dist(dist > boutlength) = 0;
         G = graph(dist);
         bout = conncomp(G)';
+        try
         g = table(bout,repmat(i,height(t),1),'VariableNames',{'Bout','File'});
         AllCalls = [AllCalls; g t];
         waitbar(i/length(filename),h)
+        catch
+        warning('No Accepted Calls in File');
+        end
         
     end
 end
