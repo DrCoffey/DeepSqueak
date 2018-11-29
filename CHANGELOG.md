@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.7 2018-11-27
+Various bug Fixes
+
+Improved syntax analyses
+
+DS now checks to see if a newer version is online
+
 ## 1.1.6 2018-11-19
 Fixed error in importing files from Ultravox.
 

@@ -73,11 +73,30 @@ cd(handles.squeakfolder);
 % Display version
 try
     fid = fopen(fullfile(handles.squeakfolder,'CHANGELOG.md'));
-    txt = textscan(fid,'%s');
-    disp(['DeepSqueak version ' txt{1}{4}]);
+    txt = fscanf(fid,'%c');
+    txt = strsplit(txt);
+    changes = find(contains(txt,'##'),1); % Get the values after the bold heading
+    DSVersion = txt{changes+1};
+    disp(['DeepSqueak version ' DSVersion]);
     fclose(fid);
 end
+% Check if a new version is avaliable by comparing changelog to whats online
+try
+    WebChangelogTxt= webread('https://raw.githubusercontent.com/DrCoffey/DeepSqueak/master/CHANGELOG.md');
+    WebChangelog = strsplit(WebChangelogTxt);
+    changes = find(contains(WebChangelog,'##')); % Get the values after the bold heading
+    WebVersion = WebChangelog{changes+1};
+    if ~strcmp(WebVersion,DSVersion)
+        disp ' '
+        disp 'A new version of DeepSqueak is avaliable.'
+        disp('<a href="https://github.com/DrCoffey/DeepSqueak">Download link</a>')
+        changes = strfind(WebChangelogTxt,'##');
+        disp(WebChangelogTxt(changes(1)+3:changes(2)-1))
+    end
+end
 
+
+    
 handles.cmap ='inferno';
 handles.cmapname = {'inferno'};
 handles.spect = imagesc(1,1,1,'Parent', handles.axes1);
@@ -120,6 +139,7 @@ end
 addpath(handles.squeakfolder);
 addpath(fullfile(handles.squeakfolder, 'Functions'));
 addpath(fullfile(handles.squeakfolder, 'Functions','Colormaps'));
+savepath
 
 % Cool Background Image
 imshow(handles.background, 'Parent', handles.axes1);
