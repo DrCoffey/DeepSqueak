@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2 2018-11-27
+Various bug Fixes
+
 ## 1.1.6 2018-11-19
 Fixed error in importing files from Ultravox.
 
