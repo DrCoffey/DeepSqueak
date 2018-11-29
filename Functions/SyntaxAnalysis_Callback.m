@@ -9,7 +9,7 @@ if ischar(filename)
     filename=tmp;
 end
 
-settings = inputdlg({'Maximum bout seperation (s)','Exclude Classes with frequency below (0-1)'},'Syntax',[1 50],{'10','.01'});
+settings = inputdlg({'Maximum bout seperation (s)','Exclude Classes with frequency below (0-1)'},'Syntax',[1 50],{'2','.01'});
 boutlength = str2num(settings{1});
 minfreq = str2num(settings{2});
 
@@ -87,10 +87,9 @@ delete(h)
 %% Create Figures
 figure('position',[0 0 700 600],'color','w')
 h = heatmap(cats,cats,counts,'ColorMethod','mean');
-h.Colormap = plasma;
 h.XLabel = 'Transition Probability';
 h.YLabel = 'Syllable';
-set(gcf,'Colormap',plasma);
+set(gcf,'Colormap',inferno);
 set(gca,'GridVisible','off','FontSize',14);
 h.CellLabelFormat = '%.3f';
 colorbar off
@@ -98,13 +97,20 @@ colorbar off
 figure('position',[300 0 700 600],'color','w')
 counts(counts<.05)=0;
 G = digraph(counts,cats);
+idxg=find(G.Edges.Weight<.075);
+G=rmedge(G,idxg);
 g = plot(G,'EdgeCData',G.Edges.Weight);
 axis off
-g.ArrowSize = 10;
-g.LineWidth = 10*G.Edges.Weight;
+g.ArrowSize = 15;
+g.LineWidth = 15*G.Edges.Weight;
 g.EdgeAlpha = .8;
-layout(g,'layered');
-set(gcf,'Colormap',plasma);
+g.NodeFontSize = 12;
+g.NodeColor = [.2 .2 .2];
+layout(g,'circle');
+set(gcf,'Colormap',inferno);
+cb=colorbar;
+cb.Label.String='Transition Probability';
+cb.Label.Rotation=90;
 
 
 %% Save Matrix
