@@ -5,15 +5,15 @@ function ViewClusters_Callback(hObject, eventdata, handles)
 
 % Save the clusters
 if finished == 1
-saveChoice =  questdlg('Update files with new clusters?','Save clusters','Yes','No','No');
-switch saveChoice
-    case 'Yes'
-        % Apply new category names
-        clustAssign =  renamecats(clustAssign,cellstr(unique(clustAssign)),cellstr(clusterName));
-        UpdateCluster(ClusteringData, clustAssign, clusterName, rejected)
-    case 'No'
-        return
-end
+    saveChoice =  questdlg('Update files with new clusters?','Save clusters','Yes','No','No');
+    switch saveChoice
+        case 'Yes'
+            % Apply new category names
+            clustAssign =  renamecats(clustAssign,cellstr(unique(clustAssign)),cellstr(clusterName));
+            UpdateCluster(ClusteringData, clustAssign, clusterName, rejected)
+        case 'No'
+            return
+    end
 end
 
 end
@@ -81,12 +81,13 @@ end
 close(h)
 end
 
+%% Save new data
 function UpdateCluster(ClusteringData, clustAssign, clusterName, rejected)
-[files, ~, ic] = unique(ClusteringData(:,6),'stable');
+[files, ia, ic] = unique(ClusteringData(:,6),'stable');
 h = waitbar(0,'Initializing');
 for j = 1:length(files)  % For Each File
     load(files{j});
-    for i = 1:sum(ic==j)   % For Each Call
+    for i = (1:sum(ic==j)) + ia(j) - 1   % For Each Call
         waitbar(j/length(files),h,['Processing File ' num2str(j) ' of '  num2str(length(files))]);
         
         % Update the cluster assignment and rejected status
@@ -102,3 +103,4 @@ for j = 1:length(files)  % For Each File
 end
 close(h)
 end
+
