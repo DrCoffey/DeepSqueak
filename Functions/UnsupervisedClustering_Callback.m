@@ -85,7 +85,7 @@ while ~finished
                         continue
                     end
             end
-            clustAssign = knnsearch(C,data);
+            clustAssign = knnsearch(C,data,'Distance','seuclidean');
             
         case 'ARTwarp'
             FromExisting = questdlg('From existing model?','Cluster','Yes','No','No');
@@ -239,11 +239,11 @@ end
 
 %% Save new data
 function UpdateCluster(ClusteringData, clustAssign, clusterName, rejected)
-[files, ~, ic] = unique(ClusteringData(:,6),'stable');
+[files, ia, ic] = unique(ClusteringData(:,6),'stable');
 h = waitbar(0,'Initializing');
 for j = 1:length(files)  % For Each File
     load(files{j});
-    for i = 1:sum(ic==j)   % For Each Call
+    for i = (1:sum(ic==j)) + ia(j) - 1   % For Each Call
         waitbar(j/length(files),h,['Processing File ' num2str(j) ' of '  num2str(length(files))]);
         
         if isnan(clustAssign(i))

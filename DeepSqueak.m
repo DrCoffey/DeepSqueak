@@ -120,6 +120,7 @@ end
 addpath(handles.squeakfolder);
 addpath(fullfile(handles.squeakfolder, 'Functions'));
 addpath(fullfile(handles.squeakfolder, 'Functions','Colormaps'));
+savepath
 
 % Cool Background Image
 imshow(handles.background, 'Parent', handles.axes1);
