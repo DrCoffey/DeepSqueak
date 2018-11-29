@@ -2,8 +2,18 @@ function ViewClusters_Callback(hObject, eventdata, handles)
 [ClusteringData,clustAssign] = CreateClusteringData(hObject, eventdata, handles);
 
 [clusterName, rejected, finished] = clusteringGUI(clustAssign, ClusteringData,1);
+
+% Save the clusters
 if finished == 1
-    UpdateCluster(ClusteringData, clustAssign, clusterName, rejected)
+saveChoice =  questdlg('Update files with new clusters?','Save clusters','Yes','No','No');
+switch saveChoice
+    case 'Yes'
+        % Apply new category names
+        clustAssign =  renamecats(clustAssign,cellstr(unique(clustAssign)),cellstr(clusterName));
+        UpdateCluster(ClusteringData, clustAssign, clusterName, rejected)
+    case 'No'
+        return
+end
 end
 
 end
@@ -14,17 +24,10 @@ function [ClusteringData, clustAssign]= CreateClusteringData(hObject, eventdata,
 % For each file selected, create a cell array with the image, and contour
 % of calls where Calls.Accept == 1
 cd(handles.squeakfolder);
-[trainingdata trainingpath] = uigetfile([handles.settings.detectionfolder '/*.mat'],'Select Detection File(s) for Clustering ','MultiSelect', 'on');
-if isnumeric(trainingdata)    
+[trainingdata, trainingpath] = uigetfile([handles.settings.detectionfolder '/*.mat'],'Select Detection File(s) for Clustering ','MultiSelect', 'on');
+if isnumeric(trainingdata)
     return
 end
-
-% prompt = {'winds Frames (default: 800)','Overlap Frames (700 for 55s, 7 for 22s)','NFFT (default: 800)'};
-%             dlg_title = 'Spectrogram Settings';
-%             num_lines=1; options.Resize='off'; options.windStyle='modal'; options.Interpreter='tex';
-% spectSettings = str2double(inputdlg(prompt,dlg_title,num_lines,{'800','700','800'},options));
-
-
 
 if ischar(trainingdata)==1
     tmp{1}=trainingdata;
@@ -32,75 +35,70 @@ if ischar(trainingdata)==1
     trainingdata=tmp;
 end
 h = waitbar(0,'Initializing');
-c=0;
 
 ClusteringData = {};
 clustAssign = categorical();
 for j = 1:length(trainingdata)  % For Each File
-    FileInfo = who('-file',[trainingpath trainingdata{j}]);
-    if ismember('ClusteringData',FileInfo)
-        load([trainingpath trainingdata{j}],'ClusteringData');
-        return
-    end
     load([trainingpath trainingdata{j}],'Calls');
     
-    for i = 1:length(Calls)     % For Each Call
+    for i = 1:length(Calls)
         waitbar(i/length(Calls),h,['Loading File ' num2str(j) ' of '  num2str(length(trainingdata))]);
-        if Calls(i).Accept == 1 && Calls(i).Type ~= 'Noise';
-            wind = round(.0032 * Calls(i).Rate);
-            noverlap = round(.0028 * Calls(i).Rate);
-            nfft = round(.0032 * Calls(i).Rate);
-            
-            c=c+1;
-            
-            audio =  Calls(i).Audio;
-            if ~isa(audio,'double')
-                audio = double(audio) / (double(intmax(class(audio)))+1);
-            end
-            
-            % Get spectrogram data
-            [I,~,noverlap,nfft,rate,box] = CreateSpectrogram(Calls(i));
-            
-            
-            im = mat2gray(flipud(I),[0 max(max(I))/4]); % Set max brightness to 1/4 of max
-            stats = CalculateStats(I,wind,noverlap,nfft,rate,box,handles.settings.EntropyThreshold,handles.settings.AmplitudeThreshold);
-            
-            
-            spectrange = Calls(i).Rate / 2000; % get frequency range of spectrogram in KHz
-            FreqScale = spectrange / (1 + floor(nfft / 2)); % size of frequency pixels
-            TimeScale = (wind - noverlap) / Calls(i).Rate; % size of time pixels
-            
-            xFreq = FreqScale * (stats.ridgeFreq_smooth) + Calls(i).Box(2);
-            xTime = stats.ridgeTime * TimeScale;
-            
-            ClusteringData(c,:) = [{uint8(im .* 256)}, {Calls(i).RelBox(2)}, {Calls(i).RelBox(3)}, {xFreq}, {xTime}, {[trainingpath trainingdata{j}]}, {i}, {stats.SignalToNoise},  {Calls(i).RelBox(4)}]; % image, frequency, length, yline, xline, path, i
-            clustAssign(c) = Calls(i).Type;
+        call = Calls(i);
+        
+        % Skip if not accepted
+        if (call.Accept ~= 1) || ismember(call.Type,'Noise')
+            continue
         end
+        
+        
+        [I,wind,noverlap,nfft,rate,box] = CreateSpectrogram(call);
+        im = mat2gray(flipud(I),[0 max(max(I))/4]); % Set max brightness to 1/4 of max
+        
+        stats = CalculateStats(I,wind,noverlap,nfft,rate,box,handles.settings.EntropyThreshold,handles.settings.AmplitudeThreshold);
+        
+        spectrange = call.Rate / 2000; % get frequency range of spectrogram in KHz
+        FreqScale = spectrange / (1 + floor(nfft / 2)); % size of frequency pixels
+        TimeScale = (wind - noverlap) / call.Rate; % size of time pixels
+        
+        xFreq = FreqScale * (stats.ridgeFreq_smooth) + call.Box(2);
+        xTime = stats.ridgeTime * TimeScale;
+        
+        ClusteringData = [ClusteringData
+            [{uint8(im .* 256)} % Image
+            {call.RelBox(2)} % Lower freq
+            {stats.DeltaTime} % Delta time
+            {xFreq} % Time points
+            {xTime} % Freq points
+            {[trainingpath trainingdata{j}]} % File path
+            {i} % Call ID in file
+            {stats.Power}
+            {call.RelBox(4)}
+            ]'];
+        clustAssign = [clustAssign; Calls(i).Type];
     end
+    
 end
 close(h)
-handles = guidata(hObject);  % Get newest version of handles
 end
 
-%% Save new data
 function UpdateCluster(ClusteringData, clustAssign, clusterName, rejected)
-[files, ia, ic] = unique(ClusteringData(:,6),'stable');
+[files, ~, ic] = unique(ClusteringData(:,6),'stable');
 h = waitbar(0,'Initializing');
-c=0;
 for j = 1:length(files)  % For Each File
     load(files{j});
     for i = 1:sum(ic==j)   % For Each Call
         waitbar(j/length(files),h,['Processing File ' num2str(j) ' of '  num2str(length(files))]);
-        c=c+1;
-        if ~isnan(clustAssign(c))
-            Calls(ClusteringData{c,7}).Type = clusterName(clustAssign(c));
-            if rejected(ClusteringData{c,7})
-                Calls(ClusteringData{c,7}).Accept = 0;
-            end
+        
+        % Update the cluster assignment and rejected status
+        Calls(ClusteringData{i,7}).Type = clustAssign(i);
+        if rejected(i)
+            Calls(ClusteringData{i,7}).Accept = 0;
         end
     end
+    % If forgot why I added this line, but I feel like I had a reason...
     Calls = Calls(1:length([Calls.Rate]));
-    save(files{j},'Calls','-append');
+    waitbar(j/length(files),h,['Saving File ' num2str(j) ' of '  num2str(length(files))]);
+    save(files{j},'Calls','-v7.3');
 end
 close(h)
 end

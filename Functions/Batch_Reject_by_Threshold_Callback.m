@@ -71,7 +71,7 @@ for currentfile =selections % Do this for each file
     Calls.Accept(reject) = false;
     
     Calls = table2struct(Calls);
-    save([handles.detectionfiles(currentfile).folder '/' handles.detectionfiles(currentfile).name],'Calls','-v7.3');
+    save(fullfile(handles.detectionfiles(currentfile).folder,handles.detectionfiles(currentfile).name),'Calls','-v7.3');
     
     %update the display
     if isfield(handles,'current_file_id') && currentfile == handles.current_file_id

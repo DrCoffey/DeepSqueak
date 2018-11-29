@@ -85,7 +85,7 @@ while ~finished
                         continue
                     end
             end
-            clustAssign = knnsearch(C,data);
+            clustAssign = knnsearch(C,data,'Distance','seuclidean');
             
         case 'ARTwarp'
             FromExisting = questdlg('From existing model?','Cluster','Yes','No','No');
@@ -119,6 +119,22 @@ while ~finished
             [clustAssign] = GetARTwarpClusters(ClusteringData(:,4),ARTnet,settings);
     end
     
+%     data = freq;
+%         epsilon = 0.0001;
+% mu = mean(data); 
+% data = data - mean(data)
+% A = data'*data;
+% [V,D,~] = svd(A);
+% whMat = sqrt(size(data,1)-1)*V*sqrtm(inv(D + eye(size(D))*epsilon))*V';
+% Xwh = data*whMat;  
+% invMat = pinv(whMat);
+% 
+% data = Xwh
+%     
+% data  = (freq-mean(freq)) ./ std(freq)
+% [clustAssign, C]= kmeans(data,10,'Distance','sqeuclidean','Replicates',10);
+
+    
     %% Assign Names
     [clusterName, rejected, finished] = clusteringGUI(clustAssign, ClusteringData);
 
@@ -127,7 +143,7 @@ while ~finished
 end
 %% Update Files
 % Save the clustering model
-if FromExisting(1) == 'N';
+if FromExisting(1) == 'N'
     switch choice
         case 'K-means (recommended)'
             [FileName,PathName] = uiputfile(fullfile(handles.squeakfolder,'Clustering Models','K-Means Model.mat'),'Save clustering model');
@@ -159,7 +175,7 @@ function [ClusteringData, trainingdata, trainingpath]= CreateClusteringData(hObj
 % For each file selected, create a cell array with the image, and contour
 % of calls where Calls.Accept == 1
 cd(handles.squeakfolder);
-[trainingdata trainingpath] = uigetfile(fullfile(handles.settings.detectionfolder,'*.mat'),'Select Detection File(s) for Clustering or extracted contours','MultiSelect', 'on');
+[trainingdata, trainingpath] = uigetfile(fullfile(handles.settings.detectionfolder,'*.mat'),'Select detection file(s) for clustering OR extracted contours','MultiSelect', 'on');
 if isnumeric(trainingdata)
     return
 end
@@ -171,38 +187,31 @@ if ischar(trainingdata)==1
     trainingdata=tmp;
 end
 h = waitbar(.5,'Gathering File Info');
-c=0;
 
 ClusteringData = {};
-
 %% For Each File
 for j = 1:length(trainingdata)
-    FileInfo = who('-file',[trainingpath trainingdata{j}]);
-    if ismember('ClusteringData',FileInfo)
-        close(h)
-        h = waitbar(.5,'Loading Contours From File');
-        load([trainingpath trainingdata{j}],'ClusteringData');
-        close(h)
-        return
-    end
-    load([trainingpath trainingdata{j}],'Calls');
+    file = load(fullfile(trainingpath,trainingdata{j}));
     
-    %% for each call in the file
-    for i = 1:length(Calls)     % For Each Call
-        waitbar(i/length(Calls),h,['Loading File ' num2str(j) ' of '  num2str(length(trainingdata))]);
-        if Calls(i).Accept == 1;
-            call = Calls(i);
-            wind = round(.0032 * call.Rate);
-            noverlap = round(.0028 * call.Rate);
-            nfft = round(.0032 * call.Rate);
+    % If the files is extracted contours, rather than a detection file
+    if isfield(file,'ClusteringData')
+        ClusteringData = [ClusteringData; file.ClusteringData];
+    else
+        % for each call in the file, calculate stats for clustering
+        for i = 1:length(file.Calls)
+            waitbar(i/length(file.Calls),h,['Loading File ' num2str(j) ' of '  num2str(length(trainingdata))]);
             
-            c=c+1;
+            % Skip if not accepted
+            if file.Calls(i).Accept ~= 1;
+                continue
+            end
             
-            [I,~,noverlap,nfft,rate,box] = CreateSpectrogram(call);
+            call = file.Calls(i);
+            
+            [I,wind,noverlap,nfft,rate,box] = CreateSpectrogram(call);
             im = mat2gray(flipud(I),[0 max(max(I))/4]); % Set max brightness to 1/4 of max
             
             stats = CalculateStats(I,wind,noverlap,nfft,rate,box,handles.settings.EntropyThreshold,handles.settings.AmplitudeThreshold);
-            
             
             spectrange = call.Rate / 2000; % get frequency range of spectrogram in KHz
             FreqScale = spectrange / (1 + floor(nfft / 2)); % size of frequency pixels
@@ -211,8 +220,8 @@ for j = 1:length(trainingdata)
             xFreq = FreqScale * (stats.ridgeFreq_smooth) + call.Box(2);
             xTime = stats.ridgeTime * TimeScale;
             
-            ClusteringData(c,:) = [
-                {uint8(im .* 256)} % Image
+            ClusteringData = [ClusteringData
+                [{uint8(im .* 256)} % Image
                 {call.RelBox(2)} % Lower freq
                 {stats.DeltaTime} % Delta time
                 {xFreq} % Time points
@@ -221,33 +230,36 @@ for j = 1:length(trainingdata)
                 {i} % Call ID in file
                 {stats.Power}
                 {call.RelBox(4)}
-                ]';
+                ]'];
         end
     end
 end
 close(h)
-handles = guidata(hObject);  % Get newest version of handles
 end
 
 %% Save new data
 function UpdateCluster(ClusteringData, clustAssign, clusterName, rejected)
 [files, ia, ic] = unique(ClusteringData(:,6),'stable');
 h = waitbar(0,'Initializing');
-c=0;
 for j = 1:length(files)  % For Each File
     load(files{j});
-    for i = 1:sum(ic==j)   % For Each Call
+    for i = (1:sum(ic==j)) + ia(j) - 1   % For Each Call
         waitbar(j/length(files),h,['Processing File ' num2str(j) ' of '  num2str(length(files))]);
-        c=c+1;
-        if ~isnan(clustAssign(c))
-            Calls(ClusteringData{c,7}).Type = clusterName(clustAssign(c));
-            if rejected(ClusteringData{c,7})
-                Calls(ClusteringData{c,7}).Accept = 0;
-            end
+        
+        if isnan(clustAssign(i))
+            continue
+        end
+        
+        % Update the cluster assignment and rejected status
+        Calls(ClusteringData{i,7}).Type = clusterName(clustAssign(i));
+        if rejected(i)
+            Calls(ClusteringData{i,7}).Accept = 0;
         end
     end
+    % If forgot why I added this line, but I feel like I had a reason...
     Calls = Calls(1:length([Calls.Rate]));
-    save(files{j},'Calls','-append');
+    waitbar(j/length(files),h,['Saving File ' num2str(j) ' of '  num2str(length(files))]);
+    save(files{j},'Calls','-v7.3');
 end
 close(h)
 end
