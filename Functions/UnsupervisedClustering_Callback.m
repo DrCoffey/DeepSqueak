@@ -85,7 +85,40 @@ while ~finished
                         continue
                     end
             end
-            clustAssign = knnsearch(C,data,'Distance','seuclidean');
+            [clustAssign,D] = knnsearch(C,data,'Distance','seuclidean');
+            
+            %% Sort the calls by how close they are to the cluster center
+            [~,idx] = sort(D);
+            clustAssign = clustAssign(idx);
+            ClusteringData = ClusteringData(idx,:);
+            
+            %% Make a montage with the top calls in each class
+            try
+                % Find the maximum call length
+                maxlength = 0;
+                for i = unique(clustAssign,'sorted')'
+                    index = find(clustAssign==i,1);
+                    im = ClusteringData{index(1),1};
+                    maxlength = max(size(im,2),maxlength);
+                end
+                % Make the image stack
+                montageI = [];
+                for i = unique(clustAssign)'
+                    index = find(clustAssign==i,1);
+                    tmp = ClusteringData{index(1),1};
+                    tmp = padarray(tmp,[0,maxlength-size(tmp,2)],'both');
+                    tmp = rescale(tmp,1,100);
+                    montageI(:,:,i) = floor(imresize(tmp,[120,240]));
+                end
+                
+                % Make the figure
+                figure('Color','w','Position',[50,50,800,800])
+                montage(montageI,inferno,'BorderSize',1,'BackgroundColor','w');
+                title('Top call in each cluster')
+            catch
+                disp('For some reason, I couldn''t make a montage of the call exemplars')
+            end
+            
             
         case 'ARTwarp'
             FromExisting = questdlg('From existing model?','Cluster','Yes','No','No');
