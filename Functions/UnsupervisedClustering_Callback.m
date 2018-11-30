@@ -91,26 +91,25 @@ while ~finished
             [~,idx] = sort(D);
             clustAssign = clustAssign(idx);
             ClusteringData = ClusteringData(idx,:);
-            
             %% Make a montage with the top calls in each class
             try
-                % Find the maximum call length
-                maxlength = 0;
+                % Find the median call length
+                maxlength = [];
                 for i = unique(clustAssign,'sorted')'
                     index = find(clustAssign==i,1);
-                    im = ClusteringData{index(1),1};
-                    maxlength = max(size(im,2),maxlength);
+                    im = ClusteringData{index,1};
+                    maxlength = [maxlength,size(im,2)];
                 end
+                maxlength = round(prctile(maxlength,75));
                 % Make the image stack
                 montageI = [];
                 for i = unique(clustAssign)'
                     index = find(clustAssign==i,1);
-                    tmp = ClusteringData{index(1),1};
-                    tmp = padarray(tmp,[0,maxlength-size(tmp,2)],'both');
+                    tmp = ClusteringData{index,1};
+                    tmp = padarray(tmp,[0,max(maxlength-size(tmp,2),0)],'both');
                     tmp = rescale(tmp,1,100);
                     montageI(:,:,i) = floor(imresize(tmp,[120,240]));
                 end
-                
                 % Make the figure
                 figure('Color','w','Position',[50,50,800,800])
                 montage(montageI,inferno,'BorderSize',1,'BackgroundColor','w');
