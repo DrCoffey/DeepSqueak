@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.8 2018-11-30
+Added figure with cluster exemplars for k-means clustering
+
+Calls in the clustering GUI are now sorted by how well they match the cluster
+
 ## 1.1.7 2018-11-27
 Various bug Fixes
 
