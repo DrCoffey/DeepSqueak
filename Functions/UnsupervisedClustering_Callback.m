@@ -42,9 +42,9 @@ while ~finished
                     % Get parameter weights
                     clusterParameters= inputdlg({'Shape weight','Frequency weight','Duration weight'},'Choose cluster parameters:',1,{'1','1','1'});
                     if isempty(clusterParameters); return; end
-                    slope_weight = num2str(clusterParameters{1});
-                    freq_weight = num2str(clusterParameters{2});
-                    duration_weight = num2str(clusterParameters{3});
+                    slope_weight = str2double(clusterParameters{1});
+                    freq_weight = str2double(clusterParameters{2});
+                    duration_weight = str2double(clusterParameters{3});
 
                     data = [
                         freq     .*  freq_weight,...
