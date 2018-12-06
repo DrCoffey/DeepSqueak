@@ -1,4 +1,8 @@
 # Changelog
+## 1.1.9 2018-12-5
+Fixed bug in k-means feature weighting
+
+Added tool to create t-sne image of calls. "Tools -> Call Classification -> Create t-sne"
 
 ## 1.1.8 2018-11-30
 Added figure with cluster exemplars for k-means clustering
