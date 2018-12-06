@@ -9,7 +9,7 @@ function create_tsne_Callback(hObject, eventdata, handles)
 
 
 % Get the clustering parameters, prepare data as if performing k-means
-clusterParameters= inputdlg({'Shape weight','Frequency weight','Duration weight','Images height (pixels)','Image width (pixels)','Perplexity'},'Choose cluster parameters:',1,{'1','1','1','9000','6000','30'});
+clusterParameters= inputdlg({'Shape weight','Frequency weight','Duration weight','Images height (pixels)','Image width (pixels)','Perplexity','Max number of calls to plot (set to 0 to plot everything)'},'Choose cluster parameters:',1,{'1','1','1','9000','6000','30','2000'});
 if isempty(clusterParameters); return; end
 
 slope_weight = str2double(clusterParameters{1});
@@ -17,6 +17,7 @@ freq_weight = str2double(clusterParameters{2});
 duration_weight = str2double(clusterParameters{3});
 imsize = str2double(clusterParameters(4:5))';
 perplexity = str2double(clusterParameters{6});
+NumberOfCalls = str2double(clusterParameters{7});
 
 padding = 1000;
 
@@ -59,8 +60,10 @@ a(:,11) = num2cell(embed(:,2));
 %% Create the image
 im = zeros([imsize+padding*2,3],'uint8');
 
-NumberOfCalls = 2000;
 % Only plot the X number of calls
+if NumberOfCalls == 0
+    NumberOfCalls = size(a,1);
+end
 calls2plot = datasample(a,min(size(a,1),NumberOfCalls),1,'Replace',false);
 
 for i = calls2plot'
