@@ -137,8 +137,7 @@ end
 
 % Add DeepSqueak to the path
 addpath(handles.squeakfolder);
-addpath(fullfile(handles.squeakfolder, 'Functions'));
-addpath(fullfile(handles.squeakfolder, 'Functions','Colormaps'));
+addpath(genpath(fullfile(handles.squeakfolder, 'Functions')));
 savepath
 
 % Cool Background Image

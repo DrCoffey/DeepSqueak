@@ -4,7 +4,7 @@ switch nargin
         layers = [
             imageInputLayer([30 50 1])
             
-            convolution2dLayer([5 5], 20, 'Padding', 1, 'Stride', [2 2])
+            convolution2dLayer([5 5], 16, 'Padding', 1, 'Stride', [2 2])
             batchNormalizationLayer
             leakyReluLayer(0.1)
             
@@ -12,7 +12,11 @@ switch nargin
             batchNormalizationLayer
             leakyReluLayer(0.1)
             
-            maxPooling2dLayer(3, 'Stride',2)
+                        convolution2dLayer([3 3], 32)
+            batchNormalizationLayer
+            leakyReluLayer(0.1)
+            
+            maxPooling2dLayer(2, 'Stride',2)
             
             fullyConnectedLayer(64)
             reluLayer()
@@ -22,21 +26,29 @@ switch nargin
             ];
 end
 
+        % Matlab 2018b changed neural network training, so adjust the
+        % settings accordingly.
+        if verLessThan('matlab','9.5')
+            MiniBatchSize = 32;
+        else
+            MiniBatchSize = 1;
+        end
+        
         optionsStage1 = trainingOptions('sgdm', ...
             'MaxEpochs', 8, ...
-            'InitialLearnRate', 1e-5,'MiniBatchSize',1);
+            'InitialLearnRate', 1e-3,'MiniBatchSize',MiniBatchSize);
 
         optionsStage2 = trainingOptions('sgdm', ...
             'MaxEpochs', 8, ...
-            'InitialLearnRate', 1e-5,'MiniBatchSize',1);
+            'InitialLearnRate', 1e-3,'MiniBatchSize',MiniBatchSize);
 
         optionsStage3 = trainingOptions('sgdm', ...
             'MaxEpochs', 8, ...
-            'InitialLearnRate', 1e-6,'MiniBatchSize',1);
+            'InitialLearnRate', 1e-4,'MiniBatchSize',MiniBatchSize);
 
         optionsStage4 = trainingOptions('sgdm', ...
             'MaxEpochs', 8, ...
-            'InitialLearnRate', 1e-6,'MiniBatchSize',1);
+            'InitialLearnRate', 1e-4,'MiniBatchSize',MiniBatchSize);
 
         options = [
             optionsStage1
@@ -46,8 +58,8 @@ end
             ];
         
     detector = trainFasterRCNNObjectDetector(TrainingTables, layers, options, ...
-        'NegativeOverlapRange', [0 0.3], ...
+        'NegativeOverlapRange', [0 0.4], ...
         'PositiveOverlapRange', [0.6 1], ...
-        'BoxPyramidScale', 1.2,'NumStrongestRegions',Inf);
+        'BoxPyramidScale', 1.8,'NumStrongestRegions',Inf);
 end
     
