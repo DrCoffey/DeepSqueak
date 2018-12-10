@@ -30,7 +30,7 @@ if size(unique(AllSettings,'rows'),1) ~= 1
         'Warning','Train anyway','Cancel','Cancel');
     waitfor(warningmsg)
 end
-if strcmp(warningmsg,'Train anyway'); return; end
+if ~strcmp(warningmsg,'Train anyway'); return; end
 
 %% Train the network
 choice = questdlg(['Train from existing network?'], ...
