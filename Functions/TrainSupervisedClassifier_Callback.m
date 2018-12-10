@@ -76,9 +76,12 @@ Class = removecats(Class);
 
 close(h)
 
+X = X(:,:,:,~isundefined(Class));
+Class = Class(~isundefined(Class));
 %% Train
 
-
+% Divide the data into training and validation data.
+% 90% goes to training, 10% to validation.
 [trainInd,valInd,testInd] = dividerand(size(X,4),.9,.1,0);
 TrainX = X(:,:,:,trainInd);
 TrainY = Class(trainInd);
@@ -89,30 +92,29 @@ TestY = Class(testInd);
 
 clear X
 
-aug = imageDataAugmenter('RandXScale',[.75 1.25],'RandYScale',[.75 1.25],'RandXTranslation',[-20 20],'RandYTranslation',[-20 20]);
-auimds = augmentedImageSource(imageSize,TrainX,TrainY,'DataAugmentation',aug);
+% Augment the data by scaling and translating
+aug = imageDataAugmenter('RandXScale',[.8 1.2],'RandYScale',[.8 1.2],'RandXTranslation',[-10 10],'RandYTranslation',[-10 10]);
+auimds = augmentedImageDatastore(imageSize,TrainX,TrainY,'DataAugmentation',aug);
 
 
 layers = [
     imageInputLayer([imageSize 1],'Name','input','normalization','none')
     
-    convolution2dLayer([5 3],8,'Padding','same','stride',[2 2])
-    batchNormalizationLayer
-    convolution2dLayer(5,8,'Padding','same','stride',[1 1])
+    convolution2dLayer(3,16,'Padding','same','stride',[2 2])
     batchNormalizationLayer
     reluLayer
-    maxPooling2dLayer([3 2],'Padding','same','Stride',[2 1])
+    maxPooling2dLayer(2,'Stride',2)
     
-    convolution2dLayer(5,16,'Padding','same','stride',[2 2])
-    batchNormalizationLayer
+    
     convolution2dLayer(5,16,'Padding','same','stride',2)
     batchNormalizationLayer
     reluLayer
-    maxPooling2dLayer([2 2],'Padding','same','Stride',[2 2])
-    
-    convolution2dLayer(5,32,'Padding','same','stride',2)
+    maxPooling2dLayer(2,'Stride',2)
+    convolution2dLayer(3,31,'Padding','same','stride',1)
     batchNormalizationLayer
-    convolution2dLayer(5,32,'Padding','same','stride',2)
+    reluLayer
+    maxPooling2dLayer(2,'Stride',2)
+    convolution2dLayer(3,31,'Padding','same','stride',1)
     batchNormalizationLayer
     reluLayer
     
@@ -120,7 +122,7 @@ layers = [
     batchNormalizationLayer
     reluLayer
     
-    fullyConnectedLayer(length(unique(TrainY)))
+    fullyConnectedLayer(length(categories(TrainY)))
     softmaxLayer
     classificationLayer];
 
@@ -132,12 +134,15 @@ options = trainingOptions('sgdm',...
     'LearnRateDropFactor',0.8,...
     'LearnRateDropPeriod',1,...
     'ValidationData',{ValX, ValY},...
-    'ValidationFrequency',50,...
+    'ValidationFrequency',10,...
     'ValidationPatience',inf,...
     'Verbose',false,...
     'Plots','training-progress');
 
 ClassifyNet = trainNetwork(auimds,layers,options);
+
+figure
+confusionchart(classify(ClassifyNet,ValX),ValY)
 
 [FileName,PathName] = uiputfile('ClassifierNet.mat','Save Network');
 save([PathName FileName],'ClassifyNet','wind','noverlap','nfft','lowFreq','highFreq','imageSize','layers','options');

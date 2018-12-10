@@ -3,6 +3,7 @@ function UnsupervisedClustering_Callback(hObject, eventdata, handles)
 
 % Get the data
 [ClusteringData] = CreateClusteringData(hObject, eventdata, handles);
+if isempty(ClusteringData); return; end
 
 [FileName,PathName] = uiputfile('Extracted Contours.mat','Save contours for faster loading');
 if FileName ~= 0

@@ -50,7 +50,6 @@ for j = 1:length(trainingdata)  % For Each File
             continue
         end
         
-        
         [I,wind,noverlap,nfft,rate,box] = CreateSpectrogram(call);
         im = mat2gray(flipud(I),[0 max(max(I))/4]); % Set max brightness to 1/4 of max
         

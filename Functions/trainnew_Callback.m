@@ -1,6 +1,10 @@
 function trainnew_Callback(hObject, eventdata, handles)
 %% Train a new neural network
 cd(handles.squeakfolder);
+
+% Apparently, "wind" is a function name, so initialize it as empty
+wind = [];
+
 waitfor(msgbox('Select Image Tables'))
 [trainingdata trainingpath] = uigetfile(['Training/*.mat'],'Select Training File(s) for Training ','MultiSelect', 'on');
 TrainingTables = [];

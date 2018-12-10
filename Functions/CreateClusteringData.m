@@ -3,6 +3,9 @@
 function [ClusteringData, trainingdata, trainingpath]= CreateClusteringData(hObject, eventdata, handles)
 % For each file selected, create a cell array with the image, and contour
 % of calls where Calls.Accept == 1
+
+ClusteringData = [];
+
 cd(handles.squeakfolder);
 [trainingdata, trainingpath] = uigetfile(fullfile(handles.settings.detectionfolder,'*.mat'),'Select detection file(s) for clustering OR extracted contours','MultiSelect', 'on');
 if isnumeric(trainingdata)
