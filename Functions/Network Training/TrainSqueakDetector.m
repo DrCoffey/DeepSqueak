@@ -12,7 +12,7 @@ switch nargin
             batchNormalizationLayer
             leakyReluLayer(0.1)
             
-                        convolution2dLayer([3 3], 32)
+            convolution2dLayer([3 3], 32)
             batchNormalizationLayer
             leakyReluLayer(0.1)
             
@@ -26,40 +26,40 @@ switch nargin
             ];
 end
 
-        % Matlab 2018b changed neural network training, so adjust the
-        % settings accordingly.
-        if verLessThan('matlab','9.5')
-            MiniBatchSize = 32;
-        else
-            MiniBatchSize = 1;
-        end
-        
-        optionsStage1 = trainingOptions('sgdm', ...
-            'MaxEpochs', 8, ...
-            'InitialLearnRate', 1e-3,'MiniBatchSize',MiniBatchSize);
-
-        optionsStage2 = trainingOptions('sgdm', ...
-            'MaxEpochs', 8, ...
-            'InitialLearnRate', 1e-3,'MiniBatchSize',MiniBatchSize);
-
-        optionsStage3 = trainingOptions('sgdm', ...
-            'MaxEpochs', 8, ...
-            'InitialLearnRate', 1e-4,'MiniBatchSize',MiniBatchSize);
-
-        optionsStage4 = trainingOptions('sgdm', ...
-            'MaxEpochs', 8, ...
-            'InitialLearnRate', 1e-4,'MiniBatchSize',MiniBatchSize);
-
-        options = [
-            optionsStage1
-            optionsStage2
-            optionsStage3
-            optionsStage4
-            ];
-        
-    detector = trainFasterRCNNObjectDetector(TrainingTables, layers, options, ...
-        'NegativeOverlapRange', [0 0.4], ...
-        'PositiveOverlapRange', [0.6 1], ...
-        'BoxPyramidScale', 1.8,'NumStrongestRegions',Inf);
+% Matlab 2018b changed neural network training, so adjust the
+% settings accordingly.
+if verLessThan('matlab','9.5')
+    MiniBatchSize = 32;
+else
+    MiniBatchSize = 1;
 end
-    
+
+optionsStage1 = trainingOptions('sgdm', ...
+    'MaxEpochs', 8, ...
+    'InitialLearnRate', 1e-3,'MiniBatchSize',MiniBatchSize);
+
+optionsStage2 = trainingOptions('sgdm', ...
+    'MaxEpochs', 8, ...
+    'InitialLearnRate', 1e-3,'MiniBatchSize',MiniBatchSize);
+
+optionsStage3 = trainingOptions('sgdm', ...
+    'MaxEpochs', 8, ...
+    'InitialLearnRate', 1e-4,'MiniBatchSize',MiniBatchSize);
+
+optionsStage4 = trainingOptions('sgdm', ...
+    'MaxEpochs', 8, ...
+    'InitialLearnRate', 1e-4,'MiniBatchSize',MiniBatchSize);
+
+options = [
+    optionsStage1
+    optionsStage2
+    optionsStage3
+    optionsStage4
+    ];
+
+detector = trainFasterRCNNObjectDetector(TrainingTables, layers, options, ...
+    'NegativeOverlapRange', [0 0.4], ...
+    'PositiveOverlapRange', [0.6 1], ...
+    'BoxPyramidScale', 1.8,'NumStrongestRegions',Inf);
+end
+
