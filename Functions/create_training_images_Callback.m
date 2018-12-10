@@ -97,14 +97,14 @@ for k = 1:length(trainingdata)
             
             
             for j = 1:repeats
-                IMname = fullfile(fname,[num2str(c) '_' num2str(j) '.png']);
+                IMname = [num2str(c) '_' num2str(j) '.png'];
                 [~,box] = CreateTrainingData(...
                     Audio,...
                     rate,...
                     Boxes,...
                     1,...
-                    wind,noverlap,nfft,cont,rate/2,IMname,AmplitudeRange,j);
-                TTable = [TTable;{IMname, box}];
+                    wind,noverlap,nfft,cont,rate/2,fullfile(fname,IMname),AmplitudeRange,j);
+                TTable = [TTable;{fullfile('Training','Images',filename,IMname), box}];
                 
             end
             waitbar(i/length(unique(bins)),h,['Processing File ' num2str(k) ' of '  num2str(length(trainingdata))]);
@@ -119,16 +119,16 @@ for k = 1:length(trainingdata)
             
             % Augment audio by adding write noise, and change the amplitude
             for j = 1:repeats
-                IMname = fullfile(fname,[num2str(c) '_' num2str(j) '.png']);
+                IMname = [num2str(c) '_' num2str(j) '.png'];
                 [~,box] = CreateTrainingData(...
                     Calls(i).Audio,...
                     Calls(i).Rate,...
                     Calls(i).RelBox,...
                     Calls(i).Accept,...
-                    wind,noverlap,nfft,cont,Calls(i).Rate/2,IMname,AmplitudeRange,j);
+                    wind,noverlap,nfft,cont,Calls(i).Rate/2,fullfile(fname,IMname),AmplitudeRange,j);
                 
                 %                 imwrite(im,filename,'BitDepth',8)
-                TTable = [TTable;{IMname, box}];
+                TTable = [TTable;{fullfile('Training','Images',filename,IMname), box}];
             end
             
             waitbar(i/length(Calls),h,['Processing File ' num2str(k) ' of '  num2str(length(trainingdata))]);
