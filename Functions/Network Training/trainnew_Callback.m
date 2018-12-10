@@ -38,9 +38,8 @@ choice = questdlg(['Train from existing network?'], ...
 switch choice
     case 'Yes'
         [NetName NetPath] = uigetfile(handles.settings.networkfolder,'Select Existing Network');
-        load([NetPath NetName],'detector','options');
-        layers = detector.Network.Layers;
-        [detector, layers, options] = TrainSqueakDetector(TrainingTables,layers);
+        load([NetPath NetName],'detector');
+        [detector, layers, options] = TrainSqueakDetector(TrainingTables,detector);
     case 'No'
         [detector, layers, options] = TrainSqueakDetector(TrainingTables);
 end

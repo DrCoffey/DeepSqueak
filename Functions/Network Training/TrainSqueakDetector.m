@@ -1,6 +1,7 @@
 function [detector layers options] = TrainSqueakDetector(TrainingTables,layers)
-switch nargin
-    case 1 % Specify layers if not transfering from previous network
+
+% Specify layers if not transfering from previous network
+if nargin == 1
         layers = [
             imageInputLayer([30 50 1])
             
