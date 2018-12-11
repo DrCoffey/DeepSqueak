@@ -68,13 +68,13 @@ for i = 1:((time - overlap) / (chunksize - overlap))
     end
     
     % Read the audio
-    a = (audioread(inputfile,[windL windR]));
+    a = audioread(inputfile,[windL windR]);
     if wind > length(a)
         errordlg(['For this network, audio chucks must be at least ' num2str(networkfile.wind) ' seconds long.']);
         return
     end
     % Create the spectrogram
-    s = spectrogram((a),wind,noverlap,nfft,info.SampleRate,'yaxis');
+    s = spectrogram(a,wind,noverlap,nfft,info.SampleRate,'yaxis');
     pixels = length(s);
     s=flipud(abs(s));
 
@@ -96,20 +96,17 @@ for i = 1:((time - overlap) / (chunksize - overlap))
     
     % Detect
     try
-        if contains(version,'2018')
-            [bboxes, scores, Class] = detect(network, im2uint8(s), 'ExecutionEnvironment','auto'); % Matlab 2018 doesn't auto-convert to uint8
-        else
-            [bboxes, scores, Class] = detect(network, s, 'ExecutionEnvironment','auto'); % Detect!
-        end
+        % Convert spectrogram to uint8 for detection, because network
+        % is trained with uint8 images
+        [bboxes, scores, Class] = detect(network, im2uint8(s), 'ExecutionEnvironment','auto','NumStrongestRegions',Inf);
+
         
         % bboxes start in pixels. Make this relative to position in file
         bboxes(:,2)=bboxes(:,2)+upper_freq;
         bboxes(:,1)=bboxes(:,1)+round(c*(pixels*(1-(overlap/chunksize))));
+        
+        % Sort the boxes by start time
         [bboxes,index] = sortrows(bboxes);
-%         [bboxes(:,1),index] = sort(bboxes(:,1),'ascend');
-%         bboxes(:,2)=bboxes(index,2);
-%         bboxes(:,3)=bboxes(index,3);
-%         bboxes(:,4)=bboxes(index,4);
         scores=scores(index);
         Class=Class(index);
         AllBoxes=[AllBoxes
