@@ -139,7 +139,7 @@ ymax = ymin + AllBoxes(:,4) - 1;
 overlapRatio = bboxOverlapRatio(OverBoxes, OverBoxes);
 n = size(overlapRatio,1);
 overlapRatio(1:n+1:n^2) = 0;
-% overlapRatio(overlapRatio<.2)=0; Change Overlap Ratio Acceptance
+overlapRatio(overlapRatio<.2)=0; %Change Overlap Ratio Acceptance
 g = graph(overlapRatio);
 componentIndices = conncomp(g);
 xmin = accumarray(componentIndices', xmin, [], @min);
@@ -192,7 +192,7 @@ if ~isempty(thresholdScores)
         relbox = [ti(thresholdBoxes(i,3)) ((ffr(thresholdBoxes(i,2)+thresholdBoxes(i,4))))/1000 ti(thresholdBoxes(i,3)) fr(thresholdBoxes(i,4))/1000];
     
         % Make the box a little bigger
-        expansionfactor = [0.15,0.25];
+        expansionfactor = [0.05,0.15];
         time_pad = min(relbox(3) * expansionfactor(1),ti(end-1)-relbox(3));
         freq_pad = relbox(4) * expansionfactor(2);
         
