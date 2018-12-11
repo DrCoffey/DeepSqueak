@@ -235,10 +235,14 @@ if ~isempty(thresholdScores)
         if contains(networkname,'long','IgnoreCase',true)
             EntropyThreshold = 0.3;
             AmplitudeThreshold = 0.15;
-            stats = CalculateStats(I,wind,noverlap,nfft,Calls(i).Rate,Calls(i).Box,EntropyThreshold,AmplitudeThreshold,0);
-            if (stats.SignalToNoise > .4) & stats.DeltaTime > .2;
-                Calls(i).Accept=1;
-            else
+            try
+                stats = CalculateStats(I,wind,noverlap,nfft,Calls(i).Rate,Calls(i).Box,EntropyThreshold,AmplitudeThreshold,0);
+                if (stats.SignalToNoise > .4) & stats.DeltaTime > .2;
+                    Calls(i).Accept=1;
+                else
+                    Calls(i).Accept=0;
+                end
+            catch
                 Calls(i).Accept=0;
             end
         end
