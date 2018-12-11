@@ -13,11 +13,11 @@ if ischar(trainingdata)
 end
 
 % Get training settings
-prompt = {'Window Length (s)','Overlap (s)','NFFT (s)','Amplitude Cutoff (3 for 55s, 1 for 22s)', 'Bout Length (s) [Requires Single Files & Audio]',...
+prompt = {'Window Length (s)','Overlap (s)','NFFT (s)','Amplitude Cutoff (Try 3)', 'Bout Length (s) [Requires Single Files & Audio]',...
     'Number of augmented duplicates','Minimum amplitude augmentation','Maximum amplitude augmentation'};
 dlg_title = 'Spectrogram Settings';
 num_lines=[1 40]; options.Resize='off'; options.windStyle='modal'; options.Interpreter='tex';
-spectSettings = str2double(inputdlg(prompt,dlg_title,num_lines,{'0.0032','0.0028','0.0032','1','0','2','0.25','1.2'},options));
+spectSettings = str2double(inputdlg(prompt,dlg_title,num_lines,{'0.0032','0.0016','0.0022','1','0','3','0.25','1.25'},options));
 if isempty(spectSettings); return; end
 
 wind = spectSettings(1);
