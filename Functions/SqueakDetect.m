@@ -1,14 +1,6 @@
-function  Calls=SqueakDetect(inputfile,networkfile,fname,Settings,include_date,savefile,currentFile,totalFiles,networkname)
+function  Calls=SqueakDetect(inputfile,networkfile,fname,Settings,currentFile,totalFiles,networkname)
 % Find Squeaks
 h = waitbar(0,'Initializing');
-
-if ~exist('include_date');
-    include_date = 1;
-end
-
-if ~exist('savefile');
-    savefile = 1;
-end
 
 info = audioinfo(inputfile);
 if info.SampleRate ~= 250000
@@ -31,6 +23,7 @@ nfft = round(nfft * info.SampleRate);
 AllBoxes=[];
 AllScores=[];
 AllClass=[];
+AllPowers=[];
 c=0;
 %Calls = struct('Rate',struct,'Box',struct,'RelBox',struct,'Score',struct,'Audio',struct,'Accept',struct,'Power',struct);
 
@@ -68,16 +61,18 @@ for i = 1:((time - overlap) / (chunksize - overlap))
     end
     
     % Read the audio
-    a = audioread(inputfile,[windL windR]);
-    if wind > length(a)
+    audio = audioread(inputfile,floor([windL, windR]));
+    if wind > length(audio)
         errordlg(['For this network, audio chucks must be at least ' num2str(networkfile.wind) ' seconds long.']);
         return
     end
     % Create the spectrogram
-    s = spectrogram(a,wind,noverlap,nfft,info.SampleRate,'yaxis');
-    pixels = length(s);
-    s=flipud(abs(s));
-
+    [s,fr,ti] = spectrogram(audio,wind,noverlap,nfft,info.SampleRate,'yaxis');
+    
+    % Extract the region within the frequency range
+    s = s(upper_freq:lower_freq,:);
+    s = flip(abs(s),1);
+    fr = flip(fr,1);
     
     % Use a moving average, to scale the spectrogram
     current_low_percentile = prctile(s(:),7.5);
@@ -86,35 +81,42 @@ for i = 1:((time - overlap) / (chunksize - overlap))
     else
         low = (low + 0.1 * current_low_percentile) / 1.1;
     end
-    s = mat2gray(s,[low cont]);
     
     % Apply gain setting
-    s = s(upper_freq:lower_freq,:).*gain;
+    im = mat2gray(s,[low cont]) .* gain;
     
     % Subtract the 5th percentile to remove horizontal noise bands
-    s = s - prctile(s,5,2); 
+    im = im - prctile(im,5,2);
     
-    % Detect
+    % Detect!
     try
         % Convert spectrogram to uint8 for detection, because network
         % is trained with uint8 images
-        [bboxes, scores, Class] = detect(network, im2uint8(s), 'ExecutionEnvironment','auto','NumStrongestRegions',Inf);
-
+        [bboxes, scores, Class] = detect(network, im2uint8(im), 'ExecutionEnvironment','auto','NumStrongestRegions',Inf);
         
-        % bboxes start in pixels. Make this relative to position in file
-        bboxes(:,2)=bboxes(:,2)+upper_freq;
-        bboxes(:,1)=bboxes(:,1)+round(c*(pixels*(1-(overlap/chunksize))));
+        % Calculate each call's power
+        for j = 1:size(bboxes,1)
+            AllPowers = [AllPowers
+                max(...
+                s(bboxes(j,2):bboxes(j,2)+bboxes(j,4)-1,bboxes(j,1):bboxes(j,3)+bboxes(j,1)-1),...
+                [],'all')];
+        end
         
-        % Sort the boxes by start time
-        [bboxes,index] = sortrows(bboxes);
-        scores=scores(index);
-        Class=Class(index);
+        bboxes(:,1) = ti(bboxes(:,1)) + (windL ./ info.SampleRate);
+        bboxes(:,2) = fr(bboxes(:,2) + bboxes(:,4) + upper_freq) ./ 1000;
+        bboxes(:,3) = ti(bboxes(:,3));
+        bboxes(:,4) = fr(end-bboxes(:,4)) ./ 1000;
+        
+        
+        
+        
         AllBoxes=[AllBoxes
             bboxes(Class == 'USV',:)];
         AllScores=[AllScores
             scores(Class == 'USV',:)];
         AllClass=[AllClass
             Class(Class == 'USV',:)];
+        
     catch ME
         warning('Error in Network, Skiping Audio Chunk');
         disp(ME.message);
@@ -126,150 +128,138 @@ end
 close(h);
 
 %% Merge overlapping boxes
+% Sort the boxes by start time
+[AllBoxes,index] = sortrows(AllBoxes);
+AllScores=AllScores(index);
+AllClass=AllClass(index);
+AllPowers=AllPowers(index);
+
+% Find all the boxes that overlap in time
+% Set frequency on all boxes to be equal, so that only time is considered
 OverBoxes=AllBoxes;
 OverBoxes(:,2)=1;
-OverBoxes(:,4)=100;
-xmin = AllBoxes(:,1);
-ymin = AllBoxes(:,2);
-xmax = xmin + AllBoxes(:,3) - 1;
-ymax = ymin + AllBoxes(:,4) - 1;
+OverBoxes(:,4)=1;
+
+% Calculate overlap ratio
 overlapRatio = bboxOverlapRatio(OverBoxes, OverBoxes);
-n = size(overlapRatio,1);
-overlapRatio(1:n+1:n^2) = 0;
-overlapRatio(overlapRatio<.2)=0; %Change Overlap Ratio Acceptance
+
+% Merge all boxes with overlap ratio greater than 0.2
+OverlapMergeThreshold = 0.2;
+overlapRatio(overlapRatio<OverlapMergeThreshold)=0;
+
+% Create a graph with the connected boxes
 g = graph(overlapRatio);
+
+
+% Make new boxes from the minimum and maximum start and end time of each
+% overlapping box.
 componentIndices = conncomp(g);
-xmin = accumarray(componentIndices', xmin, [], @min);
-ymin = accumarray(componentIndices', ymin, [], @min);
-xmax = accumarray(componentIndices', xmax, [], @max);
-ymax = accumarray(componentIndices', ymax, [], @max);
-merged_scores = accumarray(componentIndices', AllScores, [], @max);
-merged_boxes = [xmin ymin xmax-xmin+1 ymax-ymin+1];
+begin_time = accumarray(componentIndices', AllBoxes(:,1), [], @min);
+lower_freq = accumarray(componentIndices', AllBoxes(:,2), [], @min);
+end_time__ = accumarray(componentIndices', AllBoxes(:,1)+AllBoxes(:,3), [], @max);
+high_freq_ = accumarray(componentIndices', AllBoxes(:,2)+AllBoxes(:,4), [], @max);
+
+merged_scores = accumarray(componentIndices', AllScores, [], @mean);
+merged_powers = accumarray(componentIndices', AllPowers, [], @max);
+
 [~, z2]=unique(componentIndices);
 merged_Class = AllClass(z2);
 
+
+call_duration = end_time__ - begin_time;
+call_bandwidth = high_freq_ - lower_freq;
+
+%% Make the boxes all a little bigger
+timeExpansion = .15;
+freqExpansion = .05;
+
+begin_time = begin_time - call_duration.*timeExpansion;
+end_time__ = end_time__ + call_duration.*timeExpansion;
+lower_freq = lower_freq - call_bandwidth.*freqExpansion;
+high_freq_ = high_freq_ + call_bandwidth.*freqExpansion;
+
+% Don't let the calls leave the range of the audio
+begin_time = max(begin_time,0.01);
+end_time__ = min(end_time__,info.Duration);
+lower_freq = max(lower_freq,1);
+high_freq_ = min(high_freq_,info.SampleRate./2000 - 1);
+
+call_duration = end_time__ - begin_time;
+call_bandwidth = high_freq_ - lower_freq;
+
+
 %% Create Output Structure
-thresholdBoxes = merged_boxes;
-thresholdScores = merged_scores;
 hc = waitbar(0,'Writing Output Structure');
-if ~isempty(thresholdScores)
-    for i=1:size(thresholdBoxes,1)
-        waitbar(i/length(thresholdBoxes),hc);
-        frames = ((chunksize)*info.SampleRate)/pixels;
-        WindL=round((thresholdBoxes(i,1)-(thresholdBoxes(i,3)))*frames);
-        if WindL<=0
+if ~isempty(merged_scores)
+    for i=1:length(begin_time)
+        waitbar(i/length(begin_time),hc);
+        
+        %% Audio beginning and end time
+        WindL=(begin_time(i)-call_duration(i)) .* info.SampleRate;
+        if WindL<=1
             pad=abs(WindL);
             WindL = 1;
         end
-        WindR=round((thresholdBoxes(i,1)+thresholdBoxes(i,3)+(thresholdBoxes(i,3)))*frames);
+        
+        WindR=(end_time__(i)+call_duration(i)) .* info.SampleRate;
         WindR = min(WindR,info.TotalSamples); % Prevent WindR from being greater than total samples
-        a = audioread(inputfile,[WindL WindR],'native');
-        if WindL==1;
+        
+        
+        audio = audioread(inputfile,floor([WindL WindR]),'native');
+        
+        % Pad the audio if the call would be cut off
+        if WindL==1
             pad=zeros(pad,1);
-            a=[pad
-                a];
-        end
-        CallAudio = a;
-        
-        if ~isa(a,'double')
-            tmp_a = a;
-            a = double(tmp_a) / (double(intmax(class(tmp_a)))+1);
+            audio=[pad; audio];
         end
         
         
-        
-        [sn,fr,ti] = spectrogram(a,wind,noverlap,nfft,info.SampleRate,'yaxis');
-        ffr=flipud(fr);
-        
-        box = [ti(thresholdBoxes(i,3)) + WindL/250000,...
-            ((ffr(thresholdBoxes(i,2)+thresholdBoxes(i,4))))/1000,...
-            ti(thresholdBoxes(i,3)),...
-            fr(thresholdBoxes(i,4))/1000];
-        % Relative box
-        relbox = [ti(thresholdBoxes(i,3)) ((ffr(thresholdBoxes(i,2)+thresholdBoxes(i,4))))/1000 ti(thresholdBoxes(i,3)) fr(thresholdBoxes(i,4))/1000];
-    
-        % Make the box a little bigger
-        expansionfactor = [0.05,0.15];
-        time_pad = min(relbox(3) * expansionfactor(1),ti(end-1)-relbox(3));
-        freq_pad = relbox(4) * expansionfactor(2);
-        
-        box(1) =    box(1) - time_pad;
-        relbox(1) = relbox(1) - time_pad;
-        box(2)   =  max(ti(1),box(2) - freq_pad);
-        relbox(2) = max(ti(1),relbox(2) - freq_pad);
-        box(3)   =  box(3) + time_pad * 2;
-        relbox(3) = relbox(3) + time_pad * 2;
-        box(4) =   min((ffr(1)/1000)-box(2),box(4) + freq_pad * 2);
-        relbox(4) =min((ffr(1)/1000)-box(2), relbox(4) + freq_pad * 2);
-        
-        
+        % box = [start time (s), low freq (Hz), duration (s), bandwidth (Hz)]
         % Final Structure
         Calls(i).Rate=info.SampleRate;
-        Calls(i).Box=box;
-        Calls(i).RelBox=relbox;
-        Calls(i).Score=thresholdScores(i,:);
-        Calls(i).Audio=CallAudio;
+        Calls(i).Box=[begin_time(i), lower_freq(i), call_duration(i), call_bandwidth(i)];
+        Calls(i).RelBox=[call_duration(i), lower_freq(i), call_duration(i), call_bandwidth(i)];
+        Calls(i).Score=merged_scores(i,:);
+        Calls(i).Audio=audio;
         Calls(i).Type=merged_Class(i);
-        
-        % Power
-        x1=find(ti>=Calls(i).RelBox(1),1);
-        x2=find(ti>=Calls(i).RelBox(1)+Calls(i).RelBox(3),1);
-        y1=find(fr./1000>=round(Calls(i).RelBox(2)),1);
-        y2=find(fr./1000>=round(Calls(i).RelBox(2)+Calls(i).RelBox(4)),1);
-        I=abs(sn(y1:y2,x1:x2));
-        [max_amp ind] = max(max(I,[],2));
-        Calls(i).Power=max_amp;
+        Calls(i).Power = merged_powers(i);
         
         % Acceptance
-        if thresholdScores(i,:)>sensitivity
+        if merged_scores(i,:)>sensitivity
             Calls(i).Accept=1;
         else
             Calls(i).Accept=0;
         end
-        
         
         % For the long call network, remove calls with tonality < 0.5
         if contains(networkname,'long','IgnoreCase',true)
             EntropyThreshold = 0.3;
             AmplitudeThreshold = 0.15;
             try
-                stats = CalculateStats(I,wind,noverlap,nfft,Calls(i).Rate,Calls(i).Box,EntropyThreshold,AmplitudeThreshold,0);
-                if (stats.SignalToNoise > .4) & stats.DeltaTime > .2;
+                [I,windowsize,noverlap,nfft,rate,box] = CreateSpectrogram(Calls(i));
+                stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,EntropyThreshold,AmplitudeThreshold,0);
+                if (stats.SignalToNoise > .4) & stats.DeltaTime > .2
                     Calls(i).Accept=1;
                 else
                     Calls(i).Accept=0;
                 end
             catch
+                disp('Could not detect long 22')
                 Calls(i).Accept=0;
             end
         end
-            
-            
-            
     end
     
-    try 
-    Calls = Calls([Calls.Power] > powerthresh);
-    Calls = Calls([Calls.Accept] == 1);
-    
-    if contains(networkname,'long','IgnoreCase',true)
-        Calls = SeperateLong22s_Callback([],[],[],inputfile,Calls);
-    end
-    
+    try % Reject calls below the power threshold and combine 22s
+        Calls = Calls([Calls.Power] > powerthresh);
+        Calls = Calls([Calls.Accept] == 1);
+        if contains(networkname,'long','IgnoreCase',true)
+            Calls = SeperateLong22s_Callback([],[],[],inputfile,Calls);
+        end
     catch ME
         disp(ME)
     end
     
-    if savefile == 1;
-        if include_date == 1;
-            t=datestr(datetime('now'),'mmm-DD-YYYY HH_MM PM');
-            waitbar(.5,hc,'Saving Output Structure');
-            save([strtok(fname,'.') ' ' t],'Calls','-v7.3');
-        else
-            waitbar(.5,hc,'Saving Output Structure');
-            save([strtok(fname,'.')],'Calls','-v7.3');
-        end
-    end
     close(hc);
 else
     Calls=[];

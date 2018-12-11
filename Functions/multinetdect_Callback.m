@@ -90,9 +90,9 @@ for j = 1:length(audioselections)
         NeuralNetwork=load(networkpath);%get currently selected option from menu
         close(h);
         if k==1
-            Calls1=SqueakDetect(AudioFile,NeuralNetwork,handles.audiofiles(CurrentAudioFile).name,Settings(:,k),0,0,j,length(audioselections),networkname);
+            Calls1=SqueakDetect(AudioFile,NeuralNetwork,handles.audiofiles(CurrentAudioFile).name,Settings(:,k),j,length(audioselections),networkname);
         elseif k==2
-            Calls2=SqueakDetect(AudioFile,NeuralNetwork,handles.audiofiles(CurrentAudioFile).name,Settings(:,k),0,0,j,length(audioselections),networkname);
+            Calls2=SqueakDetect(AudioFile,NeuralNetwork,handles.audiofiles(CurrentAudioFile).name,Settings(:,k),j,length(audioselections),networkname);
         end
     end
     
@@ -107,7 +107,7 @@ for j = 1:length(audioselections)
     if Settings(8)
         fname = fullfile(handles.settings.detectionfolder,[audioname ' ' detectiontime '.mat']);
     else
-        fname = fullfile(handles.settings.detectionfolder,audioname);
+        fname = fullfile(handles.settings.detectionfolder,[audioname '.mat']);
     end
     
     if length(networkselections)==1
