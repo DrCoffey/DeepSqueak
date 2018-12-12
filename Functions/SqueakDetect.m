@@ -41,9 +41,9 @@ sensitivity=Settings(6);
 powerthresh=Settings(7);
 gain=Settings(9);
 
-spectrange = info.SampleRate / 2000; % get range of spectrogram in KHz
-upper_freq = round((spectrange - Settings(4)) * (1 + floor(nfft / 2)) / spectrange); % get upper limit
-lower_freq = round((spectrange - Settings(5)) * (1 + floor(nfft / 2)) / spectrange); % get upper limit
+% spectrange = info.SampleRate / 2000; % get range of spectrogram in KHz
+% upper_freq = round((spectrange - Settings(4)) * (1 + floor(nfft / 2)) / spectrange); % get upper limit
+% lower_freq = round((spectrange - Settings(5)) * (1 + floor(nfft / 2)) / spectrange); % get upper limit
 
 
 % Detect Calls
@@ -69,11 +69,15 @@ for i = 1:((time - overlap) / (chunksize - overlap))
     % Create the spectrogram
     [s,fr,ti] = spectrogram(audio,wind,noverlap,nfft,info.SampleRate,'yaxis');
     
-    % Extract the region within the frequency range
-    s = s(upper_freq:lower_freq,:);
-    s = flip(abs(s),1);
-    fr = flip(fr,1);
+    upper_freq = find(fr>Settings(4)*1000,1);
+    lower_freq = find(fr>Settings(5)*1000,1);
     
+    
+    % Extract the region within the frequency range
+    s = s(lower_freq:upper_freq,:);
+    s = flip(abs(s),1);
+    
+
     % Use a moving average, to scale the spectrogram
     current_low_percentile = prctile(s(:),7.5);
     if i==1
@@ -88,6 +92,7 @@ for i = 1:((time - overlap) / (chunksize - overlap))
     % Subtract the 5th percentile to remove horizontal noise bands
     im = im - prctile(im,5,2);
     
+    
     % Detect!
     try
         % Convert spectrogram to uint8 for detection, because network
@@ -97,15 +102,14 @@ for i = 1:((time - overlap) / (chunksize - overlap))
         % Calculate each call's power
         for j = 1:size(bboxes,1)
             AllPowers = [AllPowers
-                max(...
-                s(bboxes(j,2):bboxes(j,2)+bboxes(j,4)-1,bboxes(j,1):bboxes(j,3)+bboxes(j,1)-1),...
-                [],'all')];
+                max(max(...
+                s(bboxes(j,2):bboxes(j,2)+bboxes(j,4)-1,bboxes(j,1):bboxes(j,3)+bboxes(j,1)-1)))];
         end
         
         bboxes(:,1) = ti(bboxes(:,1)) + (windL ./ info.SampleRate);
-        bboxes(:,2) = fr(bboxes(:,2) + bboxes(:,4) + upper_freq) ./ 1000;
+        bboxes(:,2) = fr(upper_freq - (bboxes(:,2) + bboxes(:,4))) ./ 1000;
         bboxes(:,3) = ti(bboxes(:,3));
-        bboxes(:,4) = fr(end-bboxes(:,4)) ./ 1000;
+        bboxes(:,4) = fr(bboxes(:,4)) ./ 1000;
         
         
         
