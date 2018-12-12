@@ -18,9 +18,9 @@ end
 %% Load the data into a single table
 AllSettings = [];
 for i = 1:length(trainingdata)
-    load([trainingpath trainingdata{i}],'TTable','wind','noverlap','nfft','cont');
+    load([trainingpath trainingdata{i}],'TTable','wind','noverlap','nfft');
     TrainingTables = [TrainingTables; TTable];
-    AllSettings = [AllSettings; wind noverlap nfft cont];
+    AllSettings = [AllSettings; wind noverlap nfft];
 end
 
 %% Create a warning if training files were created with different parameters
@@ -49,9 +49,9 @@ end
 wind = max(AllSettings(:,1));
 noverlap = max(AllSettings(:,2));
 nfft = max(AllSettings(:,3));
-cont = max(AllSettings(:,4));
 
-save(fullfile(PathName,FileName),'detector','layers','options','wind','noverlap','nfft','cont');
+
+save(fullfile(PathName,FileName),'detector','layers','options','wind','noverlap','nfft');
 
 %% Update the menu
 update_folders(hObject, eventdata, handles);

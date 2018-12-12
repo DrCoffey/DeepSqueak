@@ -37,6 +37,7 @@ cb.Color = [1 1 1];
 cb.FontSize = 12;
 ylabel(handles.axes1,'Frequency (kHZ)','Color','w');
 xlabel(handles.axes1,'Time (s)','Color','w');
+set(handles.axes1,'Color',[.1 .1 .1]);
 handles.box=rectangle('Position',[1 1 1 1],'Curvature',0.2,'EdgeColor','g',...
     'LineWidth',3,'Parent', handles.axes1);
 

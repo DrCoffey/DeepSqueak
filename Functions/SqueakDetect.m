@@ -23,7 +23,7 @@ nfft = round(nfft * info.SampleRate);
 AllBoxes=[];
 AllScores=[];
 AllClass=[];
-AllPowers=[];
+AllPowers=[]; 
 c=0;
 %Calls = struct('Rate',struct,'Box',struct,'RelBox',struct,'Score',struct,'Audio',struct,'Accept',struct,'Power',struct);
 
@@ -37,9 +37,7 @@ else
 end
 chunksize=Settings(2);
 overlap=Settings(3);
-sensitivity=Settings(6);
-powerthresh=Settings(7);
-gain=Settings(9);
+score_cuttoff=Settings(6);
 
 % spectrange = info.SampleRate / 2000; % get range of spectrogram in KHz
 % upper_freq = round((spectrange - Settings(4)) * (1 + floor(nfft / 2)) / spectrange); % get upper limit
@@ -72,26 +70,17 @@ for i = 1:((time - overlap) / (chunksize - overlap))
     upper_freq = find(fr>Settings(4)*1000,1);
     lower_freq = find(fr>Settings(5)*1000,1);
     
-    
     % Extract the region within the frequency range
     s = s(lower_freq:upper_freq,:);
     s = flip(abs(s),1);
     
-
-    % Use a moving average, to scale the spectrogram
-    current_low_percentile = prctile(s(:),7.5);
-    if i==1
-        low=current_low_percentile;
-    else
-        low = (low + 0.1 * current_low_percentile) / 1.1;
-    end
     
-    % Apply gain setting
-    im = mat2gray(s,[low cont]) .* gain;
+    % Normalize gain setting
+    med=median(s(:));
+    im = mat2gray(s,[med*.1 med*35]);
     
     % Subtract the 5th percentile to remove horizontal noise bands
     im = im - prctile(im,5,2);
-    
     
     % Detect!
     try
@@ -148,7 +137,7 @@ OverBoxes(:,4)=1;
 overlapRatio = bboxOverlapRatio(OverBoxes, OverBoxes);
 
 % Merge all boxes with overlap ratio greater than 0.2
-OverlapMergeThreshold = 0.2;
+OverlapMergeThreshold = 0.1;
 overlapRatio(overlapRatio<OverlapMergeThreshold)=0;
 
 % Create a graph with the connected boxes
@@ -229,7 +218,7 @@ if ~isempty(merged_scores)
         Calls(i).Power = merged_powers(i);
         
         % Acceptance
-        if merged_scores(i,:)>sensitivity
+        if merged_scores(i,:)>score_cuttoff
             Calls(i).Accept=1;
         else
             Calls(i).Accept=0;
@@ -255,7 +244,6 @@ if ~isempty(merged_scores)
     end
     
     try % Reject calls below the power threshold and combine 22s
-        Calls = Calls([Calls.Power] > powerthresh);
         Calls = Calls([Calls.Accept] == 1);
         if contains(networkname,'long','IgnoreCase',true)
             Calls = SeperateLong22s_Callback([],[],[],inputfile,Calls);

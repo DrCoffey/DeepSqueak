@@ -13,20 +13,20 @@ if ischar(trainingdata)
 end
 
 % Get training settings
-prompt = {'Window Length (s)','Overlap (s)','NFFT (s)','Amplitude Cutoff (Try 3)', 'Bout Length (s) [Requires Single Files & Audio]',...
-    'Number of augmented duplicates','Minimum amplitude augmentation','Maximum amplitude augmentation'};
+prompt = {'Window Length (s)','Overlap (s)','NFFT (s)','Bout Length (s) [Requires Single Files & Audio]',...
+    'Number of augmented duplicates'};
 dlg_title = 'Spectrogram Settings';
 num_lines=[1 40]; options.Resize='off'; options.windStyle='modal'; options.Interpreter='tex';
-spectSettings = str2double(inputdlg(prompt,dlg_title,num_lines,{'0.0032','0.0016','0.0022','1','0','3','0.25','1.25'},options));
+spectSettings = str2double(inputdlg(prompt,dlg_title,num_lines,{'0.0032','0.0016','0.0022','1','1'},options));
 if isempty(spectSettings); return; end
 
 wind = spectSettings(1);
 noverlap = spectSettings(2);
 nfft = spectSettings(3);
-cont = spectSettings(4);
-bout = spectSettings(5);
-repeats = spectSettings(6)+1;
-AmplitudeRange = [spectSettings(7), spectSettings(8)];
+bout = spectSettings(4);
+repeats = spectSettings(5)+1;
+AmplitudeRange = [0.25, 1.25];
+StretchRange = [0.75, 1.25];
 
 if bout ~= 0
     if length(trainingdata) > 1
@@ -103,7 +103,7 @@ for k = 1:length(trainingdata)
                     rate,...
                     Boxes,...
                     1,...
-                    wind,noverlap,nfft,cont,rate/2,fullfile(fname,IMname),AmplitudeRange,j);
+                    wind,noverlap,nfft,rate/2,fullfile(fname,IMname),AmplitudeRange,j,StretchRange);
                 TTable = [TTable;{fullfile('Training','Images',filename,IMname), box}];
                 
             end
@@ -125,7 +125,7 @@ for k = 1:length(trainingdata)
                     Calls(i).Rate,...
                     Calls(i).RelBox,...
                     Calls(i).Accept,...
-                    wind,noverlap,nfft,cont,Calls(i).Rate/2,fullfile(fname,IMname),AmplitudeRange,j);
+                    wind,noverlap,nfft,Calls(i).Rate/2,fullfile(fname,IMname),AmplitudeRange,j,StretchRange);
                 
                 %                 imwrite(im,filename,'BitDepth',8)
                 TTable = [TTable;{fullfile('Training','Images',filename,IMname), box}];
@@ -134,7 +134,7 @@ for k = 1:length(trainingdata)
             waitbar(i/length(Calls),h,['Processing File ' num2str(k) ' of '  num2str(length(trainingdata))]);
         end
     end
-    save(fullfile(handles.squeakfolder,'Training',[filename '.mat']),'TTable','wind','noverlap','nfft','cont');
+    save(fullfile(handles.squeakfolder,'Training',[filename '.mat']),'TTable','wind','noverlap','nfft');
     disp(['Created ' num2str(height(TTable)) ' Training Images']);
 end
 close(h)
@@ -144,28 +144,28 @@ end
 
 
 % Create training images and boxes
-function [im,box] = CreateTrainingData(audio,rate,RelBox,Accept,wind,noverlap,nfft,cont,cutoff,filename,AmplitudeRange,replicatenumber)
+function [im,box] = CreateTrainingData(audio,rate,RelBox,Accept,wind,noverlap,nfft,cutoff,filename,AmplitudeRange,replicatenumber,StretchRange)
 
 % Convert audio to double, if it is not already
 if ~isa(audio,'double')
     audio = double(audio) / (double(intmax(class(audio)))+1);
 end
 
-% Augment by adding white noise, and adjusting the gain.
-NoiseRange = [39, 60];
-AmplitudeFactor = range(AmplitudeRange).*rand() + AmplitudeRange(1);
-NoiseFactor = range(NoiseRange).*rand() + NoiseRange(1);
-
+% Augment by adjusting the gain
 % The first training image should not be augmented
 if replicatenumber > 1
-    audio = AmplitudeFactor .* awgn(audio,NoiseFactor);
+    AmplitudeFactor = range(AmplitudeRange).*rand() + AmplitudeRange(1);
+    StretchFactor = range(StretchRange).*rand() + StretchRange(1);
+else
+    AmplitudeFactor = 1;
+    StretchFactor = 1;
 end
 
 % Make the spectrogram
 [s, fr, ti] = spectrogram(audio,...
-    round(rate * wind),...
-    round(rate * noverlap),...
-    round(rate * nfft),...
+    round(rate * wind*StretchFactor),...
+    round(rate * noverlap*StretchFactor),...
+    round(rate * nfft*StretchFactor),...
     rate,...
     'yaxis');
 
@@ -185,8 +185,14 @@ else
 end
 
 s=flipud(abs(s));
-im = mat2gray(s,[prctile(s(:),7.5) cont]);
-imwrite(im,filename,'BitDepth',8)
+med=median(s(:))*AmplitudeFactor;
+im = mat2gray(s,[med*.1 med*35]);
+if size(im,2)<25
+   box=[box;[box(:,1)+size(im,2) box(:,2:4)]];
+   im = [im im];
+end
+%im = insertObjectAnnotation(im, 'rectangle', box, ' ');
+imwrite(im,filename,'BitDepth',8);
 
 end
 

@@ -54,7 +54,7 @@ end
 
 Settings = [];
 for k=1:length(networkselections)
-    prompt = {'Total Analysis Length (Seconds; 0 = Full Duration)','Analysis Chunk Length (Seconds; GPU Dependent)','Overlap (Seconds)','Frequency Cut Off High (kHZ)','Frequency Cut Off Low (kHZ)','Score Threshold (0-1)','Power Threshold (0-10)','Append Date to FileName (1 = yes)','Spectrogram Gain'};
+    prompt = {'Total Analysis Length (Seconds; 0 = Full Duration)','Analysis Chunk Length (Seconds; GPU Dependent)','Overlap (Seconds)','Frequency Cut Off High (kHZ)','Frequency Cut Off Low (kHZ)','Score Threshold (0-1)','Append Date to FileName (1 = yes)'};
     dlg_title = ['Settings for ' handles.networkfiles(networkselections(k)).name];
     num_lines=[1 100]; options.Resize='off'; options.WindowStyle='modal'; options.Interpreter='tex';
     def = handles.settings.detectionSettings;
@@ -104,7 +104,7 @@ for j = 1:length(audioselections)
     detectiontime=datestr(datetime('now'),'mmm-DD-YYYY HH_MM PM');
     
     % Append date to filename
-    if Settings(8)
+    if Settings(7)
         fname = fullfile(handles.settings.detectionfolder,[audioname ' ' detectiontime '.mat']);
     else
         fname = fullfile(handles.settings.detectionfolder,[audioname '.mat']);

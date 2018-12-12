@@ -106,7 +106,7 @@ if ~(exist(fullfile(handles.squeakfolder, 'settings.mat'), 'file')==2)
     handles.settings.detectionfolder = fullfile(handles.squeakfolder, 'Detections/');
     handles.settings.networkfolder = fullfile(handles.squeakfolder, 'Networks/');
     handles.settings.audiofolder = fullfile(handles.squeakfolder, 'Audio/');
-    handles.settings.detectionSettings = {'0' '3' '.1' '100' '18' '0.65' '0' '1' '1'};
+    handles.settings.detectionSettings = {'0' '6' '.1' '100' '18' '0' '1'};
     handles.settings.playback_rate = 0.05;
     handles.settings.LowFreq = 15;
     handles.settings.HighFreq = 115;
@@ -215,7 +215,7 @@ rate = handles.calls(handles.currentcall).Rate * handles.settings.playback_rate;
 paddedsound = [zeros(3125,1); audio; zeros(3125,1)];
 audiostart = handles.calls(handles.currentcall).RelBox(1) * handles.calls(handles.currentcall).Rate;
 audiolength = handles.calls(handles.currentcall).RelBox(3) * handles.calls(handles.currentcall).Rate;
-sound(paddedsound(round(audiostart:audiostart+audiolength + 6249)),rate);
+soundsc(paddedsound(round(audiostart:audiostart+audiolength + 6249)),rate);
 guidata(hObject, handles);
 
 % --- Executes on button press in NextCall.
