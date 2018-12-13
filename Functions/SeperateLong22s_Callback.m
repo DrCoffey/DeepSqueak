@@ -88,14 +88,14 @@ for i=1:length(begin_time)
     entropy = 1 - (geomean(I,1) ./ mean(I,1));
     
     % Tonality of the upper region
-    I2 = abs(s(round(hi_freq:2*hi_freq-lowfreq),:));
+    I2 = abs(s(round(hi_freq:min(2*hi_freq-lowfreq,size(s,1))),:));
     UpperEntropy = 1 - (geomean(I2,1) ./ mean(I2,1));
     % Use MAD to estimate mean and sd of entropy
     EntropyMedian = median(UpperEntropy);
     EntropySD = 1.4826 * median(abs(EntropyMedian - UpperEntropy));
     
     CallRegions = entropy > EntropyMedian + EntropySD*3;
-    
+    CallRegions = entropy > EntropyMedian + 0.1;
     % Calls must have continuously high tonality
     radius = find(ti>0.1,1);
     CallRegions = movmean(CallRegions,radius);
@@ -159,7 +159,7 @@ end
 
 
 if nargin == 3
-    [FileName,PathName,FilterIndex] = uiputfile([handles.settings.detectionfolder '/*.mat'],'Save Merged Detections');
+    [FileName,PathName,FilterIndex] = uiputfile(fullfile(handles.settings.detectionfolder,trainingdata),'Save Merged Detections');
     waitbar(i/length(newBoxes),hc,'Saving...');
     Calls = NewCalls;
     save([PathName,FileName],'Calls','-v7.3');
