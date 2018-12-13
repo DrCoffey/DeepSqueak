@@ -68,8 +68,8 @@ for i = 1:((time - overlap) / (chunksize - overlap))
     % Create the spectrogram
     [s,fr,ti] = spectrogram(audio,wind,noverlap,nfft,info.SampleRate,'yaxis');
     
-    upper_freq = find(fr>Settings(4)*1000,1);
-    lower_freq = find(fr>Settings(5)*1000,1);
+    upper_freq = find(fr>=Settings(4)*1000,1);
+    lower_freq = find(fr>=Settings(5)*1000,1);
     
     % Extract the region within the frequency range
     s = s(lower_freq:upper_freq,:);
@@ -78,7 +78,7 @@ for i = 1:((time - overlap) / (chunksize - overlap))
     
     % Normalize gain setting
     med=median(s(:));
-    im = mat2gray(s,[med*.1 med*35]);
+    im = mat2gray(s,[med*.1 med*30]);
     
     % Subtract the 5th percentile to remove horizontal noise bands
     %im = im - prctile(im,5,2);
@@ -87,7 +87,7 @@ for i = 1:((time - overlap) / (chunksize - overlap))
     try
         % Convert spectrogram to uint8 for detection, because network
         % is trained with uint8 images
-        [bboxes, scores, Class] = detect(network, im2uint8(im), 'ExecutionEnvironment','auto','NumStrongestRegions',Inf,'Threshold',.35);
+        [bboxes, scores, Class] = detect(network, im2uint8(im), 'ExecutionEnvironment','auto','NumStrongestRegions',Inf,'Threshold',.5);
         
         % Calculate each call's power
         for j = 1:size(bboxes,1)
@@ -140,7 +140,7 @@ try
 overlapRatio = bboxOverlapRatio(OverBoxes, OverBoxes);
 
 % Merge all boxes with overlap ratio greater than 0.2
-OverlapMergeThreshold = 0.025;
+OverlapMergeThreshold = 0.;
 overlapRatio(overlapRatio<OverlapMergeThreshold)=0;
 
 % Create a graph with the connected boxes
