@@ -140,7 +140,7 @@ try
 overlapRatio = bboxOverlapRatio(OverBoxes, OverBoxes);
 
 % Merge all boxes with overlap ratio greater than 0.2
-OverlapMergeThreshold = 0.1;
+OverlapMergeThreshold = 0.025;
 overlapRatio(overlapRatio<OverlapMergeThreshold)=0;
 
 % Create a graph with the connected boxes
@@ -166,7 +166,7 @@ call_duration = end_time__ - begin_time;
 call_bandwidth = high_freq_ - lower_freq;
 
 %% Make the boxes all a little bigger
-timeExpansion = .15;
+timeExpansion = .1;
 freqExpansion = .05;
 
 begin_time = begin_time - call_duration.*timeExpansion;
