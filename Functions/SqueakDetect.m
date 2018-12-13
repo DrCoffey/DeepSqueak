@@ -3,8 +3,9 @@ function  Calls=SqueakDetect(inputfile,networkfile,fname,Settings,currentFile,to
 h = waitbar(0,'Initializing');
 
 info = audioinfo(inputfile);
-if info.SampleRate ~= 250000
-    disp('Warning: DeepSqueak was designed for sample rates of 250KHz')
+if info.SampleRate < (Settings(4)*1000)*2
+    disp('Warning: Upper Range Above Samplng Frequency');
+    Settings(4)=floor(info.SampleRate/2000);
 end
 
 
@@ -13,7 +14,7 @@ network=networkfile.detector;
 wind=networkfile.wind;
 noverlap=networkfile.noverlap;
 nfft=networkfile.nfft;
-cont=networkfile.cont;
+
 
 % Adjust settings, so spectrograms are the same for different sample rates
 wind = round(wind * info.SampleRate);
@@ -80,13 +81,13 @@ for i = 1:((time - overlap) / (chunksize - overlap))
     im = mat2gray(s,[med*.1 med*35]);
     
     % Subtract the 5th percentile to remove horizontal noise bands
-    im = im - prctile(im,5,2);
+    %im = im - prctile(im,5,2);
     
     % Detect!
     try
         % Convert spectrogram to uint8 for detection, because network
         % is trained with uint8 images
-        [bboxes, scores, Class] = detect(network, im2uint8(im), 'ExecutionEnvironment','auto','NumStrongestRegions',Inf);
+        [bboxes, scores, Class] = detect(network, im2uint8(im), 'ExecutionEnvironment','auto','NumStrongestRegions',Inf,'Threshold',.35);
         
         % Calculate each call's power
         for j = 1:size(bboxes,1)
@@ -120,6 +121,7 @@ for i = 1:((time - overlap) / (chunksize - overlap))
 end
 close(h);
 
+
 %% Merge overlapping boxes
 % Sort the boxes by start time
 [AllBoxes,index] = sortrows(AllBoxes);
@@ -134,6 +136,7 @@ OverBoxes(:,2)=1;
 OverBoxes(:,4)=1;
 
 % Calculate overlap ratio
+try
 overlapRatio = bboxOverlapRatio(OverBoxes, OverBoxes);
 
 % Merge all boxes with overlap ratio greater than 0.2
@@ -179,7 +182,9 @@ high_freq_ = min(high_freq_,info.SampleRate./2000 - 1);
 
 call_duration = end_time__ - begin_time;
 call_bandwidth = high_freq_ - lower_freq;
-
+catch
+errordlg('Why No Calls?');    
+end
 
 %% Create Output Structure
 hc = waitbar(0,'Writing Output Structure');
@@ -188,17 +193,17 @@ if ~isempty(merged_scores)
         waitbar(i/length(begin_time),hc);
         
         %% Audio beginning and end time
-        WindL=(begin_time(i)-call_duration(i)) .* info.SampleRate;
+        WindL=round((begin_time(i)-call_duration(i)) .* info.SampleRate);
         if WindL<=1
             pad=abs(WindL);
             WindL = 1;
         end
         
-        WindR=(end_time__(i)+call_duration(i)) .* info.SampleRate;
+        WindR=round((end_time__(i)+call_duration(i)) .* info.SampleRate);
         WindR = min(WindR,info.TotalSamples); % Prevent WindR from being greater than total samples
         
         
-        audio = audioread(inputfile,floor([WindL WindR]),'native');
+        audio = audioread(inputfile,([WindL WindR]),'native');
         
         % Pad the audio if the call would be cut off
         if WindL==1
