@@ -1,4 +1,4 @@
-function Calls = SeperateLong22s_Callback(hObject, eventdata, handles, inputfile, Calls)
+function NewCalls = SeperateLong22s_Callback(hObject, eventdata, handles, inputfile, Calls)
 %% Get if clicked through menu, or using the long call network
 if nargin == 3
     [trainingdata, trainingpath] = uigetfile([handles.settings.detectionfolder '/*.mat'],'Select Detection File','MultiSelect', 'off');
@@ -12,21 +12,57 @@ info = audioinfo(inputfile);
 newBoxes = [];
 newScores = [];
 newPower = [];
-newAccept = [];
 
-for i=1:length(Calls)
+
+%% First, find all the overlapping calls
+
+% Get the oldBoxes
+oldBoxes = vertcat(Calls.Box);
+
+% Pad the oldBoxes so that all of the audio is contained within the box
+oldBoxes(:,1) = oldBoxes(:,1) - 0.5;
+oldBoxes(:,2) = oldBoxes(:,2) - 2.0;
+oldBoxes(:,3) = oldBoxes(:,3) + 1.0;
+oldBoxes(:,4) = oldBoxes(:,4) + 4.0;
+
+% Calculate overlap ratio
+overlapRatio = bboxOverlapRatio(oldBoxes, oldBoxes);
+
+g = graph(overlapRatio);
+
+% Make new oldBoxes from the minimum and maximum start and end time of each
+% overlapping box.
+componentIndices = conncomp(g);
+begin_time = accumarray(componentIndices', oldBoxes(:,1), [], @min);
+lower_freq = accumarray(componentIndices', oldBoxes(:,2), [], @min);
+end_time__ = accumarray(componentIndices', oldBoxes(:,1)+oldBoxes(:,3), [], @max);
+high_freq_ = accumarray(componentIndices', oldBoxes(:,2)+oldBoxes(:,4), [], @max);
+
+merged_scores = accumarray(componentIndices', [Calls.Score]', [], @mean);
+merged_power = accumarray(componentIndices', [Calls.Power]', [], @mean);
+
+call_duration = end_time__ - begin_time;
+call_bandwidth = high_freq_ - lower_freq;
+
+
+
+%% Now, extract the spectrogram from each box, and find the calls within the box by using tonality
+for i=1:length(begin_time)
     
+    % If ran through the menu
     if nargin == 3
         waitbar(i/length(Calls),hc,'Splitting Calls');
     end
-    
-    
-    WindL=round((Calls(i).Box(1)-(Calls(i).Box(3)))*(info.SampleRate));
+
+    % Get the audio
+    WindL=round((begin_time(i)-0.1) .* info.SampleRate);
     if WindL<=1
         pad=abs(WindL);
         WindL = 1;
     end
-    WindR=round((Calls(i).Box(1)+Calls(i).Box(3)+(Calls(i).Box(3)))*(info.SampleRate));
+    WindR=round((end_time__(i)+0.1) .* info.SampleRate);
+    WindR = min(WindR,info.TotalSamples); % Prevent WindR from being greater than total samples
+    
     audio = audioread(inputfile,[WindL WindR]);
     if WindL==1;
         pad=zeros(pad,1);
@@ -34,102 +70,74 @@ for i=1:length(Calls)
             audio];
     end
     
+    % Make the spectrogram
+    windowsize = round(info.SampleRate * 0.02);
+    noverlap = round(info.SampleRate * 0.01);
+    nfft = round(info.SampleRate * 0.02);
     
+    [s, fr, ti] = spectrogram(audio,windowsize,noverlap,nfft,info.SampleRate,'yaxis');    
     
-    windowsize = round(info.SampleRate * 0.01);
-    noverlap = round(info.SampleRate * 0.005);
-    nfft = round(info.SampleRate * 0.01);
+    % Get the part of the spectrogram within the frequency bandwidth
+    x1 = axes2pix(length(ti),ti,call_duration(i));
+    x2 = axes2pix(length(ti),ti,call_duration(i));
+    lowfreq = axes2pix(length(fr),fr./1000,lower_freq(i));
+    hi_freq = axes2pix(length(fr),fr./1000,high_freq_(i));
     
-    [s, fr, ti] = spectrogram(audio,windowsize,noverlap,nfft,info.SampleRate,'yaxis');
+    I = abs(s(round(lowfreq:hi_freq),:));
+    % Calculate the entropy
+    entropy = 1 - (geomean(I,1) ./ mean(I,1));
     
-    x1 = axes2pix(length(ti),ti,Calls(i).Box(3));
-    x2 = axes2pix(length(ti),ti,Calls(i).Box(3));
-    y1 = axes2pix(length(fr),fr./1000,Calls(i).Box(2)-5);
-    y2 = axes2pix(length(fr),fr./1000,Calls(i).Box(4)+5);
+    % Tonality of the upper region
+    I2 = abs(s(round(hi_freq:2*hi_freq-lowfreq),:));
+    UpperEntropy = 1 - (geomean(I2,1) ./ mean(I2,1));
+    % Use MAD to estimate mean and sd of entropy
+    EntropyMedian = median(UpperEntropy);
+    EntropySD = 1.4826 * median(abs(EntropyMedian - UpperEntropy));
     
+    CallRegions = entropy > EntropyMedian + EntropySD*3;
     
-    I = (abs(s(round(y1:y1+y2),:)));
+    % Calls must have continuously high tonality
+    radius = find(ti>0.1,1);
+    CallRegions = movmean(CallRegions,radius);
     
-    signal2noise = geomean(I,1) ./ mean(I,1);
+    CallRegions = [0, CallRegions, 0];
+    startime = find(CallRegions(1:end-1) < 0.5 & CallRegions(2:end) >= 0.5);
+    stoptime = find(CallRegions(1:end-1) >= 0.5 & CallRegions(2:end) < 0.5);
     
-    [kmean, C] = kmeans(signal2noise',2);
-    [~,ind] = min(C);
-    CallRegions = (kmean==ind);
-    
-    
-    radius = find(ti>0.025,1);
-    dist = zeros(length(kmean));
-    for k = 1:length(kmean)
-        r = max(1,k-radius):min(length(kmean),k+radius);
-        if  mean(CallRegions(r)) > .75;
-            dist(r,r) = 1;
-        end
-    end
-    
-    G = graph(dist);
-    callBins = conncomp(G,'OutputForm','cell');
-    newBox = [];
-    for bins = 1:length(callBins)
-        if length(callBins{bins}) < 3
-            continue
-        end
-        Call = callBins{bins};
-        if ((Call(end) > x1) && (Call(end) < x1+x2)) || (Call(1) > x1) && (Call(1) < x1+x2); % if contained in original box
-            newBox(1) = (WindL / info.SampleRate) + ti(Call(1));
-            newBox(2) = Calls(i).Box(2);
-            newBox(3) = ti(Call(end)) -  ti(Call(1));
-            newBox(4) = Calls(i).Box(4);
-            
-            newBoxes(end+1,:) = newBox;
-            newScores(end+1,:) = Calls(i).Score;
-            newPower(end+1,:) = Calls(i).Power;
-            newAccept(end+1,:) = Calls(i).Accept;
-        end
-    end
-    if isempty(newBox)
-        newBoxes(end+1,:) = Calls(i).Box;
-        newScores(end+1,:) = Calls(i).Score;
-        newPower(end+1,:) = Calls(i).Power;
-        newAccept(end+1,:) = Calls(i).Accept;
-    end
+    newBoxes = [newBoxes
+        ti(startime)' + (WindL ./ info.SampleRate),...
+        repmat(lower_freq(i),length(startime),1),...
+        ti(stoptime - startime)',...
+        repmat(high_freq_(i)-lower_freq(i),length(startime),1)];
+        
+    newScores = [newScores; repmat(merged_scores(i),length(startime),1)];
+    newPower = [newScores; repmat(merged_power(i),length(startime),1)];
     
 end
 
-xmin = newBoxes(:,1);
-ymin = newBoxes(:,2);
-xmax = xmin + newBoxes(:,3) - 1;
-ymax = ymin + newBoxes(:,4) - 1;
+%%
 
-overlapRatio = bboxOverlapRatio(newBoxes, newBoxes);
-n = size(overlapRatio,1);
-overlapRatio(1:n+1:n^2) = 0;
-g = graph(overlapRatio);
-componentIndices = conncomp(g);
-
-xmin = accumarray(componentIndices', xmin, [], @min);
-ymin = accumarray(componentIndices', ymin, [], @min);
-xmax = accumarray(componentIndices', xmax, [], @max);
-ymax = accumarray(componentIndices', ymax, [], @max);
-
-[z1 z2 z3]=unique(componentIndices);
-merged_boxes = [xmin ymin xmax-xmin+1 ymax-ymin+1];
-merged_scores = accumarray(componentIndices', newScores, [], @max);
-merged_power = accumarray(componentIndices', newPower, [], @max);
-merged_accept = accumarray(componentIndices', newAccept, [], @max);
-
+% Now that we have new boxes of high tonality regions, exclude the new
+% boxes that don't overlap with the old boxes.
+overlapRatio = bboxOverlapRatio(newBoxes, oldBoxes);
+OverlapsWithOld = any(overlapRatio,2);
 
 % Re Make Call Structure
-for i=1:size(merged_boxes,1)
+for i=1:size(newBoxes,1)
     if nargin == 3
-    waitbar(i/length(merged_boxes),hc,'Remaking Structure');
+    waitbar(i/length(newBoxes),hc,'Remaking Structure');
     end
     
-    WindL=round((merged_boxes(i,1)-(merged_boxes(i,3)))*(info.SampleRate));
+    if ~OverlapsWithOld; continue; end
+    
+    % Get the audio around the new call
+    WindL=round( (newBoxes(i,1)-newBoxes(i,3))*info.SampleRate);
     if WindL<=1
         pad=abs(WindL);
         WindL = 1;
     end
-    WindR=round((merged_boxes(i,1)+merged_boxes(i,3)+(merged_boxes(i,3)))*(info.SampleRate));
+    WindR = round( (newBoxes(i,1)+newBoxes(i,3)*2)*info.SampleRate);
+    WindR = min(WindR,info.TotalSamples); % Prevent WindR from being greater than total samples
     a = audioread(inputfile,[WindL WindR],'native');
     if WindL==1;
         pad=zeros(pad,1);
@@ -139,32 +147,22 @@ for i=1:size(merged_boxes,1)
     
     % Final Structure
     NewCalls(i).Rate=info.SampleRate;
-    NewCalls(i).Box=merged_boxes(i,:);
-    NewCalls(i).RelBox=[merged_boxes(i,3) merged_boxes(i,2) merged_boxes(i,3) merged_boxes(i,4)];
-    NewCalls(i).Score=merged_scores(i);
+    NewCalls(i).Box=newBoxes(i,:);
+    NewCalls(i).RelBox=[newBoxes(i,3) newBoxes(i,2) newBoxes(i,3) newBoxes(i,4)];
+    NewCalls(i).Score=newScores(i);
     NewCalls(i).Audio=a;
     NewCalls(i).Type=categorical({'USV'});
-    NewCalls(i).Power=merged_power(i);
-    NewCalls(i).Accept=merged_accept(i);
-    
-    %% Autoreject calls with low tonality
-    EntropyThreshold = 0.3;
-    AmplitudeThreshold = 0.15;
-    stats = CalculateStats(I,windowsize,noverlap,nfft,NewCalls(i).Rate,NewCalls(i).Box,EntropyThreshold,AmplitudeThreshold,0);
-    if (stats.SignalToNoise > .4) & stats.DeltaTime > .2;
-        NewCalls(i).Accept=1;
-    else
-        NewCalls(i).Accept=0;
-    end
-    
+    NewCalls(i).Power=newPower(i);
+    NewCalls(i).Accept=1;
+
 end
-Calls = NewCalls([NewCalls.Accept] == 1);
+
 
 if nargin == 3
     [FileName,PathName,FilterIndex] = uiputfile([handles.settings.detectionfolder '/*.mat'],'Save Merged Detections');
-    waitbar(i/length(merged_boxes),hc,'Saving...');
+    waitbar(i/length(newBoxes),hc,'Saving...');
+    Calls = NewCalls;
     save([PathName,FileName],'Calls','-v7.3');
     update_folders(hObject, eventdata, handles);
-    handles = guidata(hObject);  % Get newest version of handles
     close(hc);
 end
