@@ -1,6 +1,6 @@
 # DeepSqueak
 
-DeepSqueak 1.0 was designed and tested with MATLAB 2017b.
+DeepSqueak 2.0 was designed and tested with MATLAB 2017b, 2018a, and 2018b.
 
 To run DeepSqueak, navigate to the main DeepSqueak folder in MATLAB, and type "DeepSqeak" into the command line. 
 DeepSqueak will add itself to the MATLAB path after running.
