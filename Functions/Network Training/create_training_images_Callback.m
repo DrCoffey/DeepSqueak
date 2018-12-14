@@ -176,6 +176,8 @@ x2 = axes2pix(length(ti),ti,RelBox(:,3));
 y1 = axes2pix(length(fr),fr./1000,RelBox(:,2));
 y2 = axes2pix(length(fr),fr./1000,RelBox(:,4));
 maxfreq = find(fr<cutoff,1,'last');
+%maxfreq = find(fr<40000,1,'last');
+
 fr = fr(1:maxfreq);
 s = s(1:maxfreq,:);
 if Accept == 1;

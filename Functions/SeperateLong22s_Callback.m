@@ -95,7 +95,7 @@ for i=1:length(begin_time)
     EntropySD = 1.4826 * median(abs(EntropyMedian - UpperEntropy));
     
     CallRegions = entropy > EntropyMedian + EntropySD*3;
-    CallRegions = entropy > EntropyMedian + 0.1;
+    %CallRegions = entropy > EntropyMedian + 0.1;
     % Calls must have continuously high tonality
     radius = find(ti>0.1,1);
     CallRegions = movmean(CallRegions,radius);

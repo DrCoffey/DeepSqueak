@@ -229,23 +229,6 @@ if ~isempty(merged_scores)
             Calls(i).Accept=0;
         end
         
-        % For the long call network, remove calls with tonality < 0.5
-        if contains(networkname,'long','IgnoreCase',true)
-            EntropyThreshold = 0.3;
-            AmplitudeThreshold = 0.15;
-            try
-                [I,windowsize,noverlap,nfft,rate,box] = CreateSpectrogram(Calls(i));
-                stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,EntropyThreshold,AmplitudeThreshold,0);
-                if (stats.SignalToNoise > .4) & stats.DeltaTime > .2
-                    Calls(i).Accept=1;
-                else
-                    Calls(i).Accept=0;
-                end
-            catch
-                disp('Could not detect long 22')
-                Calls(i).Accept=0;
-            end
-        end
     end
     
     try % Reject calls below the power threshold and combine 22s
