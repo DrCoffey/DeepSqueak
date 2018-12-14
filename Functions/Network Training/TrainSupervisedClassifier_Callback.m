@@ -91,10 +91,10 @@ ValY = Class(valInd);
 TestX = X(:,:,:,testInd);
 TestY = Class(testInd);
 
-clear X
+%clear X
 
 % Augment the data by scaling and translating
-aug = imageDataAugmenter('RandXScale',[.8 1.2],'RandYScale',[.8 1.2],'RandXTranslation',[-10 10],'RandYTranslation',[-10 10]);
+aug = imageDataAugmenter('RandXScale',[.9 1.1],'RandYScale',[.9 1.1],'RandXTranslation',[-10 10],'RandYTranslation',[-10 10]);
 auimds = augmentedImageDatastore(imageSize,TrainX,TrainY,'DataAugmentation',aug);
 
 
@@ -130,9 +130,9 @@ layers = [
 
 options = trainingOptions('sgdm',...
     'MaxEpochs',10, ...
-    'InitialLearnRate',.05,...
+    'InitialLearnRate',.02,...
     'LearnRateSchedule','piecewise',...
-    'LearnRateDropFactor',0.8,...
+    'LearnRateDropFactor',0.95,...
     'LearnRateDropPeriod',1,...
     'ValidationData',{ValX, ValY},...
     'ValidationFrequency',10,...
@@ -146,7 +146,7 @@ figure
 confusionchart(classify(ClassifyNet,ValX),ValY)
 
 [FileName,PathName] = uiputfile('ClassifierNet.mat','Save Network');
-save([PathName FileName],'ClassifyNet','wind','noverlap','nfft','lowFreq','highFreq','imageSize','layers','options');
+save([PathName FileName],'ClassifyNet','wind','noverlap','nfft','lowFreq','highFreq','imageSize','layers');
 
 
 end
