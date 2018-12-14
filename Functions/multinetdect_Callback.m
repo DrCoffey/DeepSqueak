@@ -54,7 +54,7 @@ end
 
 Settings = [];
 for k=1:length(networkselections)
-    prompt = {'Total Analysis Length (Seconds; 0 = Full Duration)','Analysis Chunk Length (Seconds; GPU Dependent)','Overlap (Seconds)','Frequency Cut Off High (kHZ)','Frequency Cut Off Low (kHZ)','Score Threshold (0-1)','Power Threshold (0-10)','Append Date to FileName (1 = yes)','Spectrogram Gain'};
+    prompt = {'Total Analysis Length (Seconds; 0 = Full Duration)','Analysis Chunk Length (Seconds; GPU Dependent)','Overlap (Seconds)','Frequency Cut Off High (kHZ)','Frequency Cut Off Low (kHZ)','Score Threshold (0-1)','Append Date to FileName (1 = yes)'};
     dlg_title = ['Settings for ' handles.networkfiles(networkselections(k)).name];
     num_lines=[1 100]; options.Resize='off'; options.WindowStyle='modal'; options.Interpreter='tex';
     def = handles.settings.detectionSettings;
@@ -90,9 +90,9 @@ for j = 1:length(audioselections)
         NeuralNetwork=load(networkpath);%get currently selected option from menu
         close(h);
         if k==1
-            Calls1=SqueakDetect(AudioFile,NeuralNetwork,handles.audiofiles(CurrentAudioFile).name,Settings(:,k),0,0,j,length(audioselections),networkname);
+            Calls1=SqueakDetect(AudioFile,NeuralNetwork,handles.audiofiles(CurrentAudioFile).name,Settings(:,k),j,length(audioselections),networkname);
         elseif k==2
-            Calls2=SqueakDetect(AudioFile,NeuralNetwork,handles.audiofiles(CurrentAudioFile).name,Settings(:,k),0,0,j,length(audioselections),networkname);
+            Calls2=SqueakDetect(AudioFile,NeuralNetwork,handles.audiofiles(CurrentAudioFile).name,Settings(:,k),j,length(audioselections),networkname);
         end
     end
     
@@ -104,10 +104,10 @@ for j = 1:length(audioselections)
     detectiontime=datestr(datetime('now'),'mmm-DD-YYYY HH_MM PM');
     
     % Append date to filename
-    if Settings(8)
+    if Settings(7)
         fname = fullfile(handles.settings.detectionfolder,[audioname ' ' detectiontime '.mat']);
     else
-        fname = fullfile(handles.settings.detectionfolder,audioname);
+        fname = fullfile(handles.settings.detectionfolder,[audioname '.mat']);
     end
     
     if length(networkselections)==1
