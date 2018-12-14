@@ -61,7 +61,7 @@ for j = 1:length(trainingdata)  % For Each File
 %             y2 = axes2pix(length(fr),fr./1000,Calls(i).RelBox(4)+20) + y1;
                     y1 = axes2pix(length(fr),fr./1000,lowFreq);
                     y2 = axes2pix(length(fr),fr./1000,highFreq);
-            I=abs(s(round(y1:y2),round(x1:x2))); % Get the pixels in the box
+            I=abs(s(round(y1:min(y2,size(s,1))),round(x1:x2))); % Get the pixels in the box
             % Use median scaling
             med = median(abs(s(:)));
             im = mat2gray(flipud(I),[med*0.1, med*35]); 
@@ -142,8 +142,14 @@ options = trainingOptions('sgdm',...
 
 ClassifyNet = trainNetwork(auimds,layers,options);
 
-figure
-confusionchart(classify(ClassifyNet,ValX),ValY)
+% Plot the confusion matrix
+figure('color','w')
+[C,order] = confusionmat(classify(DenoiseNet,ValX),ValY)
+h = heatmap(order,order,C)
+h.Title = 'Confusion Matrix';
+h.XLabel = 'Predicted class';
+h.YLabel = 'True Class';
+h.ColorbarVisible = 'off';
 
 [FileName,PathName] = uiputfile('ClassifierNet.mat','Save Network');
 save([PathName FileName],'ClassifyNet','wind','noverlap','nfft','lowFreq','highFreq','imageSize','layers');

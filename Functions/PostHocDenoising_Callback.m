@@ -53,8 +53,11 @@ for j = 1:length(selections) % Do this for each file
         %     y2 = axes2pix(length(fr),fr./1000,Calls(i).RelBox(4)) + y1;
         y1 = axes2pix(length(fr),fr./1000,lowFreq);
         y2 = axes2pix(length(fr),fr./1000,highFreq);
-        I=abs(s(round(y1:y2),round(x1:x2))); % Get the pixels in the box
-        im = mat2gray(flipud(I),[prctile(abs(s(:)),7.5) prctile(abs(s(:)),99)]);
+        I=abs(s(round(y1:min(y2,size(s,1))),round(x1:x2))); % Get the pixels in the box
+        
+        % Use median scaling
+        med = median(abs(s(:)));
+        im = mat2gray(flipud(I),[med*0.1, med*35]);
         
         X = imresize(im,imageSize);
         [Class,score] = classify(DenoiseNet,X);
