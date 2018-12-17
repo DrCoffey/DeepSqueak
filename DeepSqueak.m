@@ -318,13 +318,9 @@ function figure1_WindowKeyPressFcn(hObject, eventdata, handles)
 switch eventdata.Key
     case 'p'
         PlayCall_Callback(hObject, eventdata, handles)
-    case 'rightarrow'
+    case {'rightarrow','e'}
         NextCall_Callback(hObject, eventdata, handles)
-    case 'leftarrow'
-        PreviousCall_Callback(hObject, eventdata, handles)
-    case 'e'
-        NextCall_Callback(hObject, eventdata, handles)
-    case 'q'
+    case {'leftarrow','q'}
         PreviousCall_Callback(hObject, eventdata, handles)
     case 'a'
         AcceptCall_Callback(hObject, eventdata, handles)
@@ -332,32 +328,8 @@ switch eventdata.Key
         RejectCall_Callback(hObject, eventdata, handles)
     case 'd'
         rectangle_Callback(hObject, eventdata, handles)
-    case '1'
-        handles.calls(handles.currentcall).Type=handles.settings.labels(1);
-        update_fig(hObject, eventdata, handles);
-    case '2'
-        handles.calls(handles.currentcall).Type=handles.settings.labels(2);
-        update_fig(hObject, eventdata, handles);
-    case '3'
-        handles.calls(handles.currentcall).Type=handles.settings.labels(3);
-        update_fig(hObject, eventdata, handles);
-    case '4'
-        handles.calls(handles.currentcall).Type=handles.settings.labels(4);
-        update_fig(hObject, eventdata, handles);
-    case '5'
-        handles.calls(handles.currentcall).Type=handles.settings.labels(5);
-        update_fig(hObject, eventdata, handles);
-    case '6'
-        handles.calls(handles.currentcall).Type=handles.settings.labels(6);
-        update_fig(hObject, eventdata, handles);
-    case '7'
-        handles.calls(handles.currentcall).Type=handles.settings.labels(7);
-        update_fig(hObject, eventdata, handles);
-    case '8'
-        handles.calls(handles.currentcall).Type=handles.settings.labels(8);
-        update_fig(hObject, eventdata, handles);
-    case '9'
-        handles.calls(handles.currentcall).Type=handles.settings.labels(9);
+    case {'1','2','3','4','5','6','7','8','9'}
+        handles.calls(handles.currentcall).Type=categorical(handles.settings.labels(str2double(eventdata.Key)));
         update_fig(hObject, eventdata, handles);
 end
 
