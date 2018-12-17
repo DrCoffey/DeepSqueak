@@ -80,7 +80,7 @@ for i = 1:length(chunks)-1
         windR = chunks(i+1) + overlap*SampleRate;
         [bboxes,scores,Class,Power] = Create_Spectrogram_And_Detect(windL,windR,SampleRate,inputfile,wind,noverlap,nfft,network,HighCutoff,LowCutoff);
     end
-    if i = 1; DetectStart = tic; end
+    if i == 1; DetectStart = tic; end
     
     % Concatinate the results
     AllBoxes=[AllBoxes
