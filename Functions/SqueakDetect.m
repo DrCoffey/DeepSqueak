@@ -87,7 +87,7 @@ for i = 1:((time - overlap) / (chunksize - overlap))
     try
         % Convert spectrogram to uint8 for detection, because network
         % is trained with uint8 images
-        [bboxes, scores, Class] = detect(network, im2uint8(im), 'ExecutionEnvironment','auto','NumStrongestRegions',Inf,'Threshold',.5);
+        [bboxes, scores, Class] = detect(network, im2uint8(im), 'ExecutionEnvironment','auto','NumStrongestRegions',Inf);
         
         % Calculate each call's power
         for j = 1:size(bboxes,1)
