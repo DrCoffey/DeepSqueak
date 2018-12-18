@@ -1,4 +1,7 @@
 # Changelog
+## 2.0.1 2018-12-18
+Fixed minor bugs in 2.0 release
+
 ## 2.0.0 2018-12-14
 **DeepSqueak 2.0**
 ```
