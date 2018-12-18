@@ -59,7 +59,7 @@ for i=1:size(begin_time,1)
     % Pad the audio if the call would be cut off
     if WindL==1
         pad=zeros(pad,1);
-        audio=[pad; audio];
+        a=[pad; a];
     end
     
     % Final Structure
