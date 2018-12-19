@@ -61,69 +61,75 @@ Calls = [];
 % Break the audio file into chunks
 chunks = linspace(1,(DetectLength - overlap) * SampleRate,round(DetectLength / chunksize));
 for i = 1:length(chunks)-1
-    DetectStart = tic;
-
-    % Get the audio windows
-    windL = chunks(i);
-    windR = chunks(i+1) + overlap*SampleRate;
-    
-    % Read the audio
-    audio = audioread(inputfile,floor([windL, windR]));
-    
-    % Create the spectrogram
-    [s,fr,ti] = spectrogram(audio,wind,noverlap,nfft,SampleRate,'yaxis');
-    
-    upper_freq = find(fr>=HighCutoff*1000,1);
-    lower_freq = find(fr>=LowCutoff*1000,1);
-    
-    % Extract the region within the frequency range
-    s = s(lower_freq:upper_freq,:);
-    s = flip(abs(s),1);
-    
-    % Normalize gain setting
-    med=median(s(:));
-    im = mat2gray(s,[med*.1 med*30]);
-    
-    % Subtract the 5th percentile to remove horizontal noise bands
-    %im = im - prctile(im,5,2);
-    
-    % Detect!
-    % Convert spectrogram to uint8 for detection, because network is trained with uint8 images.
-    [bboxes, scores, Class] = detect(network, im2uint8(im), 'ExecutionEnvironment','auto','NumStrongestRegions',Inf);
-    
-    % Calculate each call's power
-    Power = [];
-    for j = 1:size(bboxes,1)
-        Power = [Power
-            max(max(...
-            s(bboxes(j,2):bboxes(j,2)+bboxes(j,4)-1,bboxes(j,1):bboxes(j,3)+bboxes(j,1)-1)))];
-    end
-    
-    % Convert boxes from pixels to time and kHz
-    bboxes(:,1) = ti(bboxes(:,1)) + (windL ./ SampleRate);
-    bboxes(:,2) = fr(upper_freq - (bboxes(:,2) + bboxes(:,4))) ./ 1000;
-    bboxes(:,3) = ti(bboxes(:,3));
-    bboxes(:,4) = fr(bboxes(:,4)) ./ 1000;
-    
-    
-    
-    % Concatinate the results
-    AllBoxes=[AllBoxes
-        bboxes(Class == 'USV',:)];
-    AllScores=[AllScores
-        scores(Class == 'USV',:)];
-    AllClass=[AllClass
-        Class(Class == 'USV',:)];
-    AllPowers=[AllPowers
-        Power(Class == 'USV',:)];
-    
-    if i > 1
-    t = toc(DetectStart);
-    waitbar(...
-        i/(length(chunks)-1),...
-        h,...
-        sprintf(['Detection Speed: ' num2str((chunksize - overlap) / t,'%.1f') 'x  Call Fragments Found:' num2str(length(AllBoxes)) '\n File ' num2str(currentFile) ' of ' num2str(totalFiles)]));
-
+    try
+        DetectStart = tic;
+        
+        % Get the audio windows
+        windL = chunks(i);
+        windR = chunks(i+1) + overlap*SampleRate;
+        
+        % Read the audio
+        audio = audioread(inputfile,floor([windL, windR]));
+        
+        % Create the spectrogram
+        [s,fr,ti] = spectrogram(audio,wind,noverlap,nfft,SampleRate,'yaxis');
+        
+        upper_freq = find(fr>=HighCutoff*1000,1);
+        lower_freq = find(fr>=LowCutoff*1000,1);
+        
+        % Extract the region within the frequency range
+        s = s(lower_freq:upper_freq,:);
+        s = flip(abs(s),1);
+        
+        % Normalize gain setting
+        med=median(s(:));
+        im = mat2gray(s,[med*.1 med*30]);
+        
+        % Subtract the 5th percentile to remove horizontal noise bands
+        %im = im - prctile(im,5,2);
+        
+        % Detect!
+        % Convert spectrogram to uint8 for detection, because network is trained with uint8 images.
+        [bboxes, scores, Class] = detect(network, im2uint8(im), 'ExecutionEnvironment','auto','NumStrongestRegions',Inf);
+        
+        % Calculate each call's power
+        Power = [];
+        for j = 1:size(bboxes,1)
+            Power = [Power
+                max(max(...
+                s(bboxes(j,2):bboxes(j,2)+bboxes(j,4)-1,bboxes(j,1):bboxes(j,3)+bboxes(j,1)-1)))];
+        end
+        
+        % Convert boxes from pixels to time and kHz
+        bboxes(:,1) = ti(bboxes(:,1)) + (windL ./ SampleRate);
+        bboxes(:,2) = fr(upper_freq - (bboxes(:,2) + bboxes(:,4))) ./ 1000;
+        bboxes(:,3) = ti(bboxes(:,3));
+        bboxes(:,4) = fr(bboxes(:,4)) ./ 1000;
+        
+        
+        % Concatinate the results
+        AllBoxes=[AllBoxes
+            bboxes(Class == 'USV',:)];
+        AllScores=[AllScores
+            scores(Class == 'USV',:)];
+        AllClass=[AllClass
+            Class(Class == 'USV',:)];
+        AllPowers=[AllPowers
+            Power(Class == 'USV',:)];
+        
+            t = toc(DetectStart);
+            waitbar(...
+                i/(length(chunks)-1),...
+                h,...
+                sprintf(['Detection Speed: ' num2str((chunksize - overlap) / t,'%.1f') 'x  Call Fragments Found:' num2str(length(AllBoxes)) '\n File ' num2str(currentFile) ' of ' num2str(totalFiles)]));
+          
+    catch ME
+        waitbar(...
+            i/(length(chunks)-1),...
+            h,...
+            sprintf(['Error in Network, Skiping Audio Chunk']));
+        warning('Error in Network, Skiping Audio Chunk');
+        disp(ME.message);
     end
 end
 % Return is nothing was found
