@@ -59,11 +59,12 @@ for k=1:length(networkselections)
     num_lines=[1 100]; options.Resize='off'; options.WindowStyle='modal'; options.Interpreter='tex';
     def = handles.settings.detectionSettings;
     settingsK = str2double(inputdlg(prompt,dlg_title,num_lines,def,options));
-    Settings = [Settings settingsK];
     
     if isempty(settingsK) % Stop if user presses cancel
         return
     end
+    Settings = [Settings settingsK];
+    
     
     % Save new settings
     handles.settings.detectionSettings = sprintfc('%g',Settings(:,1))';
@@ -115,7 +116,7 @@ for j = 1:length(audioselections)
         fname = fullfile(handles.settings.detectionfolder,[audioname '.mat']);
     end
     
-
+    % Display the number of calls
     fprintf(1,'%d Calls found in: %s \n',length(Calls),audioname)
     
     if ~isempty(Calls)
