@@ -55,6 +55,10 @@ for i=1:length(ultravox.Call)
     end
     windR = ultravox.StopTime_s_(i) + (ultravox.Duration_ms_(i) / 1000);
     
+    if windR*rate>info.TotalSamples
+       windR=info.TotalSamples;
+    end
+    
     Calls(i).Audio=audioread(AudioFile,round([windL windR]*rate),'native');
     Calls(i).Accept=1;
     Calls(i).Type=categorical(ultravox.CallName(i));
