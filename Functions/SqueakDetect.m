@@ -128,8 +128,8 @@ for i = 1:length(chunks)-1
             i/(length(chunks)-1),...
             h,...
             sprintf(['Error in Network, Skiping Audio Chunk']));
-        warning('Error in Network, Skiping Audio Chunk');
-        disp(ME.message);
+        disp('Error in Network, Skiping Audio Chunk');
+        warning( getReport( ME, 'extended', 'hyperlinks', 'on' ) );
     end
 end
 % Return is nothing was found
