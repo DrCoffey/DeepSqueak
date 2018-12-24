@@ -189,7 +189,7 @@ end
 s=flipud(abs(s));
 med=median(s(:))*AmplitudeFactor;
 im = mat2gray(s,[med*.1 med*35]);
-if size(im,2)<25
+while size(im,2)<25
    box=[box;[box(:,1)+size(im,2) box(:,2:4)]];
    im = [im im];
 end
