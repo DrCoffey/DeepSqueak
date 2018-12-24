@@ -34,7 +34,7 @@ for i=1:length(ultravox.Call)
     waitbar(i/length(ultravox.Call),hc);
     
     Calls(i).Rate = rate;
-
+    
     Calls(i).Box = [
         ultravox.StartTime_s_(i),...
         (ultravox.FreqAtMaxAmp_Hz_(i)/1000) - CallBandwidth / 2,...
@@ -48,18 +48,30 @@ for i=1:length(ultravox.Call)
         CallBandwidth];
     
     Calls(i).Score = 1;
-  
+    
     windL = ultravox.StartTime_s_(i) - (ultravox.Duration_ms_(i) / 1000);
-    if windL < 0
-        windL = 1 / rate;
+    windL = round(windL .* rate);
+    % If the call starts at the very beginning of the file, pad the audio with zeros
+    pad = [];
+    if windL<=1
+        pad=zeros(abs(windL),1);
+        windL = 1;
     end
     windR = ultravox.StopTime_s_(i) + (ultravox.Duration_ms_(i) / 1000);
+    windR = round(windR .* rate);
+    windR = min(windR,info.TotalSamples);
     
-    if windR*rate>info.TotalSamples
-       windR=info.TotalSamples;
+    
+    if windL >= info.TotalSamples
+        disp('Call starts after the file ends')
+        continue
+    end
+    if windR > info.TotalSamples
+        disp('Call ends after the file ends')
+        continue
     end
     
-    Calls(i).Audio=audioread(AudioFile,round([windL windR]*rate),'native');
+    Calls(i).Audio=[pad, audioread(AudioFile,[windL, windR],'native')];
     Calls(i).Accept=1;
     Calls(i).Type=categorical(ultravox.CallName(i));
     Calls(i).Power = 0;
