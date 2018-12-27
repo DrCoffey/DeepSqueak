@@ -7,13 +7,10 @@ wind = [];
 
 %% Select the tables that contains the training data
 waitfor(msgbox('Select Image Tables'))
-[trainingdata trainingpath] = uigetfile(['Training/*.mat'],'Select Training File(s) for Training ','MultiSelect', 'on');
+[trainingdata, trainingpath] = uigetfile(['Training/*.mat'],'Select Training File(s) for Training ','MultiSelect', 'on');
 TrainingTables = [];
-if ischar(trainingdata)==1
-    tmp{1}=trainingdata;
-    clear trainingdata
-    trainingdata=tmp;
-end
+trainingdata = cellstr(trainingdata);
+
 
 %% Load the data into a single table
 AllSettings = [];

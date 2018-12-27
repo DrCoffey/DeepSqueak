@@ -1,13 +1,9 @@
 function SyntaxAnalysis_Callback(hObject, eventdata, handles)
 
-[filename filepath] = uigetfile({'*.mat;*.xlsx'},'Select Detection Files OR Exported Detections','MultiSelect', 'on',char(handles.settings.detectionfolder));
+[filename, filepath] = uigetfile({'*.mat;*.xlsx'},'Select Detection Files OR Exported Detections','MultiSelect', 'on',char(handles.settings.detectionfolder));
 if isnumeric(filename); return; end
+filename = cellstr(filename);
 
-if ischar(filename)
-    tmp{1}=filename;
-    clear trainingdata
-    filename=tmp;
-end
 
 settings = inputdlg({'Maximum bout seperation (s)','Exclude Classes with frequency below (0-1)'},'Syntax',[1 50],{'2','.01'});
 boutlength = str2num(settings{1});

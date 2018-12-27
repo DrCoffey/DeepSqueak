@@ -3,37 +3,35 @@ function excel_Callback(hObject, eventdata, handles)
 % This function xports selected call files to excel sheets with stats for each call
 
 %% Select Files
-selections = listdlg('PromptString','Select Files for Export:','ListSize',[500 300],'ListString',handles.detectionfilesnames);
-if isempty(selections); return; end
+% Select the files
+[fname, fpath] = uigetfile([char(handles.settings.detectionfolder) '/*.mat'],'Select Files to Export:','MultiSelect', 'on');
+if isnumeric(fname); return; end
+fname = cellstr(fname);
 
+% Do we include calls that were rejected?
 includereject = questdlg('Include Rejected Calls?','Export','Yes','No','No');
+if isempty(includereject); return; end
+includereject = strcmp(includereject,'Yes');
 
+% Specifiy the output folder
 PathName = uigetdir(handles.settings.detectionfolder,'Select Output Folder');
 if isnumeric(PathName); return; end
 
-
+%% Make the output tables
 hc = waitbar(0,'Initializing');
-for j = 1:length(selections) % Do this for each file
-    currentfile = selections(j);
-    tmp=load([handles.detectionfiles(currentfile).folder '/' handles.detectionfiles(currentfile).name]);%get currently selected option from menu
-    current_detection_file = handles.detectionfiles(currentfile).name;
-    [~,FileName]=fileparts(current_detection_file);
-    FileName = [FileName '_Stats.xlsx'];
+for j = 1:length(fname) % Do this for each file
+    currentfile = fullfile(fpath,fname{j});
+    tmp=load(currentfile);
     
     exceltable = [{'ID'} {'Label'} {'Accepted'} {'Score'}  {'Begin Time (s)'} {'End Time (s)'} {'Call Length (s)'} {'Principal Frequency (KHz)'} {'Low Freq (KHz)'} {'High Freq (KHz)'} {'Delta Freq (KHz)'} {'Frequency Standard Deviation (KHz)'} {'Slope (KHz / s)'} {'Sinuosity'} {'Max Power'} {'Tonality'}];
     for i = 1:length(tmp.Calls) % Do this for each call
-        waitbar(i/length(tmp.Calls),hc,['Calculating call statistics for file ' num2str(j) ' of ' num2str(length(selections))]);
+        waitbar(i/length(tmp.Calls),hc,['Calculating call statistics for file ' num2str(j) ' of ' num2str(length(fname))]);
         
-        if (tmp.Calls(i).Accept==1) | strcmp(includereject,'Yes');
-            
-
+        if includereject || tmp.Calls(i).Accept==1;
             % Get spectrogram data
             [I,windowsize,noverlap,nfft,rate,box] = CreateSpectrogram(tmp.Calls(i));
-            
-            
             % Calculate statistics
             stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.settings.EntropyThreshold,handles.settings.AmplitudeThreshold);
-            
             
             ID = i;
             Label = tmp.Calls(i).Type;
@@ -43,15 +41,17 @@ for j = 1:length(selections) % Do this for each file
         end
         
     end
-    % xlswrite([PathName '/' FileName],exceltable)
     t = cell2table(exceltable);
-    clear exceltable
     
-    if exist([PathName '/' FileName], 'file')==2
-        delete([PathName '/' FileName]);
+    % Name the output file. If the file already exists, delete it so that
+    % writetable overwrites the data instead of appending it to the table.
+    [~,FileName]=fileparts(currentfile);
+    outputName = fullfile(PathName,[FileName '_Stats.xlsx']);
+    if exist(outputName, 'file')==2
+        delete(outputName);
     end
-
-    writetable(t,[PathName '/' FileName],'WriteVariableNames',0');
+    
+    writetable(t,outputName,'WriteVariableNames',0');
     
 end
 close(hc);

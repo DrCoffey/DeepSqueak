@@ -13,11 +13,8 @@ cd(handles.squeakfolder);
 if isnumeric(trainingdata)  % If user cancels
     return
 end
-if ischar(trainingdata)==1
-    tmp{1}=trainingdata;
-    clear trainingdata
-    trainingdata=tmp;
-end
+trainingdata = cellstr(trainingdata);
+
 
 % Spectrogram Settings
 wind = .0032;

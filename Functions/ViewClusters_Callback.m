@@ -28,12 +28,8 @@ cd(handles.squeakfolder);
 if isnumeric(trainingdata)
     return
 end
+trainingdata = cellstr(trainingdata);
 
-if ischar(trainingdata)==1
-    tmp{1}=trainingdata;
-    clear trainingdata
-    trainingdata=tmp;
-end
 h = waitbar(0,'Initializing');
 
 ClusteringData = {};

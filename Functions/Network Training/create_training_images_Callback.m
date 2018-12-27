@@ -5,12 +5,7 @@ function create_training_images_Callback(hObject, eventdata, handles)
 cd(handles.squeakfolder);
 [trainingdata trainingpath] = uigetfile([char(handles.settings.detectionfolder) '/*.mat'],'Select Detection File for Training ','MultiSelect', 'on');
 if isnumeric(trainingdata); return; end
-
-if ischar(trainingdata)
-    tmp{1}=trainingdata;
-    clear trainingdata
-    trainingdata=tmp;
-end
+trainingdata = cellstr(trainingdata);
 
 % Get training settings
 prompt = {'Window Length (s)','Overlap (s)','NFFT (s)','Bout Length (s) [Requires Single Files & Audio]',...

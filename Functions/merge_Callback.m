@@ -1,16 +1,12 @@
 function merge_Callback(hObject, eventdata, handles)
 
 cd(handles.squeakfolder);
-[trainingdata trainingpath] = uigetfile([handles.settings.detectionfolder '/*.mat'],'Select Detection File(s) for Merging','MultiSelect', 'on');
-[audiodata audiopath] = uigetfile({'*.wav;*.flac;*.UVD' 'Audio File';'*.wav' 'WAV(*.wav)'; '*.flac' 'FLAC (*.flac)'; '*.UVD' 'Ultravox File (*.UVD)'},'Select Corresponding Audio File',handles.settings.detectionfolder);
+[trainingdata, trainingpath] = uigetfile([handles.settings.detectionfolder '/*.mat'],'Select Detection File(s) for Merging','MultiSelect', 'on');
+[audiodata, audiopath] = uigetfile({'*.wav;*.flac;*.UVD' 'Audio File';'*.wav' 'WAV(*.wav)'; '*.flac' 'FLAC (*.flac)'; '*.UVD' 'Ultravox File (*.UVD)'},'Select Corresponding Audio File',handles.settings.detectionfolder);
 hc = waitbar(0,'Merging Output Structures');  
 
 cd(handles.squeakfolder);
-if ischar(trainingdata)==1
-   tmp{1}=trainingdata;
-   clear trainingdata
-   trainingdata=tmp;
-end
+trainingdata = cellstr(trainingdata);
 
 for j = 1:length(trainingdata)
 load([trainingpath trainingdata{j}]);

@@ -8,16 +8,11 @@ ClusteringData = [];
 
 cd(handles.squeakfolder);
 [trainingdata, trainingpath] = uigetfile(fullfile(handles.settings.detectionfolder,'*.mat'),'Select detection file(s) for clustering OR extracted contours','MultiSelect', 'on');
-if isnumeric(trainingdata)
-    return
-end
+if isnumeric(trainingdata);return;end
 
 % If one file is selected, turn it into a cell
-if ischar(trainingdata)==1
-    tmp{1}=trainingdata;
-    clear trainingdata
-    trainingdata=tmp;
-end
+trainingdata = cellstr(trainingdata);
+
 h = waitbar(.5,'Gathering File Info');
 
 ClusteringData = {};
