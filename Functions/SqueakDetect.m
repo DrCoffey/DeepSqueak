@@ -225,7 +225,7 @@ for i = 1:length(begin_time)
     WindR = min(WindR,TotalSamples); % Prevent WindR from being greater than total samples
     
     audio = audioread(inputfile,([WindL WindR]),'native');
-    audio=[pad, audio];
+    audio=[pad; audio];
     
     Calls(i).Rate=SampleRate;
     Calls(i).Box=[begin_time(i), lower_freq(i), duration__(i), bandwidth_(i)];

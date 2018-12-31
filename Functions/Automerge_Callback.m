@@ -45,8 +45,11 @@ for i=1:size(begin_time,1)
     waitbar(i/length(begin_time),hc);
     
     WindL=round((begin_time(i)-call_duration(i)) .* info.SampleRate);
+    
+    % If the call starts at the very beginning of the file, pad the audio with zeros
+    pad = [];
     if WindL<=1
-        pad=abs(WindL);
+        pad=zeros(abs(WindL),1);
         WindL = 1;
     end
     
@@ -55,19 +58,12 @@ for i=1:size(begin_time,1)
     
     a = audioread(AudioFile,[WindL WindR],'native');
     
-    
-    % Pad the audio if the call would be cut off
-    if WindL==1
-        pad=zeros(pad,1);
-        a=[pad; a];
-    end
-    
     % Final Structure
     Calls(i).Rate=info.SampleRate;
     Calls(i).Box=[begin_time(i), lower_freq(i), call_duration(i), call_bandwidth(i)];
     Calls(i).RelBox=[call_duration(i), lower_freq(i), call_duration(i), call_bandwidth(i)];
     Calls(i).Score=merged_scores(i);
-    Calls(i).Audio=a;
+    Calls(i).Audio= [pad; a];
     Calls(i).Type=categorical({'USV'});
     Calls(i).Power=merged_power(i);
     Calls(i).Accept=merged_accept(i);

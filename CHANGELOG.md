@@ -1,4 +1,7 @@
 # Changelog
+## 2.0.2 2018-12-31
+Fixed issue when the first samples in an audio file contain calls
+
 ## 2.0.1 2018-12-18
 Fixed minor bugs in 2.0 release
 
@@ -8,14 +11,14 @@ Fixed minor bugs in 2.0 release
  (                   (                                         
  )\ )                )\ )                      )      )     )  
 (()/(    (   (      (()/(  (    (    (    ) ( /(   ( /(  ( /(  
- /(_))  ))\ ))\`  )  /(_)( )\  ))\  ))\( /( )\())  )(_)) )\()) 
+ /(_))  ))\ ))\`  )  /(_)( )\  ))\  ))\( /( )\())  )(_)) )\())
 (_))_  /((_/((_/(/( (_)) )(( )/((_)/((_)(_)((_)\  ((_)  ((_)\  
- |   \(_))(_))((_)_\/ __((_)_(_))((_))((_)_| |(_) |_  ) /  (_) 
+ |   \(_))(_))((_)_\/ __((_)_(_))((_))((_)_| |(_) |_  ) /  (_)
  | |) / -_/ -_| '_ \\__ / _` | || / -_/ _` | / /   / / | () |  
  |___/\___\___| .__/|___\__, |\_,_\___\__,_|_\_\  /___(_\__/   
               |_|          |_|                                 
 ```
-                               
+
 **Major Improvements to Speed**
  * DeepSqueak now detects at 20x - 40x
  * Speed improvements come from optimized spectrogram settings and network architechture
@@ -27,15 +30,15 @@ Fixed minor bugs in 2.0 release
  * New Long Rat call Network
  * New Post-Hoc Denoising Network
  * New Wright Category Classification Network
- 
+
 **Automatic Audio Scaling**
  * Gain setting is removed and instead DeepSqueak will automatically scale all audio to the proper volume for detection
- 
+
 **Simplified Network Training**
  * Netowork training only works in 2018a (currently working with Matlab to find the problem with faster-RCNN in 2018b)
- 
+
 **Various minor quality of life improvements**
- 
+
 ## 1.1.9 2018-12-5
 Fixed bug in k-means feature weighting
 

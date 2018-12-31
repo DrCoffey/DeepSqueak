@@ -71,7 +71,7 @@ for i=1:length(ultravox.Call)
         continue
     end
     
-    Calls(i).Audio=[pad, audioread(AudioFile,[windL, windR],'native')];
+    Calls(i).Audio=[pad; audioread(AudioFile,[windL, windR],'native')];
     Calls(i).Accept=1;
     Calls(i).Type=categorical(ultravox.CallName(i));
     Calls(i).Power = 0;

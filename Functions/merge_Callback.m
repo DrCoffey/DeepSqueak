@@ -60,24 +60,22 @@ for i=1:length(merged_boxes)
 waitbar(i/length(merged_boxes),hc); 
 
 WindL=round((merged_boxes(i,1)-(merged_boxes(i,3)))*(info.SampleRate));
+
+pad = [];
 if WindL<=1
-    pad=abs(WindL);
+    pad=zeros(abs(WindL),1);
     WindL = 1;
 end
+
 WindR=round((merged_boxes(i,1)+merged_boxes(i,3)+(merged_boxes(i,3)))*(info.SampleRate));
 a = audioread([audiopath audiodata],[WindL WindR],'native');
-if WindL==1;
-   pad=zeros(pad,1);
-   a=[pad 
-       a];
-end
 
 % Final Structure
 Calls(i).Rate=info.SampleRate;
 Calls(i).Box=merged_boxes(i,:);
 Calls(i).RelBox=[merged_boxes(i,3) merged_boxes(i,2) merged_boxes(i,3) merged_boxes(i,4)];
 Calls(i).Score=merged_scores(i);
-Calls(i).Audio=a;
+Calls(i).Audio= [pad; a];
 Calls(i).Type=categorical({'USV'});
 Calls(i).Power=merged_power(i);
 Calls(i).Accept=merged_accept(i);
