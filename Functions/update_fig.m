@@ -71,12 +71,12 @@ ContourLine = lsline(handles.axes7);
 set(ContourLine,'LineStyle','--','Color','y');
 
 % Update text
-set(handles.slope,'String',['Slope: ' num2str(stats.Slope,'%.3f') ' KHz/s']);
+set(handles.slope,'String',['Slope: ' num2str(stats.Slope,'%.3f') ' kHz/s']);
 set(handles.duration,'String',['Duration: ' num2str(stats.DeltaTime*1000,'%.0f') ' ms']);
 set(handles.sinuosity,'String',['Sinuosity: ' num2str(stats.Sinuosity,'%.4f')]);
-set(handles.powertext,'String',['Avg. Power: ' num2str(handles.calls(handles.currentcall).Power)])
+set(handles.powertext,'String',['Avg. Power: ' num2str(handles.calls(handles.currentcall).Power) ' dB/Hz'])
 set(handles.tonalitytext,'String',['Avg. Tonality: ' num2str(stats.SignalToNoise,'%.4f')]);
-set(handles.freq,'String',['Frequency: ' num2str(stats.PrincipalFreq,'%.1f') ' KHz']);
+set(handles.freq,'String',['Frequency: ' num2str(stats.PrincipalFreq,'%.1f') ' kHz']);
 
 % Waveform
 cla(handles.axes3)

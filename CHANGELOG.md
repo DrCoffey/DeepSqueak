@@ -1,4 +1,9 @@
 # Changelog
+## 2.1.0 2019-01-03
+Call power is now calculated as power spectral density (units are dB/Hz), rather than amplitude.
+
+Switch KHz to kHz
+
 ## 2.0.2 2018-12-31
 Fixed issue when the first samples in an audio file contain calls
 

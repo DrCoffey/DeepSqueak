@@ -50,6 +50,9 @@ LowCutoff = Settings(5);
 % (6) Score cutoff (kHz)
 score_cuttoff=Settings(6);
 
+% Used for calculated PSD
+U = sum(hamming(wind).^2);
+
 %% Detect Calls
 % Initialize variables
 AllBoxes=[];
@@ -95,9 +98,18 @@ for i = 1:length(chunks)-1
         % Calculate each call's power
         Power = [];
         for j = 1:size(bboxes,1)
+            % Get the maximum amplitude of the region within the box
+            amplitude = max(max(...
+                s(bboxes(j,2):bboxes(j,2)+bboxes(j,4)-1,bboxes(j,1):bboxes(j,3)+bboxes(j,1)-1)));
+            
+            % convert amplitude to PSD
+            callPower = amplitude.^2 / U;
+            callPower = 2*callPower / SampleRate;
+            % Convert power to db
+            callPower = 10 * log10(callPower);
+            
             Power = [Power
-                max(max(...
-                s(bboxes(j,2):bboxes(j,2)+bboxes(j,4)-1,bboxes(j,1):bboxes(j,3)+bboxes(j,1)-1)))];
+                callPower];
         end
         
         % Convert boxes from pixels to time and kHz

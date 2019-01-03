@@ -13,13 +13,13 @@ end
 %% Make Spectrogram and box
 % Spectrogram Settings
 if (call.RelBox(3) < .4 ) || call.RelBox(2) > 25 && (call.RelBox(3) < .4 )% Spect settings for short calls
-    windowsize = round(call.Rate * 0.0032);
-    noverlap = round(call.Rate * 0.0028);
-    nfft = round(call.Rate * 0.0032);
+    windowsize = round(rate * 0.0032);
+    noverlap = round(rate * 0.0028);
+    nfft = round(rate * 0.0032);
 else % long calls
-    windowsize = round(call.Rate * 0.01);
-    noverlap = round(call.Rate * 0.005);
-    nfft = round(call.Rate * 0.01);
+    windowsize = round(rate * 0.01);
+    noverlap = round(rate * 0.005);
+    nfft = round(rate * 0.01);
 end
 
 % Spectrogram

@@ -124,7 +124,7 @@ cm(:,:,3) = color(:,3);
 image(1,xdata,cm,'parent',caxis)
 caxis.YDir = 'normal';
 set(caxis,'YColor','w','box','off','YAxisLocation','right');
-ylabel(caxis, 'Frequency (KHz)')
+ylabel(caxis, 'Frequency (kHz)')
 
 
 %% Make the axes

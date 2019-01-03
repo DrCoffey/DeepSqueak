@@ -32,10 +32,10 @@ handles.ContourLine = lsline(handles.axes7);
 % Spectrogram
 handles.spect = imagesc([],[],handles.background,'Parent', handles.axes1);
 cb=colorbar(handles.axes1);
-cb.Label.String = 'Power';
+cb.Label.String = 'Amplitude';
 cb.Color = [1 1 1];
 cb.FontSize = 12;
-ylabel(handles.axes1,'Frequency (kHZ)','Color','w');
+ylabel(handles.axes1,'Frequency (kHz)','Color','w');
 xlabel(handles.axes1,'Time (s)','Color','w');
 set(handles.axes1,'Color',[.1 .1 .1]);
 handles.box=rectangle('Position',[1 1 1 1],'Curvature',0.2,'EdgeColor','g',...

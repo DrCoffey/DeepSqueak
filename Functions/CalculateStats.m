@@ -61,9 +61,19 @@ catch
     stats.Slope = 0;
 end
 
-% Max Power
-stats.MaxPower = mean(mx(stats.ridgeTime));
-stats.Power = mx(stats.ridgeTime);
+% Max Power ( PSD )
+% Magnitude
+ridgePower = mx(stats.ridgeTime);
+
+% Magnitude sqaured divided by sum of squares of hamming window
+ridgePower = ridgePower.^2 / sum(hamming(windowsize).^2);
+ridgePower = 2*ridgePower / SampleRate;
+
+% Convert power to db
+ridgePower = 10 * log10(ridgePower);
+
+stats.MaxPower = mean(ridgePower);
+stats.Power = ridgePower;
 
 % Time Stats
 stats.BeginTime = Box(1) + min(stats.ridgeTime)*TimeScale;
