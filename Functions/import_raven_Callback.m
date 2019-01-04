@@ -5,7 +5,7 @@ function import_raven_Callback(hObject, eventdata, handles)
 
 [ravenname,ravenpath] = uigetfile([handles.squeakfolder '/*.txt'],'Select Raven Log');
 raven = tdfread([ravenpath ravenname]);
-[audioname, audiopath] = uigetfile({'*.wav;*.flac;*.UVD' 'Audio File';'*.wav' 'WAV(*.wav)'; '*.flac' 'FLAC (*.flac)'; '*.UVD' 'Ultravox File (*.UVD)'},'Select Audio File',handles.settings.audiofolder);
+[audioname, audiopath] = uigetfile({'*.wav;*.wmf;*.flac;*.UVD' 'Audio File';'*.wav' 'WAV (*.wav)'; '*.wmf' 'WMF (*.wmf)'; '*.flac' 'FLAC (*.flac)'; '*.UVD' 'Ultravox File (*.UVD)'},'Select Audio File',handles.settings.audiofolder);
 
 info = audioinfo([audiopath audioname]);
 rate = info.SampleRate;

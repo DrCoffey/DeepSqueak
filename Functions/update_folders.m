@@ -34,7 +34,12 @@ if isempty(handles.settings.audiofolder)
 elseif exist(handles.settings.audiofolder,'dir')==0
     set(handles.AudioFilespopup,'String','Invalid Folder');
 else
-    handles.audiofiles=[dir([handles.settings.audiofolder '/*.wav*']); dir([handles.settings.audiofolder '/*.UVD*']); dir([handles.settings.audiofolder '/*.flac*'])];
+    handles.audiofiles=[
+        dir([handles.settings.audiofolder '/*.wav*'])
+        dir([handles.settings.audiofolder '/*.UVD*'])
+        dir([handles.settings.audiofolder '/*.wmf*'])
+        dir([handles.settings.audiofolder '/*.flac*'])
+        ];
     handles.audiofilesnames = {handles.audiofiles.name};
     if isempty(handles.audiofilesnames)
         set(handles.AudioFilespopup,'String','No Audio in Folder');
