@@ -16,11 +16,7 @@ Copyright © 2018 by Russell Marx & Kevin Coffey. All Rights Reserved.
 
 ![screenshot](https://user-images.githubusercontent.com/39605011/40864034-f4f10e60-65a6-11e8-86ef-841aae1713aa.PNG)
 
-_DeepSqueak: A Deep Learning Based System for Quantification of Ultrasonic Vocalizations_
-Kevin R. Coffey, Russell G. Marx, John F. Neumaier
-Psychiatry & Behavioral Sciences, University of Washington, Seattle, WA, 98104
 
->
 >Coffey, K. R., Marx, R. G., & Neumaier, J. F. (2019). DeepSqueak: A deep learning-based system for detection and analysis of ultrasonic  >vocalizations. _Neuropsychopharmacology_. 
 >doi:10.1038/s41386-018-0303-6
 
