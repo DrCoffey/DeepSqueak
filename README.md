@@ -13,7 +13,7 @@ DeepSqueak provides a fully automated pipeline for USV detection, classification
 * Output call statistics in spreadsheets for further analysis.
 
 ![Image by Alice Gray](https://newsroom.uw.edu/sites/default/files/deepsqueakz03.jpg)
-
+Image by Alice Gray
 
 DeepSqueak 2.0 was designed and tested with MATLAB 2017b, 2018a, and 2018b.
 
