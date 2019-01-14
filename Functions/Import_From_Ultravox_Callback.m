@@ -26,6 +26,10 @@ if isempty(CallBandwidth); return; end
 CallBandwidth = str2double(CallBandwidth);
 
 info = audioinfo(AudioFile);
+if info.NumChannels > 1
+    warning('Audio file contains more than one channel. Use channel 1...')
+end
+
 rate = info.SampleRate;
 Calls = struct('Rate',struct,'Box',struct,'RelBox',struct,'Score',struct,'Audio',struct,'Accept',struct,'Type',struct,'Power',struct);
 hc = waitbar(0,'Importing Calls from Ultravox Log');
@@ -71,7 +75,8 @@ for i=1:length(ultravox.Call)
         continue
     end
     
-    Calls(i).Audio=[pad; audioread(AudioFile,[windL, windR],'native')];
+    audio = audioread(AudioFile,[windL, windR],'native');
+    Calls(i).Audio=[pad; audio(:,1)];
     Calls(i).Accept=1;
     Calls(i).Type=categorical(ultravox.CallName(i));
     Calls(i).Power = 0;

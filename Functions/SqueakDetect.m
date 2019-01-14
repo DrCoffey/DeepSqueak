@@ -7,6 +7,10 @@ info = audioinfo(inputfile);
 SampleRate = info.SampleRate;
 TotalSamples = info.TotalSamples;
 
+if info.NumChannels > 1
+    warning('Audio file contains more than one channel. Use channel 1...')
+end
+
 % Get network and spectrogram settings
 network=networkfile.detector;
 wind=networkfile.wind;
@@ -75,7 +79,7 @@ for i = 1:length(chunks)-1
         audio = audioread(inputfile,floor([windL, windR]));
         
         % Create the spectrogram
-        [s,fr,ti] = spectrogram(audio,wind,noverlap,nfft,SampleRate,'yaxis');
+        [s,fr,ti] = spectrogram(audio(:,1),wind,noverlap,nfft,SampleRate,'yaxis'); % Just use the first audio channel
         
         upper_freq = find(fr>=HighCutoff*1000,1);
         lower_freq = find(fr>=LowCutoff*1000,1);
@@ -237,7 +241,7 @@ for i = 1:length(begin_time)
     WindR = min(WindR,TotalSamples); % Prevent WindR from being greater than total samples
     
     audio = audioread(inputfile,([WindL WindR]),'native');
-    audio=[pad; audio];
+    audio=[pad; audio(:,1)]; % Just use the first audio channel
     
     Calls(i).Rate=SampleRate;
     Calls(i).Box=[begin_time(i), lower_freq(i), duration__(i), bandwidth_(i)];

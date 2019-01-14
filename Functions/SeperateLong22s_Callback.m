@@ -7,7 +7,11 @@ if nargin == 3
     hc = waitbar(0,'Loading File');
     load([trainingpath trainingdata],'Calls');
 end
+
 info = audioinfo(inputfile);
+if info.NumChannels > 1
+    warning('Audio file contains more than one channel. Use channel 1...')
+end
 
 newBoxes = [];
 newScores = [];
@@ -64,8 +68,8 @@ for i=1:length(begin_time)
     WindR=round((end_time__(i)+0.1) .* info.SampleRate);
     WindR = min(WindR,info.TotalSamples); % Prevent WindR from being greater than total samples
     
-    audio = audioread(inputfile,[WindL WindR]);
-    audio = [pad; audio];
+    audio = audioread(inputfile,[WindL WindR]); % Take channel 1
+    audio = [pad; audio(:,1)];
     
     % Make the spectrogram
     windowsize = round(info.SampleRate * 0.02);
@@ -146,7 +150,7 @@ for i=1:size(newBoxes,1)
     NewCalls(i).Box=newBoxes(i,:);
     NewCalls(i).RelBox=[newBoxes(i,3) newBoxes(i,2) newBoxes(i,3) newBoxes(i,4)];
     NewCalls(i).Score=newScores(i);
-    NewCalls(i).Audio=[pad; a];
+    NewCalls(i).Audio=[pad; a(:,1)]; % Take channel 1
     NewCalls(i).Type=categorical({'USV'});
     NewCalls(i).Power=newPower(i);
     NewCalls(i).Accept=1;

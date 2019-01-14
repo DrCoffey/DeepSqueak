@@ -24,6 +24,9 @@ end
 clear('Calls')
 % Audio info
 info = audioinfo([audiopath audiodata]);
+if info.NumChannels > 1
+    warning('Audio file contains more than one channel. Use channel 1...')
+end
 
 %% Merge overlapping boxes
 for i=1:length(A)
@@ -75,7 +78,7 @@ Calls(i).Rate=info.SampleRate;
 Calls(i).Box=merged_boxes(i,:);
 Calls(i).RelBox=[merged_boxes(i,3) merged_boxes(i,2) merged_boxes(i,3) merged_boxes(i,4)];
 Calls(i).Score=merged_scores(i);
-Calls(i).Audio= [pad; a];
+Calls(i).Audio= [pad; a(:,1)]; % Just take the first audio channel
 Calls(i).Type=categorical({'USV'});
 Calls(i).Power=merged_power(i);
 Calls(i).Accept=merged_accept(i);

@@ -5,6 +5,9 @@ Calls1=[Calls1';Calls2'];
 
 % Audio info
 info = audioinfo(AudioFile);
+if info.NumChannels > 1
+    warning('Audio file contains more than one channel. Use channel 1...')
+end
 
 %% Merge overlapping boxes
 AllBoxes = vertcat(Calls1.Box);
@@ -57,6 +60,10 @@ for i=1:size(begin_time,1)
     WindR = min(WindR,info.TotalSamples); % Prevent WindR from being greater than total samples
     
     a = audioread(AudioFile,[WindL WindR],'native');
+    
+    if info.NumChannels > 1
+        a = a(:,1);
+    end
     
     % Final Structure
     Calls(i).Rate=info.SampleRate;

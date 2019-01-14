@@ -71,6 +71,13 @@ for k = 1:length(trainingdata)
         H =  rmedge(G,Nidx);
         bins = conncomp(H);
         
+        % Get the audio info
+        info = audioinfo([audiopath audioname]);
+        if info.NumChannels > 1
+            warning('Audio file contains more than one channel. Use channel 1...')
+        end
+        rate = info.SampleRate;
+            
         for i = 1:length(unique(bins))
             CurrentSet = Calls(bins==i);
             Boxes =reshape([CurrentSet.Box],4,[])';
@@ -78,8 +85,6 @@ for k = 1:length(trainingdata)
             Start = min(Boxes(:,1));
             Finish = max(Boxes(:,1) + Boxes(:,3));
             
-            info = audioinfo([audiopath audioname]);
-            rate = info.SampleRate;
             
             %% Read Audio
             windL = Start - mean(Boxes(:,3));
@@ -157,7 +162,7 @@ else
 end
 
 % Make the spectrogram
-[s, fr, ti] = spectrogram(audio,...
+[s, fr, ti] = spectrogram(audio(:,1),...
     round(rate * wind*StretchFactor),...
     round(rate * noverlap*StretchFactor),...
     round(rate * nfft*StretchFactor),...

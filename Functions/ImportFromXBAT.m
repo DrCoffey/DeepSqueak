@@ -51,7 +51,9 @@ for file = fname
             data.event(i).selection(4)/1000 - data.event(i).selection(2)/1000
             ];
         Calls(i).Score = data.event(i).score;
-        Calls(i).Audio=audioread(audiofile,round([windL windR]*rate),'native');
+        
+        audio = audioread(audiofile,round([windL windR]*rate),'native');
+        Calls(i).Audio = audio(:,1);
         
         if contains(data.event(i).tags,'Accept')
             Calls(i).Accept=1;
