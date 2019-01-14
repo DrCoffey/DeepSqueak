@@ -1,7 +1,9 @@
 # Changelog
-## 2.2.1 2019-01-14
+## 2.1.2 2019-01-14
 Multichannel audio no longer breaks DeepSqueak.
 If audio files have more than one channel, only the first channel is used.
+
+Added support for more categories for manual call classification
 
 ## 2.1.0 2019-01-03
 Call power is now calculated as power spectral density (units are dB/Hz), rather than amplitude.

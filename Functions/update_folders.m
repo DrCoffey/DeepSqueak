@@ -1,8 +1,13 @@
 % Updates folders and config file
 function update_folders(hObject, eventdata, handles)
+
 % Reads current config file
-% handles.config=importdata([handles.squeakfolder '/config.xlsx']);
 handles.settings = load([handles.squeakfolder '/settings.mat']);
+% Backwards compatibility from when there were fewer label shortcuts
+if length(handles.settings.labels) < length(handles.LabelShortcuts)
+    handles.settings.labels( length(handles.settings.labels)+1 : length(handles.LabelShortcuts) ) = {' '};
+end
+
 
 % Update Networks
     handles.networkfiles = {}; 

@@ -119,6 +119,9 @@ if ~(exist(fullfile(handles.squeakfolder, 'settings.mat'), 'file')==2)
     disp('Settings not found. New settings file created.')
 end
 
+% Keyboard shortcuts for labelling calls
+handles.LabelShortcuts = {'1','2','3','4','5','6','7','8','9','0','hyphen','equal'};
+
 if ~(exist(fullfile(handles.squeakfolder,'Background.png'), 'file')==2)
     disp('Background image not found')
     background = zeros(280);
@@ -146,7 +149,10 @@ set(handles.axes1,'XTick',[]);
 set(handles.axes1,'YTick',[]);
 update_folders(hObject, eventdata, handles);
 handles = guidata(hObject);  % Get newest version of handles
+
+
 set(handles.TonalitySlider,'Value',handles.settings.EntropyThreshold);
+
 guidata(hObject, handles);
 
 % Make the other figures black
@@ -164,6 +170,7 @@ set(handles.axes3,'Color',[0 0 0],'YColor',[1 1 1],'XColor',[1 1 1],'Box','off',
 set(handles.axes3,'XTickLabel',[]);
 set(handles.axes3,'XTick',[]);
 set(handles.axes3,'YTick',[]);
+
 
 %% Display error message if running on matlab before 2017b or toolboxes not found
 if verLessThan('matlab','9.3')
@@ -328,8 +335,11 @@ switch eventdata.Key
         RejectCall_Callback(hObject, eventdata, handles)
     case 'd'
         rectangle_Callback(hObject, eventdata, handles)
-    case {'1','2','3','4','5','6','7','8','9'}
-        handles.calls(handles.currentcall).Type=categorical(handles.settings.labels(str2double(eventdata.Key)));
+    case handles.LabelShortcuts
+        %% Update the call labels
+        % Index of the shortcut
+        idx = contains(handles.LabelShortcuts, eventdata.Key);
+        handles.calls(handles.currentcall).Type=categorical(handles.settings.labels(idx));
         update_fig(hObject, eventdata, handles);
 end
 
@@ -500,13 +510,26 @@ guidata(hObject, handles);
 % --------------------------------------------------------------------
 function customlabels_Callback(hObject, eventdata, handles)
 % Define call categories
-prompt = {'Label 1:','Label 2:','Label 3:','Label 4:','Label 5:','Label 6:','Label 7:','Label 8:','Label 9:'};
-dlg_title = 'Create Custom Labels';
-num_lines=1; options.Resize='off'; options.WindowStyle='modal'; options.Interpreter='tex';
-def = handles.settings.labels;% {'FF','FM','Trill','Split',' ',' ',' ',' ',' ',' '};
-tmp_labels = (inputdlg(prompt,dlg_title,num_lines,def,options));
-if ~isempty(tmp_labels)
-    handles.settings.labels = tmp_labels;
+prompt = {
+    'Label 1'
+    'Label 2'
+    'Label 3'
+    'Label 4'
+    'Label 5'
+    'Label 6'
+    'Label 7'
+    'Label 8'
+    'Label 9'
+    'Label 0'
+    'Label -'
+    'Label ='
+    };
+dlg_title = 'Set Custom Label Names';
+num_lines=[1,60]; options.Resize='off'; options.WindowStyle='modal'; options.Interpreter='tex';
+old_labels = handles.settings.labels;
+new_labels = inputdlg(prompt,dlg_title,num_lines,old_labels,options);
+if ~isempty(new_labels)
+    handles.settings.labels = new_labels;
     settings = handles.settings;
     save([handles.squeakfolder '/settings.mat'],'-struct','settings');
     update_folders(hObject, eventdata, handles);
@@ -689,3 +712,11 @@ elseif  exist(fullfile(handles.squeakfolder,'Manifestos',[hObject.Text '.pdf']),
     fname = fullfile(handles.squeakfolder,'Manifestos',[hObject.Text '.pdf']);
     open(fname)
 end
+
+
+% --------------------------------------------------------------------
+function submit_a_bug_Callback(hObject, eventdata, handles)
+% hObject    handle to submit_a_bug (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+system('start https://github.com/DrCoffey/DeepSqueak/issues');
