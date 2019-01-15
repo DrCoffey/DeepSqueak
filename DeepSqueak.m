@@ -511,18 +511,18 @@ guidata(hObject, handles);
 function customlabels_Callback(hObject, eventdata, handles)
 % Define call categories
 prompt = {
-    'Label 1'
-    'Label 2'
-    'Label 3'
-    'Label 4'
-    'Label 5'
-    'Label 6'
-    'Label 7'
-    'Label 8'
-    'Label 9'
-    'Label 0'
-    'Label -'
-    'Label ='
+    'Label 1  --- Key 1'
+    'Label 2  --- Key 2'
+    'Label 3  --- Key 3'
+    'Label 4  --- Key 4'
+    'Label 5  --- Key 5'
+    'Label 6  --- Key 6'
+    'Label 7  --- Key 7'
+    'Label 8  --- Key 8'
+    'Label 9  --- Key 9'
+    'Label 10  --- Key 0'
+    'Label 11  --- Key -'
+    'Label 12  --- Key ='
     };
 dlg_title = 'Set Custom Label Names';
 num_lines=[1,60]; options.Resize='off'; options.WindowStyle='modal'; options.Interpreter='tex';
@@ -720,3 +720,4 @@ function submit_a_bug_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 system('start https://github.com/DrCoffey/DeepSqueak/issues');
+

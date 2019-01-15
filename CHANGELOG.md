@@ -5,6 +5,8 @@ If audio files have more than one channel, only the first channel is used.
 
 Added support for more categories for manual call classification
 
+Added a function to set the upper and/or lower frequency of each call to a constant value. Located under "Tools > Automatic Review > Set Static Box Height".
+
 ## 2.1.0 2019-01-03
 Call power is now calculated as power spectral density (units are dB/Hz), rather than amplitude.
 
