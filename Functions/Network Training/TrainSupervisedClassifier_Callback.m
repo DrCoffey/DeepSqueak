@@ -141,7 +141,7 @@ ClassifyNet = trainNetwork(auimds,layers,options);
 
 % Plot the confusion matrix
 figure('color','w')
-[C,order] = confusionmat(classify(DenoiseNet,ValX),ValY)
+[C,order] = confusionmat(classify(ClassifyNet,ValX),ValY)
 h = heatmap(order,order,C)
 h.Title = 'Confusion Matrix';
 h.XLabel = 'Predicted class';
