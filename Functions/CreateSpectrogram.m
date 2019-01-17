@@ -29,6 +29,9 @@ end
 %% Get the part of the spectrogram within the box
 x1=find(ti>=call.RelBox(1),1);
 x2=find(ti>=(call.RelBox(1)+call.RelBox(3)),1);
+if isempty(x2)
+   x2=length(ti); 
+end
 y1=find(fr./1000>=round(call.RelBox(2)),1);
 y2=find(fr./1000>=round(call.RelBox(2)+call.RelBox(4)),1);
 I=abs(s(y1:y2,x1:x2));
