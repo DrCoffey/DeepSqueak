@@ -93,10 +93,10 @@ for j = 1:length(audioselections)
         close(h);
         
         if k==1
-            Calls=SqueakDetect(AudioFile,NeuralNetwork,handles.audiofiles(CurrentAudioFile).name,Settings(:,k),j,length(audioselections),networkname);
+            Calls=SqueakDetect(AudioFile,NeuralNetwork,handles.audiofiles(CurrentAudioFile).name,Settings(:,k),j,length(audioselections),networkname,handles.optimization_slider.Value);
         elseif k==2
             if isempty(Calls)
-                Calls=SqueakDetect(AudioFile,NeuralNetwork,handles.audiofiles(CurrentAudioFile).name,Settings(:,k),j,length(audioselections),networkname);
+                Calls=SqueakDetect(AudioFile,NeuralNetwork,handles.audiofiles(CurrentAudioFile).name,Settings(:,k),j,length(audioselections),networkname,handles.optimization_slider.Value);
             else
                 Calls=Automerge_Callback(Calls,SqueakDetect(AudioFile,NeuralNetwork,handles.audiofiles(CurrentAudioFile).name,Settings(:,k),j,length(audioselections),networkname),AudioFile);
             end

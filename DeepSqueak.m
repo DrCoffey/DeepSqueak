@@ -120,7 +120,7 @@ if ~(exist(fullfile(handles.squeakfolder, 'settings.mat'), 'file')==2)
 end
 
 % Keyboard shortcuts for labelling calls
-handles.LabelShortcuts = {'1','2','3','4','5','6','7','8','9','0','hyphen','equal'};
+handles.LabelShortcuts = {'1','2','3','4','5','6','7','8','9','0','-','='};
 
 if ~(exist(fullfile(handles.squeakfolder,'Background.png'), 'file')==2)
     disp('Background image not found')
@@ -322,12 +322,12 @@ function Untitled_2_Callback(hObject, eventdata, handles)
 % --- Executes on key press with focus on figure1 or any of its controls.
 function figure1_WindowKeyPressFcn(hObject, eventdata, handles)
 
-switch eventdata.Key
+switch eventdata.Character
     case 'p'
         PlayCall_Callback(hObject, eventdata, handles)
-    case {'rightarrow','e'}
+    case {'e', char(29)} % char(29) is right arrow key
         NextCall_Callback(hObject, eventdata, handles)
-    case {'leftarrow','q'}
+    case {'q', char(28)} % char(28) is left arrow key
         PreviousCall_Callback(hObject, eventdata, handles)
     case 'a'
         AcceptCall_Callback(hObject, eventdata, handles)
@@ -338,7 +338,7 @@ switch eventdata.Key
     case handles.LabelShortcuts
         %% Update the call labels
         % Index of the shortcut
-        idx = contains(handles.LabelShortcuts, eventdata.Key);
+        idx = contains(handles.LabelShortcuts, eventdata.Character);
         handles.calls(handles.currentcall).Type=categorical(handles.settings.labels(idx));
         update_fig(hObject, eventdata, handles);
 end
@@ -669,9 +669,6 @@ if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColo
     set(hObject,'BackgroundColor',[.9 .9 .9]);
 end
 
-
-
-
 function Manifesto_Callback(hObject, eventdata, handles)
 % Open the file
 
@@ -721,3 +718,6 @@ function submit_a_bug_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 system('start https://github.com/DrCoffey/DeepSqueak/issues');
 
+% --- Executes on slider movement.
+function optimization_slider_Callback(hObject, eventdata, handles)
+hObject.Value = round(hObject.Value);

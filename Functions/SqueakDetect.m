@@ -1,4 +1,4 @@
-function  Calls=SqueakDetect(inputfile,networkfile,fname,Settings,currentFile,totalFiles,networkname)
+function  Calls=SqueakDetect(inputfile,networkfile,fname,Settings,currentFile,totalFiles,networkname,number_of_repeats)
 % Find Squeaks
 h = waitbar(0,'Initializing');
 
@@ -80,7 +80,6 @@ for i = 1:length(chunks)-1
         
         % Create the spectrogram
         [s,fr,ti] = spectrogram(audio(:,1),wind,noverlap,nfft,SampleRate,'yaxis'); % Just use the first audio channel
-        
         upper_freq = find(fr>=HighCutoff*1000,1);
         lower_freq = find(fr>=LowCutoff*1000,1);
         
@@ -88,56 +87,64 @@ for i = 1:length(chunks)-1
         s = s(lower_freq:upper_freq,:);
         s = flip(abs(s),1);
         
-        % Normalize gain setting
+        % Normalize gain setting (Allows for modified precision/recall
+        % tolerance)
         med=median(s(:));
-        im = mat2gray(s,[med*.1 med*30]);
         
-        % Subtract the 5th percentile to remove horizontal noise bands
-        %im = im - prctile(im,5,2);
-        
-        % Detect!
-        % Convert spectrogram to uint8 for detection, because network is trained with uint8 images.
-        [bboxes, scores, Class] = detect(network, im2uint8(im), 'ExecutionEnvironment','auto','NumStrongestRegions',Inf);
-        
-        % Calculate each call's power
-        Power = [];
-        for j = 1:size(bboxes,1)
-            % Get the maximum amplitude of the region within the box
-            amplitude = max(max(...
-                s(bboxes(j,2):bboxes(j,2)+bboxes(j,4)-1,bboxes(j,1):bboxes(j,3)+bboxes(j,1)-1)));
+        scale_factor = [
+            .1 .65 .9  
+            30 20 10
+            ];
+
+        for iteration = 1:number_of_repeats
             
-            % convert amplitude to PSD
-            callPower = amplitude.^2 / U;
-            callPower = 2*callPower / SampleRate;
-            % Convert power to db
-            callPower = 10 * log10(callPower);
+            im = mat2gray(s,[scale_factor(1,iteration)*med scale_factor(2,iteration)*med]);
             
-            Power = [Power
-                callPower];
+            % Subtract the 5th percentile to remove horizontal noise bands
+            im = im - prctile(im,5,2);
+            
+            % Detect!
+            [bboxes, scores, Class] = detect(network, im2uint8(im), 'ExecutionEnvironment','auto','NumStrongestRegions',Inf);
+            
+            % Calculate each call's power
+            Power = [];
+            for j = 1:size(bboxes,1)
+                % Get the maximum amplitude of the region within the box
+                amplitude = max(max(...
+                    s(bboxes(j,2):bboxes(j,2)+bboxes(j,4)-1,bboxes(j,1):bboxes(j,3)+bboxes(j,1)-1)));
+                
+                % convert amplitude to PSD
+                callPower = amplitude.^2 / U;
+                callPower = 2*callPower / SampleRate;
+                % Convert power to db
+                callPower = 10 * log10(callPower);
+                
+                Power = [Power
+                    callPower];
+            end
+            
+            % Convert boxes from pixels to time and kHz
+            bboxes(:,1) = ti(bboxes(:,1)) + (windL ./ SampleRate);
+            bboxes(:,2) = fr(upper_freq - (bboxes(:,2) + bboxes(:,4))) ./ 1000;
+            bboxes(:,3) = ti(bboxes(:,3));
+            bboxes(:,4) = fr(bboxes(:,4)) ./ 1000;
+            
+            % Concatinate the results
+            AllBoxes=[AllBoxes
+                bboxes(Class == 'USV',:)];
+            AllScores=[AllScores
+                scores(Class == 'USV',:)];
+            AllClass=[AllClass
+                Class(Class == 'USV',:)];
+            AllPowers=[AllPowers
+                Power(Class == 'USV',:)];
         end
-        
-        % Convert boxes from pixels to time and kHz
-        bboxes(:,1) = ti(bboxes(:,1)) + (windL ./ SampleRate);
-        bboxes(:,2) = fr(upper_freq - (bboxes(:,2) + bboxes(:,4))) ./ 1000;
-        bboxes(:,3) = ti(bboxes(:,3));
-        bboxes(:,4) = fr(bboxes(:,4)) ./ 1000;
-        
-        
-        % Concatinate the results
-        AllBoxes=[AllBoxes
-            bboxes(Class == 'USV',:)];
-        AllScores=[AllScores
-            scores(Class == 'USV',:)];
-        AllClass=[AllClass
-            Class(Class == 'USV',:)];
-        AllPowers=[AllPowers
-            Power(Class == 'USV',:)];
-        
+
             t = toc(DetectStart);
             waitbar(...
                 i/(length(chunks)-1),...
                 h,...
-                sprintf(['Detection Speed: ' num2str((chunksize + overlap) / t,'%.1f') 'x  Call Fragments Found:' num2str(length(AllBoxes(:,1))) '\n File ' num2str(currentFile) ' of ' num2str(totalFiles)]));
+                sprintf(['Detection Speed: ' num2str((chunksize + overlap) / t,'%.1f') 'x  Call Fragments Found:' num2str(length(AllBoxes(:,1))/number_of_repeats,'%.0f') '\n File ' num2str(currentFile) ' of ' num2str(totalFiles)]));
           
     catch ME
         waitbar(...
@@ -167,8 +174,8 @@ OverBoxes(:,4)=1;
 % Calculate overlap ratio
 overlapRatio = bboxOverlapRatio(OverBoxes, OverBoxes);
 
-% Merge all boxes with overlap ratio greater than 0.2
-OverlapMergeThreshold = 0.;
+% Merge all boxes with overlap ratio greater than 0.2 (Currently off)
+OverlapMergeThreshold = 0;
 overlapRatio(overlapRatio<OverlapMergeThreshold)=0;
 
 % Create a graph with the connected boxes
@@ -263,3 +270,5 @@ if contains(networkname,'long','IgnoreCase',true)
 end
 close(h);
 end
+
+
