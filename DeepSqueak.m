@@ -627,7 +627,7 @@ guidata(hObject, handles);
 
 % --------------------------------------------------------------------
 function ViewManual_Callback(hObject, eventdata, handles)
-system('start https://github.com/DrCoffey/DeepSqueak/wiki');
+web('https://github.com/DrCoffey/DeepSqueak/wiki','-browser');
 
 % --------------------------------------------------------------------
 function AboutDeepSqueak_Callback(hObject, eventdata, handles)
@@ -708,6 +708,9 @@ if exist(fullfile(handles.squeakfolder,'Manifestos',[hObject.Text '.txt']),'file
 elseif  exist(fullfile(handles.squeakfolder,'Manifestos',[hObject.Text '.pdf']),'file') == 2
     fname = fullfile(handles.squeakfolder,'Manifestos',[hObject.Text '.pdf']);
     open(fname)
+elseif  strcmp(hObject.Text,'Read the Paper')
+    fname = fullfile(handles.squeakfolder,'DeepSqueak.pdf');
+    open(fname)
 end
 
 
@@ -716,7 +719,7 @@ function submit_a_bug_Callback(hObject, eventdata, handles)
 % hObject    handle to submit_a_bug (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-system('start https://github.com/DrCoffey/DeepSqueak/issues');
+web('https://github.com/DrCoffey/DeepSqueak/issues','-browser');
 
 % --- Executes on slider movement.
 function optimization_slider_Callback(hObject, eventdata, handles)

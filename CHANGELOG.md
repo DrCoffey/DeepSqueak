@@ -2,14 +2,15 @@
 ## 2.2.0 2019-01-25
 
 Drastically improved detection of low signal vocalizations!
-
-	- New slider to set precision to recall tradeoff
-	- When slider is set to high precision, USV detection will be fast and accurate but may miss some quiet calls
-	- When slider is set to high recall, USV detection is slightly slower but will detect even extremely low signal calls
-	- When slider is set to high recall, DeepSqueak will likely detect more noise
-	- Default slider position is in the middle, and balances both approaches
+- New slider to set precision to recall tradeoff
+- When slider is set to high precision, USV detection will be fast and accurate but may miss some quiet calls
+- When slider is set to high recall, USV detection is slightly slower but will detect even extremely low signal calls
+- When slider is set to high recall, DeepSqueak will likely detect more noise
+- Default slider position is in the middle, and balances both approaches
 
 Added a link to the "Issues" section of our GitHub in the Help Menu
+
+Included a pdf of the published paper
 
 ## 2.1.2 2019-01-14
 Multichannel audio no longer breaks DeepSqueak.
