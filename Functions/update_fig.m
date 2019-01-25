@@ -26,22 +26,13 @@ else
 end
 
 set(handles.axes1,'ylim',[handles.settings.LowFreq handles.settings.HighFreq]);
-% xlim([min(ti) max(ti)]);
 stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.settings.EntropyThreshold,handles.settings.AmplitudeThreshold);
 
 % stats = CalculateStats(I,windowsize,noverlap,nfft,handles.calls(handles.currentcall).Rate,handles.calls(handles.currentcall).Box,handles.settings.EntropyThreshold,handles.settings.AmplitudeThreshold);
 handles.calls(handles.currentcall).Power=stats.MaxPower;
 
-% Set Text
-set(handles.text19,'String',['Label: ' char(handles.calls(handles.currentcall).Type)]);
-set(handles.score,'String',['Score: ' num2str(handles.calls(handles.currentcall).Score)])
-set(handles.slider1,'Value',((handles.currentcall-1)/(length(handles.calls)-1)));
-set(handles.Ccalls,'String',['Call: ' num2str(handles.currentcall) '/' num2str(length(handles.calls))])
-if handles.calls(handles.currentcall).Accept==1
-    set(handles.status,'String','Accepted')
-else
-    set(handles.status,'String','Rejected')
-end
+% Update slider with the call ID 
+set(handles.slider1,'Value',(handles.currentcall-1)/(length(handles.calls)-1));
 
 % Box Creation
 if handles.calls(handles.currentcall).Accept==1
@@ -51,7 +42,6 @@ else
 end
 
 % Blur Box
-% imagesc(flipud(stats.FilteredImage),'Parent', handles.axes4);
 set(handles.filtered_image_plot,'CData',flipud(stats.FilteredImage))
 set(handles.axes4,'Color',[.1 .1 .1],'YColor',[1 1 1],'XColor',[1 1 1],'Box','off','Clim',[.2*min(min(stats.FilteredImage)) .2*max(max(stats.FilteredImage))],'XLim',[1 size(stats.FilteredImage,2)],'YLim',[1 size(stats.FilteredImage,1)]);
 colormap(handles.axes4,handles.cmap);
@@ -70,13 +60,21 @@ delete(handles.axes7.Children(1:end-1));
 ContourLine = lsline(handles.axes7);
 set(ContourLine,'LineStyle','--','Color','y');
 
-% Update text
+% Update call statistics text
+set(handles.Ccalls,'String',['Call: ' num2str(handles.currentcall) '/' num2str(length(handles.calls))])
+set(handles.score,'String',['Score: ' num2str(handles.calls(handles.currentcall).Score)])
+if handles.calls(handles.currentcall).Accept==1
+    set(handles.status,'String','Accepted')
+else
+    set(handles.status,'String','Rejected')
+end
+set(handles.text19,'String',['Label: ' char(handles.calls(handles.currentcall).Type)]);
+set(handles.freq,'String',['Frequency: ' num2str(stats.PrincipalFreq,'%.1f') ' kHz']);
 set(handles.slope,'String',['Slope: ' num2str(stats.Slope,'%.3f') ' kHz/s']);
 set(handles.duration,'String',['Duration: ' num2str(stats.DeltaTime*1000,'%.0f') ' ms']);
 set(handles.sinuosity,'String',['Sinuosity: ' num2str(stats.Sinuosity,'%.4f')]);
 set(handles.powertext,'String',['Avg. Power: ' num2str(handles.calls(handles.currentcall).Power) ' dB/Hz'])
 set(handles.tonalitytext,'String',['Avg. Tonality: ' num2str(stats.SignalToNoise,'%.4f')]);
-set(handles.freq,'String',['Frequency: ' num2str(stats.PrincipalFreq,'%.1f') ' kHz']);
 
 % Waveform
 cla(handles.axes3)
