@@ -68,7 +68,7 @@ elseif exist(handles.settings.detectionfolder,'dir')==0
 else
     handles.detectionfiles=dir([handles.settings.detectionfolder '/*.mat*']);
     tosort=struct2cell(handles.detectionfiles)';
-    tosort=datetime(tosort(:,3));
+    tosort=datetime(tosort(:,3),'Locale',string(java.util.Locale.getDefault()));
     [tosort idx] = sortrows(tosort,'descend');
     handles.detectionfiles=handles.detectionfiles(idx);
     handles.detectionfilesnames = {handles.detectionfiles.name};
