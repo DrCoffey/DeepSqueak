@@ -67,10 +67,11 @@ elseif exist(handles.settings.detectionfolder,'dir')==0
     set(handles.popupmenuDetectionFiles,'String','Invalid Folder');
 else
     handles.detectionfiles=dir([handles.settings.detectionfolder '/*.mat*']);
-    tosort=struct2cell(handles.detectionfiles)';
-    tosort=datetime(tosort(:,3),'Locale',string(java.util.Locale.getDefault()));
-    [tosort idx] = sortrows(tosort,'descend');
-    handles.detectionfiles=handles.detectionfiles(idx);
+    
+    % Sort the detection files by date modified
+    [~, idx] = sort([handles.detectionfiles.datenum],'descend');
+    handles.detectionfiles = handles.detectionfiles(idx);
+    
     handles.detectionfilesnames = {handles.detectionfiles.name};
     if isempty(handles.detectionfilesnames)
         set(handles.popupmenuDetectionFiles,'String','No Detections in Folder');
