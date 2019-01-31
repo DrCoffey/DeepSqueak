@@ -5,7 +5,7 @@ rate = call.Rate;
 box = call.Box;
 
 audio =  call.Audio;
-if ~isa(audio,'double')
+if ~isfloat(audio)
     audio = double(audio) / (double(intmax(class(audio)))+1);
 end
 

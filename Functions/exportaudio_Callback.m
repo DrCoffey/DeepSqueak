@@ -3,7 +3,7 @@ function exportaudio_Callback(hObject, eventdata, handles)
 
 % Convert audio to double
    audio = handles.calls(handles.currentcall).Audio;
-if ~isa(audio,'double')
+if ~isfloat(audio)
     audio = double(audio) / (double(intmax(class(audio)))+1);
 end
 

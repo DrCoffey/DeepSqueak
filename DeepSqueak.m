@@ -215,7 +215,7 @@ varargout{1} = handles.output;
 function PlayCall_Callback(hObject, eventdata, handles)
 % Play the sound within the boxs
 audio =  handles.calls(handles.currentcall).Audio;
-if ~isa(audio,'double')
+if ~isfloat(audio)
     audio = double(audio) / (double(intmax(class(audio)))+1);
 end
 rate = handles.calls(handles.currentcall).Rate * handles.settings.playback_rate; % set playback rate

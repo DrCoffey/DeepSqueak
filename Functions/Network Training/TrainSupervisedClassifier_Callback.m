@@ -46,7 +46,7 @@ for j = 1:length(trainingdata)  % For Each File
             waitbar(i/length(Calls),h,['Loading File ' num2str(j) ' of '  num2str(length(trainingdata))]);
             c=c+1;
             audio =  Calls(i).Audio;
-            if ~isa(audio,'double')
+            if ~isfloat(audio)
                 audio = double(audio) / (double(intmax(class(audio)))+1);
             end
             
@@ -74,8 +74,15 @@ Class = removecats(Class);
 
 close(h)
 
-X = X(:,:,:,~isundefined(Class));
-Class = Class(~isundefined(Class));
+%% Select the categories to train the neural network with
+call_categories = categories(Class);
+idx = listdlg('ListString',call_categories,'Name','Select categories for training','ListSize',[300,300]);
+calls_to_train_with = ismember(Class,call_categories(idx));
+X = X(:,:,:,calls_to_train_with);
+Class = Class(calls_to_train_with);
+Class = removecats(Class);
+
+
 %% Train
 
 % Divide the data into training and validation data.

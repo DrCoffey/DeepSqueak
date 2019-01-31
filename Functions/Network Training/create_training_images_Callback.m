@@ -147,7 +147,7 @@ end
 function [im,box] = CreateTrainingData(audio,rate,RelBox,Accept,wind,noverlap,nfft,cutoff,filename,AmplitudeRange,replicatenumber,StretchRange)
 
 % Convert audio to double, if it is not already
-if ~isa(audio,'double')
+if ~isfloat(audio)
     audio = double(audio) / (double(intmax(class(audio)))+1);
 end
 

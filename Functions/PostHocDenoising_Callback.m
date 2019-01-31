@@ -42,7 +42,7 @@ for j = 1:length(selections) % Do this for each file
     for i = 1:length(Calls)   % For Each Call
         waitbar(((i/length(Calls)) + j - 1) / length(selections), h, ['Denoising file ' num2str(j) ' of ' num2str(length(selections))]);
         audio =  Calls(i).Audio;
-        if ~isa(audio,'double')
+        if ~isfloat(audio)
             audio = double(audio) / (double(intmax(class(audio)))+1);
         end
         

@@ -45,7 +45,7 @@ for j = 1:length(selections) % Do this for each file
         if Calls(i).Accept == 1;
             
             audio =  Calls(i).Audio;
-            if ~isa(audio,'double')
+            if ~isfloat(audio)
                 audio = double(audio) / (double(intmax(class(audio)))+1);
             end
             
