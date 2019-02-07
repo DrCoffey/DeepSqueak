@@ -47,6 +47,8 @@ for j = 1:length(selections) % Do this for each file
             audio =  Calls(i).Audio;
             if ~isfloat(audio)
                 audio = double(audio) / (double(intmax(class(audio)))+1);
+            elseif ~isa(audio,'double')
+                audio = double(audio);
             end
             
             [s, fr, ti] = spectrogram(audio,round(Calls(i).Rate * wind),round(Calls(i).Rate * noverlap),round(Calls(i).Rate * nfft),Calls(i).Rate,'yaxis');

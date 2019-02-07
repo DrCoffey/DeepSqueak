@@ -5,6 +5,8 @@ function exportaudio_Callback(hObject, eventdata, handles)
    audio = handles.calls(handles.currentcall).Audio;
 if ~isfloat(audio)
     audio = double(audio) / (double(intmax(class(audio)))+1);
+elseif ~isa(audio,'double')
+    audio = double(audio);
 end
 
 % Get the relative playback rate

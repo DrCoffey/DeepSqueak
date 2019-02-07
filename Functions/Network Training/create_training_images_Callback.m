@@ -149,6 +149,8 @@ function [im,box] = CreateTrainingData(audio,rate,RelBox,Accept,wind,noverlap,nf
 % Convert audio to double, if it is not already
 if ~isfloat(audio)
     audio = double(audio) / (double(intmax(class(audio)))+1);
+elseif ~isa(audio,'double')
+    audio = double(audio);
 end
 
 % Augment by adjusting the gain

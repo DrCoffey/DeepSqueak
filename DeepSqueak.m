@@ -217,7 +217,10 @@ function PlayCall_Callback(hObject, eventdata, handles)
 audio =  handles.calls(handles.currentcall).Audio;
 if ~isfloat(audio)
     audio = double(audio) / (double(intmax(class(audio)))+1);
+elseif ~isa(audio,'double')
+    audio = double(audio);
 end
+
 rate = handles.calls(handles.currentcall).Rate * handles.settings.playback_rate; % set playback rate
 paddedsound = [zeros(3125,1); audio; zeros(3125,1)];
 audiostart = handles.calls(handles.currentcall).RelBox(1) * handles.calls(handles.currentcall).Rate;
