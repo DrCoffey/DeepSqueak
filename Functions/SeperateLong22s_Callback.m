@@ -159,7 +159,7 @@ end
 
 
 if nargin == 3
-    [FileName,PathName,FilterIndex] = uiputfile(fullfile(handles.settings.detectionfolder,trainingdata),'Save Merged Detections');
+    [FileName,PathName] = uiputfile(fullfile(handles.settings.detectionfolder,trainingdata),'Save Merged Detections');
     waitbar(i/length(newBoxes),hc,'Saving...');
     Calls = NewCalls;
     save([PathName,FileName],'Calls','-v7.3');

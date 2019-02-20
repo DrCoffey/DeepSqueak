@@ -58,31 +58,32 @@ for k=1:length(networkselections)
     dlg_title = ['Settings for ' handles.networkfiles(networkselections(k)).name];
     num_lines=[1 100]; options.Resize='off'; options.WindowStyle='modal'; options.Interpreter='tex';
     def = handles.settings.detectionSettings;
-    settingsK = str2double(inputdlg(prompt,dlg_title,num_lines,def,options));
+    current_settings = str2double(inputdlg(prompt,dlg_title,num_lines,def,options));
     
-    if isempty(settingsK) % Stop if user presses cancel
+    if isempty(current_settings) % Stop if user presses cancel
         return
     end
-    Settings = [Settings settingsK];
     
-    
-    % Save new settings
+    Settings = [Settings, current_settings];
     handles.settings.detectionSettings = sprintfc('%g',Settings(:,1))';
-    settings = handles.settings;
-    save([handles.squeakfolder '/settings.mat'],'-struct','settings')
-    update_folders(hObject, eventdata, handles);
-    handles = guidata(hObject);  % Get newest version of handles
 end
+
 if isempty(Settings)
     return
 end
 
+% Save the new settings
+settings = handles.settings;
+save([handles.squeakfolder '/settings.mat'],'-struct','settings')
+update_folders(hObject, eventdata, handles);
+handles = guidata(hObject);  % Get newest version of handles
 
 
 %% For Each File
 for j = 1:length(audioselections)
     CurrentAudioFile = audioselections(j);
     % For Each Network
+    Calls = [];
     for k=1:length(networkselections)
         h = waitbar(0,'Loading neural network...');
         
@@ -92,19 +93,19 @@ for j = 1:length(audioselections)
         NeuralNetwork=load(networkpath);%get currently selected option from menu
         close(h);
         
-        if k==1
-            Calls=SqueakDetect(AudioFile,NeuralNetwork,handles.audiofiles(CurrentAudioFile).name,Settings(:,k),j,length(audioselections),networkname,handles.optimization_slider.Value);
-        elseif k==2
-            if isempty(Calls)
-                Calls=SqueakDetect(AudioFile,NeuralNetwork,handles.audiofiles(CurrentAudioFile).name,Settings(:,k),j,length(audioselections),networkname,handles.optimization_slider.Value);
-            else
-                Calls=Automerge_Callback(Calls,SqueakDetect(AudioFile,NeuralNetwork,handles.audiofiles(CurrentAudioFile).name,Settings(:,k),j,length(audioselections),networkname),AudioFile);
-            end
-        end
+        Calls = [Calls, SqueakDetect(AudioFile,NeuralNetwork,handles.audiofiles(CurrentAudioFile).name,Settings(:,k),j,length(audioselections),networkname,handles.optimization_slider.Value)];
+
     end
     
-    %% Save the file
+    if isempty(Calls)
+        fprintf(1,'No Calls found in: %s \n',length(Calls),audioname)
+        continue
+    end
+    
     h = waitbar(1,'Saving...');
+    Calls = Automerge_Callback(Calls, [], AudioFile);
+    
+    %% Save the file
     
     [~,audioname] = fileparts(AudioFile);
     detectiontime=datestr(datetime('now'),'mmm-DD-YYYY HH_MM PM');
