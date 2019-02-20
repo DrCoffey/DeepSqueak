@@ -156,8 +156,8 @@ end
 % Return is nothing was found
 if isempty(AllScores); close(h); return; end
 
-h = waitbar(1,'Merging Boxes...');
-Calls = merge_boxes(AllBoxes, AllScores, AllClass, AllPowers, audio_info, 1, score_cuttoff, 1);
+h = waitbar(1,h,'Merging Boxes...');
+Calls = merge_boxes(AllBoxes, AllScores, AllClass, AllPowers, audio_info, 1, score_cuttoff, 0);
 
 % Merge long 22s if detected with a long 22 network
 if contains(networkname,'long','IgnoreCase',true)

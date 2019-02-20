@@ -15,4 +15,4 @@ AllScores = vertcat(Calls.Score);
 AllClass = vertcat(Calls.Type);
 AllPowers = vertcat(Calls.Power);
 
-Calls = merge_boxes(AllBoxes, AllScores, AllClass, AllPowers, audio_info, 0, 0, 0);
+Calls = merge_boxes(AllBoxes, AllScores, AllClass, AllPowers, audio_info, 1, 0, 0);

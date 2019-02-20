@@ -26,26 +26,7 @@ if ~SingleDetect
         return
     end
     
-    % Only two networks are allowed at a time.
-    if length(networkselections) > 2
-        errordlg(sprintf('It is illegal to use more than two networks simultaneously.\nIf you must, you may manually merge detection files'));
-        uiwait
-        networkselections = listdlg('PromptString','Select Networks:','ListSize',[500 300],'ListString',handles.networkfilesnames);
-        if length(networkselections) > 2
-            errordlg(sprintf('If you need more than two networks, you are probably doing something wrong'));
-            uiwait
-            networkselections = listdlg('PromptString','Select Networks:','ListSize',[500 300],'ListString',handles.networkfilesnames);
-            if length(networkselections) > 2
-                errordlg(sprintf('Why are you doing this? Please Stop!'));
-                uiwait
-                networkselections = listdlg('PromptString','Select Networks:','ListSize',[500 300],'ListString',handles.networkfilesnames);
-                if length(networkselections) > 2
-                    errordlg(sprintf('Ok, but its not going to work'));
-                    uiwait
-                end
-            end
-        end
-    end
+  
     %% Do this if button Single-Detect is clicked
 elseif SingleDetect
     audioselections = get(handles.AudioFilespopup,'Value');

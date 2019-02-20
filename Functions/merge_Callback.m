@@ -37,12 +37,12 @@ end
 clear('Calls')
 %% Merge overlapping boxes
 waitbar(.5,hc,'Writing Output Structure');
-Calls = merge_boxes(AllBoxes, AllScores .* AllAccept, AllClass, AllPowers, audio_info, 0, 0.1, 0)
+Calls = merge_boxes(AllBoxes, AllScores .* AllAccept, AllClass, AllPower, audio_info, 1, 0, 0);
 
 
 
 [FileName,PathName] = uiputfile(fullfile(handles.settings.detectionfolder, '*.mat'),'Save Merged Detections');
-waitbar(i/length(merged_boxes),hc,'Saving...');
+waitbar(1/2,hc,'Saving...');
 save(fullfile(PathName,FileName),'Calls','-v7.3');
 update_folders(hObject, eventdata, handles);
 close(hc);
