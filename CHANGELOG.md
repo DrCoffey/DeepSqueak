@@ -1,4 +1,9 @@
 # Changelog
+## 2.3.0 2019-02-20
+Detection is now no longer limited to two Networks.
+
+Improved separation of densely packed calls.
+
 ## 2.2.0 2019-01-25
 
 Drastically improved detection of low signal vocalizations!

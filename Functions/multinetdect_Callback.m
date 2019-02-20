@@ -21,7 +21,7 @@ if ~SingleDetect
     if isempty(audioselections)
         return
     end
-    networkselections = listdlg('PromptString','Select Networks (max 2):','ListSize',[500 300],'ListString',handles.networkfilesnames);
+    networkselections = listdlg('PromptString','Select Networks:','ListSize',[500 300],'ListString',handles.networkfilesnames);
     if isempty(audioselections)
         return
     end
