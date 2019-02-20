@@ -76,8 +76,8 @@ try
     txt = fscanf(fid,'%c');
     txt = strsplit(txt);
     changes = find(contains(txt,'##'),1); % Get the values after the bold heading
-    DSVersion = txt{changes+1};
-    disp(['DeepSqueak version ' DSVersion]);
+    handles.DSVersion = txt{changes+1};
+    disp(['DeepSqueak version ' handles.DSVersion]);
     fclose(fid);
 end
 % Check if a new version is avaliable by comparing changelog to whats online
@@ -86,7 +86,7 @@ try
     WebChangelog = strsplit(WebChangelogTxt);
     changes = find(contains(WebChangelog,'##')); % Get the values after the bold heading
     WebVersion = WebChangelog{changes+1};
-    if ~strcmp(WebVersion,DSVersion)
+    if ~strcmp(WebVersion,handles.DSVersion)
         disp ' '
         disp 'A new version of DeepSqueak is avaliable.'
         disp('<a href="https://github.com/DrCoffey/DeepSqueak">Download link</a>')
@@ -635,22 +635,45 @@ web('https://github.com/DrCoffey/DeepSqueak/wiki','-browser');
 % --------------------------------------------------------------------
 function AboutDeepSqueak_Callback(hObject, eventdata, handles)
 title = 'About DeepSqueak';
-message = [
-    {'DeepSqueak Version 1.0'}
-    {'\copyright 2018'}
-    ];
-d = dialog('Position',[300 350 250  300],'Name',title,'WindowStyle','Normal','Visible', 'off');
+
+d = dialog('Position',[300 350 500  600],'Name',title,'WindowStyle','Normal','Visible', 'off','Color', [0,0,0]);
 movegui(d,'center');
-tx = axes(d,'Units','Normalized','Position',[.2 .7 .6 .4],'Visible', 'off');
-text(tx,.5,.5,message,'HorizontalAlignment','Center')
-ha = axes(d,'Units','Normalized','Position',[.1 .15 .8 .6]);
-handle_image = image(handles.background,'parent',ha);
-axis off;
+ha = axes(d,'Units','Normalized','Position',[0,0,1,1]);
+
+A = zeros(128);
+A = insertText(A,[64,20],'Coffey & Marx, 2019','TextColor','white','BoxColor','Black','AnchorPoint','Center','FontSize',11);
+A = insertText(A,[64,64],'DeepSqueak','TextColor','white','BoxColor','Black','AnchorPoint','Center');
+A = insertText(A,[64,80],['Version ' handles.DSVersion],'TextColor','white','BoxColor','Black','AnchorPoint','Center','FontSize',11);
+
+A = A(:,:,1);
+
+P = [64, 64];
+D = 3;
+T = [1,0,-1,0;0,1,0,-1];	% 4 directions
+k = 0;
+
+handle_image = imshow(A,[0,1],'parent',ha);
+
 btn = uicontrol('Parent',d,...
-    'Position',[100 10 50 25],...
-    'String','Ok',...
+    'Units','Normalized',...
+    'Position',[.42 .01 .16 .06],...
+    'String','Okay',...
     'Callback','delete(gcf)');
 set(d,'Visible','on')
+
+while isvalid(handle_image)
+    k = k+1;
+    a = A(P(1),P(2));
+    A(P(1),P(2)) = ~a;
+    if ( a )
+        D = mod(D+1,4);
+    else
+        D = mod(D-1,4);
+    end;
+    P = P+T(:,D+1);
+    handle_image.CData = A;
+    pause(.01)
+end;
 
 
 % --- Executes on slider movement.
