@@ -53,7 +53,7 @@ for file = fname
         Calls(i).Score = data.event(i).score;
         
         audio = audioread(audiofile,round([windL windR]*rate),'native');
-        Calls(i).Audio = audio(:,1);
+        Calls(i).Audio = mean(audio,2);
         
         if contains(data.event(i).tags,'Accept')
             Calls(i).Accept=1;

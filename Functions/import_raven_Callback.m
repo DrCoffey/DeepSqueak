@@ -29,7 +29,7 @@ Calls(i).RelBox=[raven.Delta_Time_0x28s0x29(i), raven.Low_Freq_0x28Hz0x29(i)/100
 Calls(i).Score = 1;
 
 audio = audioread([audiopath audioname],round([windL windR]*rate),'native');
-Calls(i).Audio = audio(:,1); % Just take the first audio channel
+Calls(i).Audio = mean(audio,2); % Just take the first audio channel
 Calls(i).Accept=1;
 Calls(i).Type=raven.Annotation(i);
 Calls(i).Power = 0;

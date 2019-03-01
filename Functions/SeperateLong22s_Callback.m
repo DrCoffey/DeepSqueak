@@ -69,7 +69,7 @@ for i=1:length(begin_time)
     WindR = min(WindR,info.TotalSamples); % Prevent WindR from being greater than total samples
     
     audio = audioread(inputfile,[WindL WindR]); % Take channel 1
-    audio = [pad; audio(:,1)];
+    audio = [pad; mean(audio,2)];
     
     % Make the spectrogram
     windowsize = round(info.SampleRate * 0.02);
@@ -150,7 +150,7 @@ for i=1:size(newBoxes,1)
     NewCalls(i).Box=newBoxes(i,:);
     NewCalls(i).RelBox=[newBoxes(i,3) newBoxes(i,2) newBoxes(i,3) newBoxes(i,4)];
     NewCalls(i).Score=newScores(i);
-    NewCalls(i).Audio=[pad; a(:,1)]; % Take channel 1
+    NewCalls(i).Audio=[pad; mean(a,2)]; % Take channel 1
     NewCalls(i).Type=categorical({'USV'});
     NewCalls(i).Power=newPower(i);
     NewCalls(i).Accept=1;

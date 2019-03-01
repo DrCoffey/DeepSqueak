@@ -12,13 +12,6 @@ end
 handles.calls=tmp;
 handles.currentcall=1;
 
-handles.CallTime=[];
-for i=1:length(handles.calls)
-    handles.CallTime(i,1)=handles.calls(i).Box(1);
-end
-
-
-
 close(h);
 update_fig(hObject, eventdata, handles);
 guidata(hObject, handles);

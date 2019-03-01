@@ -222,6 +222,9 @@ elseif ~isa(audio,'double')
 end
 
 rate = handles.calls(handles.currentcall).Rate * handles.settings.playback_rate; % set playback rate
+
+% Bandpass Filter
+% audio = bandpass(audio,[handles.calls(handles.currentcall).RelBox(2), handles.calls(handles.currentcall).RelBox(2) + handles.calls(handles.currentcall).RelBox(4)] * 1000,handles.calls(handles.currentcall).Rate);
 paddedsound = [zeros(3125,1); audio; zeros(3125,1)];
 audiostart = handles.calls(handles.currentcall).RelBox(1) * handles.calls(handles.currentcall).Rate;
 audiolength = handles.calls(handles.currentcall).RelBox(3) * handles.calls(handles.currentcall).Rate;
@@ -477,35 +480,25 @@ guidata(hObject, handles);
 % --------------------------------------------------------------------
 function export_Callback(hObject, eventdata, handles)
 
-% --------------------------------------------------------------------
 function training_Callback(hObject, eventdata, handles)
 
-% --- Executes on button press in sortbytime.
-function sortbytime_Callback(hObject, eventdata, handles)
-% Sort current file by time
-h = waitbar(0,'Sorting...');
-A = [handles.calls.Box];
-[sorted,ix] = sort(A(1:4:end));
-handles.calls = handles.calls(ix);
-handles.currentcall=1;
-for i=1:length(handles.calls);
-    handles.CallTime(i,1)=handles.calls(i).Box(1);
-end
-update_fig(hObject, eventdata, handles);
-close(h);
-guidata(hObject, handles);
-
-% --- Executes on button press in sortbyscore.
-function sortbyscore_Callback(hObject, eventdata, handles)
+function SortCalls(hObject, eventdata, handles, type)
 % Sort current file by score
 h = waitbar(0,'Sorting...');
-% A = struct2cell(handles.calls);
-[sorted,ix] = sort([handles.calls.Score]);
-handles.calls = handles.calls(ix);
-handles.currentcall=1;
-for i=1:length(handles.calls)
-    handles.CallTime(i,1)=handles.calls(i).Box(1);
+switch type
+    case 'score'
+        [~,idx] = sort([handles.calls.Score]);
+    case 'time'
+        [~,idx] = sortrows(vertcat(handles.calls.Box),1);
+    case 'duration'
+        [~,idx] = sortrows(vertcat(handles.calls.Box),4);
+    case 'frequency'
+        Box = vertcat(handles.calls.Box);
+        [~,idx] = sort(Box(:,2) + Box(:,4)./2);
 end
+handles.calls = handles.calls(idx);
+handles.currentcall=1;
+
 update_fig(hObject, eventdata, handles);
 close(h);
 guidata(hObject, handles);

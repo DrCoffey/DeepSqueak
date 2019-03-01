@@ -10,7 +10,6 @@ handles.current_detection_file = handles.detectionfiles(handles.current_file_id)
 tmp=load([handles.detectionfiles(handles.current_file_id).folder '/' handles.detectionfiles(handles.current_file_id).name],'Calls');%get currently selected option from menu
 handles.calls=tmp.Calls;
 handles.currentcall=1;
-handles.CallTime=[];
 
 
 cla(handles.axes7);
@@ -52,27 +51,25 @@ set(handles.axes4,'YTick',[]);
 
 
 % Plot Call Position
-for i=1:length([handles.calls(:).Rate])
-    waitbar(i/length(handles.calls),h,'Loading Calls Please wait...');
-    handles.CallTime(i,1)=handles.calls(i).Box(1);
-end
+CallTime = vertcat(handles.calls.Box);
+CallTime = CallTime(:,1);
 
-line([0 max(handles.CallTime(:,1))],[0 0],'LineWidth',1,'Color','w','Parent', handles.axes5);
-line([0 max(handles.CallTime(:,1))],[1 1],'LineWidth',1,'Color','w','Parent', handles.axes5);
-set(handles.axes5,'XLim',[0 max(handles.CallTime(:,1))]);
+line([0 max(CallTime)],[0 0],'LineWidth',1,'Color','w','Parent', handles.axes5);
+line([0 max(CallTime)],[1 1],'LineWidth',1,'Color','w','Parent', handles.axes5);
+set(handles.axes5,'XLim',[0 max(CallTime)]);
 set(handles.axes5,'YLim',[0 1]);
 
 set(handles.axes5,'Color',[.1 .1 .1],'YColor',[.1 .1 .1],'XColor',[.1 .1 .1],'Box','off','Clim',[0 1]);
 set(handles.axes5,'YTickLabel',[]);
 set(handles.axes5,'XTickLabel',[]);
-set(handles.axes5,'XTick',unique(sort(handles.CallTime(:,1))));
+set(handles.axes5,'XTick',unique(sort(CallTime)));
 set(handles.axes5,'YTick',[]);
 handles.axes5.XAxis.Color = 'w';
+handles.axes5.XAxis.TickLength = [0.035 1];
 
 % Call position
-handles.CurrentCallLinePosition = line([handles.CallTime(1,1) handles.CallTime(1,1)],[0 1],'LineWidth',3,'Color','g','Parent', handles.axes5);
-handles.CurrentCallLineLext= text((max(handles.CallTime(1,1))),1.2,[num2str(1,'%.1f') ' s'],'Color','W', 'HorizontalAlignment', 'center','Parent',handles.axes5);
-
+handles.CurrentCallLinePosition = line([CallTime(1) CallTime(1)],[0 1],'LineWidth',3,'Color','g','Parent', handles.axes5);
+handles.CurrentCallLineLext= text((CallTime(1)),1.2,[num2str(1,'%.1f') ' s'],'Color','W', 'HorizontalAlignment', 'center','Parent',handles.axes5);
 
 colormap(handles.axes1,handles.cmap);
 colormap(handles.axes4,handles.cmap);

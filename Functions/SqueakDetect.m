@@ -6,7 +6,7 @@ h = waitbar(0,'Initializing');
 audio_info = audioinfo(inputfile);
 
 if audio_info.NumChannels > 1
-    warning('Audio file contains more than one channel. Use channel 1...')
+    warning('Audio file contains more than one channel. Detection will use the mean of all channels.')
 end
 
 % Get network and spectrogram settings
@@ -76,6 +76,21 @@ for i = 1:length(chunks)-1
         % Read the audio
         audio = audioread(audio_info.Filename,floor([windL, windR]));
         
+        %% Mix multichannel audio:
+        % By default, take the mean of multichannel audio. 
+        % Another method could be to take the max of the multiple channels,
+        % or just take the first channel.
+        audio = audio - mean(audio,1);
+        switch 'mean'
+            case 'first'
+                audio = audio(:,1);
+            case 'mean'
+                audio = mean(audio,2);
+            case 'max'
+                [~,index] = max(abs(audio'));
+                audio = audio(sub2ind(size(audio),1:size(audio,1),index));
+        end
+
         % Create the spectrogram
         [s,fr,ti] = spectrogram(audio(:,1),wind,noverlap,nfft,audio_info.SampleRate,'yaxis'); % Just use the first audio channel
         upper_freq = find(fr>=HighCutoff*1000,1);

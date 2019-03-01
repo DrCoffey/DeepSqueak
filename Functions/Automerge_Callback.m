@@ -5,9 +5,6 @@ Calls=[Calls1, Calls2];
 
 % Audio info
 audio_info = audioinfo(AudioFile);
-if audio_info.NumChannels > 1
-    warning('Audio file contains more than one channel. Use channel 1...')
-end
 
 %% Merge overlapping boxes
 AllBoxes = vertcat(Calls.Box);

@@ -1,4 +1,11 @@
 # Changelog
+## 2.4.1 2019-03-01
+Updated threshold rejection to use power instead of amplitude.
+
+Improved support for multichannel audio by taking the mean of all audio channels.
+Alternatively, a max intensity projection can be applied to the audio, or a single channel can be used.
+See line 79 of SqueakDetect.m for details.
+
 ## 2.3.0 2019-02-20
 Detection is now no longer limited to two Networks.
 

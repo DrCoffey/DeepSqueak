@@ -100,17 +100,14 @@ set(handles.axes3,'Color',[.1 .1 .1],'YColor',[1 1 1],'XColor',[1 1 1],'Box','of
 hold(handles.axes3,'off')
 
 % Plot Call Position
-handles.axes5.XAxis.TickLength = [0.035 1]; % Update display with time in file
-
-if handles.calls(handles.currentcall).Accept==1
-    set(handles.CurrentCallLinePosition,'XData',[handles.CallTime(handles.currentcall,1) handles.CallTime(handles.currentcall,1)],'Color','g');
+calltime = handles.calls(handles.currentcall).Box(1);
+handles.CurrentCallLinePosition.XData = [calltime, calltime];
+if handles.calls(handles.currentcall).Accept
+    handles.CurrentCallLinePosition.Color = [0,1,0];
 else
-    set(handles.CurrentCallLinePosition,'XData',[handles.CallTime(handles.currentcall,1) handles.CallTime(handles.currentcall,1)],'Color','r');
-
+    handles.CurrentCallLinePosition.Color = [1,0,0];
 end
-set(handles.CurrentCallLineLext,'Position',[(max(handles.CallTime(handles.currentcall,1))),1.2,0],'String',[num2str(stats.BeginTime,'%.1f') ' s']);
+set(handles.CurrentCallLineLext,'Position',[calltime,1.2,0],'String',[num2str(stats.BeginTime,'%.1f') ' s']);
+
 guidata(hObject, handles);
 
-% profview
-% profile off
-end
