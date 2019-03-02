@@ -29,7 +29,7 @@ for i=1:length(MUPET.SyllableNumber)
     Calls(i).Score = 1;
     
     audio = audioread([audiopath audioname],round([windL windR]*rate),'native');
-    Calls(i).Audio = mean(audio,2);
+    Calls(i).Audio = mean(audio - mean(audio,1,'native'),2,'native');
     
     Calls(i).Accept=1;
     Calls(i).Type=categorical({'USV'});
