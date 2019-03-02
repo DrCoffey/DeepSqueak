@@ -142,7 +142,7 @@ for i=1:size(newBoxes,1)
     WindR = round( (newBoxes(i,1)+newBoxes(i,3)*2)*info.SampleRate);
     WindR = min(WindR,info.TotalSamples); % Prevent WindR from being greater than total samples
 
-    a = audioread(inputfile,[WindL WindR],'native');
+    audio = audioread(inputfile,[WindL WindR],'native');
 
     
     % Final Structure
