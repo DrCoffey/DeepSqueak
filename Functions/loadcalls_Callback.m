@@ -5,10 +5,10 @@ update_folders(hObject, eventdata, handles);
 handles = guidata(hObject);
 if nargin == 3 % if "Load Calls" button pressed
     handles.current_file_id = get(handles.popupmenuDetectionFiles,'Value');
+    handles.current_detection_file = handles.detectionfiles(handles.current_file_id).name;
 end
-handles.current_detection_file = handles.detectionfiles(handles.current_file_id).name;
 
-tmp = load(fullfile(handles.detectionfiles(handles.current_file_id).folder, handles.detectionfiles(handles.current_file_id).name), 'Calls'); %get currently selected option from menu
+tmp = load(fullfile(handles.detectionfiles(handles.current_file_id).folder,  handles.current_detection_file), 'Calls'); %get currently selected option from menu
 % Backwards compatibility with struct format for detection files
 if isstruct(tmp.Calls); tmp.Calls = struct2table(tmp.Calls); end
 
