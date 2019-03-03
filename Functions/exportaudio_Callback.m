@@ -2,7 +2,7 @@ function exportaudio_Callback(hObject, eventdata, handles)
 %% Save the audio around the box to a WAVE file
 
 % Convert audio to double
-   audio = handles.calls(handles.currentcall).Audio;
+   audio = handles.calls.Audio{handles.currentcall};
 if ~isfloat(audio)
     audio = double(audio) / (double(intmax(class(audio)))+1);
 elseif ~isa(audio,'double')
@@ -17,7 +17,7 @@ if isempty(rate)
 end
 
 % Convert relative rate to samples/second
-rate = str2double(rate{:}) * handles.calls(handles.currentcall).Rate;
+rate = str2double(rate{:}) * handles.calls.Rate(handles.currentcall);
 
 % Get the output file name
 [~,detectionName] = fileparts(handles.current_detection_file);

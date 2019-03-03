@@ -34,25 +34,27 @@ h = waitbar(0,'Initializing');
 for currentfile =selections % Do this for each file
     % Load the file, skip files if variable: 'Calls' doesn't exist
     lastwarn('');
-    load([handles.detectionfiles(currentfile).folder '/' handles.detectionfiles(currentfile).name],'Calls');
+    load(fullfile(handles.detectionfiles(currentfile).folder, handles.detectionfiles(currentfile).name),'Calls');
     if ~isempty(lastwarn)
         disp([handles.detectionfiles(currentfile).name ' is not a Call file, skipping...'])
         continue
     end
+    
+    % Backwards compatibility with struct format for detection files
+    if isstruct(Calls); Calls = struct2table(Calls); end
     
     % Reject calls where reject == true, accept calls where accept == true
     
     % Get tonality
     if tonality_low_checkbox && tonality_low_checkbox
         tonality = [];
-        for i = Calls'
-            [I,windowsize,noverlap,nfft,rate,box,s,fr,ti,audio,AudioRange] = CreateSpectrogram(i);
+        for i = 1:height(Calls)
+            [I,windowsize,noverlap,nfft,rate,box] = CreateSpectrogram(Calls(i, :));
             stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.settings.EntropyThreshold,handles.settings.AmplitudeThreshold);
             tonality = [tonality; stats.SignalToNoise];
         end
     end
     
-    Calls = struct2table(Calls);
     reject = false(height(Calls),1);
     accept = false(height(Calls),1);
     
@@ -70,7 +72,6 @@ for currentfile =selections % Do this for each file
     Calls.Accept(accept) = true;
     Calls.Accept(reject) = false;
     
-    Calls = table2struct(Calls);
     save(fullfile(handles.detectionfiles(currentfile).folder,handles.detectionfiles(currentfile).name),'Calls','-v7.3');
     
     %update the display

@@ -36,10 +36,12 @@ ClusteringData = {};
 clustAssign = categorical();
 for j = 1:length(trainingdata)  % For Each File
     load([trainingpath trainingdata{j}],'Calls');
+    % Backwards compatibility with struct format for detection files
+    if isstruct(Calls); Calls = struct2table(Calls); end
     
-    for i = 1:length(Calls)
-        waitbar(i/length(Calls),h,['Loading File ' num2str(j) ' of '  num2str(length(trainingdata))]);
-        call = Calls(i);
+    for i = 1:height(Calls)
+        waitbar(i/height(Calls),h,['Loading File ' num2str(j) ' of '  num2str(length(trainingdata))]);
+        call = Calls(i,:);
         
         % Skip if not accepted
         if (call.Accept ~= 1) || ismember(call.Type,'Noise')
@@ -69,7 +71,7 @@ for j = 1:length(trainingdata)  % For Each File
             {stats.Power}
             {call.RelBox(4)}
             ]'];
-        clustAssign = [clustAssign; Calls(i).Type];
+        clustAssign = [clustAssign; Calls.Type(i)];
     end
     
 end
@@ -81,20 +83,23 @@ function UpdateCluster(ClusteringData, clustAssign, clusterName, rejected)
 [files, ia, ic] = unique(ClusteringData(:,6),'stable');
 h = waitbar(0,'Initializing');
 for j = 1:length(files)  % For Each File
-    load(files{j});
+    load(files{j}, 'Calls');
+    % Backwards compatibility with struct format for detection files
+    if isstruct(Calls); Calls = struct2table(Calls); end
+    
     for i = (1:sum(ic==j)) + ia(j) - 1   % For Each Call
         waitbar(j/length(files),h,['Processing File ' num2str(j) ' of '  num2str(length(files))]);
         
         % Update the cluster assignment and rejected status
-        Calls(ClusteringData{i,7}).Type = clustAssign(i);
+        Calls.Type(ClusteringData{i,7}) = clustAssign(i);
         if rejected(i)
-            Calls(ClusteringData{i,7}).Accept = 0;
+            Calls.Accept(ClusteringData{i,7}) = 0;
         end
     end
     % If forgot why I added this line, but I feel like I had a reason...
-    Calls = Calls(1:length([Calls.Rate]));
+    Calls = Calls(1:length(Calls.Rate), :);
     waitbar(j/length(files),h,['Saving File ' num2str(j) ' of '  num2str(length(files))]);
-    save(files{j},'Calls','-v7.3');
+    save(files{j}, 'Calls', '-v7.3');
 end
 close(h)
 end

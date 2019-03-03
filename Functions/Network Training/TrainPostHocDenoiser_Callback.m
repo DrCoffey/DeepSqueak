@@ -36,22 +36,25 @@ TrainingImages = {};
 Class = [];
 for j = 1:length(trainingdata)  % For Each File
     load([trainingpath trainingdata{j}],'Calls');
-    for i = 1:length(Calls)     % For Each Call
-        waitbar(i/length(Calls),h,['Loading File ' num2str(j) ' of '  num2str(length(trainingdata))]);
+    % Backwards compatibility with struct format for detection files
+    if isstruct(Calls); Calls = struct2table(Calls); end
+    
+    for i = 1:height(Calls)     % For Each Call
+        waitbar(i/height(Calls),h,['Loading File ' num2str(j) ' of '  num2str(length(trainingdata))]);
         c=c+1;
         
-        audio =  Calls(i).Audio;
+        audio =  Calls.Audio{i};
         if ~isfloat(audio)
             audio = double(audio) / (double(intmax(class(audio)))+1);
         elseif ~isa(audio,'double')
             audio = double(audio);
         end
 
-        [s, fr, ti] = spectrogram(audio,round(Calls(i).Rate * wind),round(Calls(i).Rate * noverlap),round(Calls(i).Rate * nfft),Calls(i).Rate,'yaxis');
-            x1 = axes2pix(length(ti),ti,Calls(i).RelBox(1));
-            x2 = axes2pix(length(ti),ti,Calls(i).RelBox(3)) + x1;
-%             y1 = axes2pix(length(fr),fr./1000,Calls(i).RelBox(2));
-%             y2 = axes2pix(length(fr),fr./1000,Calls(i).RelBox(4)) + y1;
+        [s, fr, ti] = spectrogram(audio,round(Calls.Rate(i) * wind),round(Calls.Rate(i) * noverlap),round(Calls.Rate(i) * nfft),Calls.Rate(i),'yaxis');
+            x1 = axes2pix(length(ti),ti,Calls.RelBox(i,1));
+            x2 = axes2pix(length(ti),ti,Calls.RelBox(i,3)) + x1;
+%             y1 = axes2pix(length(fr),fr./1000,Calls.RelBox(i,2));
+%             y2 = axes2pix(length(fr),fr./1000,Calls.RelBox(i,4)) + y1;
             y1 = axes2pix(length(fr),fr./1000,lowFreq);
             y2 = axes2pix(length(fr),fr./1000,highFreq);
             I=abs(s(round(y1:min(y2,size(s,1))),round(x1:x2))); % Get the pixels in the box
@@ -63,10 +66,10 @@ for j = 1:length(trainingdata)  % For Each File
             % Duplicate the image with random gaussian noise.
             im2 = imnoise(im,'gaussian',.4*rand()+.1,.1*rand());
             
-        if categorical(Calls(i).Type) == 'Noise';
+        if categorical(Calls.Type(i)) == 'Noise'
             TrainingImages = [TrainingImages; {im}; {im2}];
             Class = [Class; categorical({'Noise'}); categorical({'Noise'})];
-        elseif Calls(i).Accept == 1;
+        elseif Calls.Accept(i)
             TrainingImages = [TrainingImages; {im}; {im2}];
             Class = [Class; categorical({'USV'}); categorical({'USV'})];
         end

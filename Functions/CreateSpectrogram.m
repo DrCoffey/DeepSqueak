@@ -4,7 +4,7 @@ function [I,windowsize,noverlap,nfft,rate,box,s,fr,ti,audio,AudioRange] = Create
 rate = call.Rate;
 box = call.Box;
 
-audio =  call.Audio;
+audio =  call.Audio{:};
 if ~isfloat(audio)
     audio = double(audio) / (double(intmax(class(audio)))+1);
 elseif ~isa(audio,'double')

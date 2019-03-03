@@ -209,7 +209,10 @@ function UpdateCluster(ClusteringData, clustAssign, clusterName, rejected)
 [files, ia, ic] = unique(ClusteringData(:,6),'stable');
 h = waitbar(0,'Initializing');
 for j = 1:length(files)  % For Each File
-    load(files{j});
+    load(files{j}, 'Calls');
+    % Backwards compatibility with struct format for detection files
+    if isstruct(Calls); Calls = struct2table(Calls); end
+    
     for i = (1:sum(ic==j)) + ia(j) - 1   % For Each Call
         waitbar(j/length(files),h,['Processing File ' num2str(j) ' of '  num2str(length(files))]);
         
@@ -218,13 +221,13 @@ for j = 1:length(files)  % For Each File
         end
         
         % Update the cluster assignment and rejected status
-        Calls(ClusteringData{i,7}).Type = clusterName(clustAssign(i));
+        Calls.Type(ClusteringData{i,7}) = clusterName(clustAssign(i));
         if rejected(i)
-            Calls(ClusteringData{i,7}).Accept = 0;
+            Calls.Accept(ClusteringData{i,7}) = 0;
         end
     end
-    % If forgot why I added this line, but I feel like I had a reason...
-    Calls = Calls(1:length([Calls.Rate]));
+    % If forgot why I added this line, but I feel like I had a reason... -RM
+    Calls = Calls(1:length(Calls.Rate), :);
     waitbar(j/length(files),h,['Saving File ' num2str(j) ' of '  num2str(length(files))]);
     save(files{j},'Calls','-v7.3');
 end

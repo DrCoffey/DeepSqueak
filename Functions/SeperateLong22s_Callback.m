@@ -6,6 +6,8 @@ if nargin == 3
     inputfile = [audiopath audiodata];
     hc = waitbar(0,'Loading File');
     load([trainingpath trainingdata],'Calls');
+    % Backwards compatibility with struct format for detection files
+    if isstruct(Calls); Calls = struct2table(Calls); end
 end
 
 info = audioinfo(inputfile);
@@ -21,7 +23,7 @@ newPower = [];
 %% First, find all the overlapping calls
 
 % Get the oldBoxes
-oldBoxes = vertcat(Calls.Box);
+oldBoxes = Calls.Box;
 
 % Pad the oldBoxes so that all of the audio is contained within the box
 oldBoxes(:,1) = oldBoxes(:,1) - 0.5;
@@ -42,8 +44,8 @@ lower_freq = accumarray(componentIndices', oldBoxes(:,2), [], @min);
 end_time__ = accumarray(componentIndices', oldBoxes(:,1)+oldBoxes(:,3), [], @max);
 high_freq_ = accumarray(componentIndices', oldBoxes(:,2)+oldBoxes(:,4), [], @max);
 
-merged_scores = accumarray(componentIndices', [Calls.Score]', [], @mean);
-merged_power = accumarray(componentIndices', [Calls.Power]', [], @mean);
+merged_scores = accumarray(componentIndices', Calls.Score, [], @mean);
+merged_power  = accumarray(componentIndices', Calls.Power, [], @mean);
 
 call_duration = end_time__ - begin_time;
 call_bandwidth = high_freq_ - lower_freq;
@@ -55,9 +57,9 @@ for i=1:length(begin_time)
     
     % If ran through the menu
     if nargin == 3
-        waitbar(i/length(Calls),hc,'Splitting Calls');
+        waitbar(i/height(Calls),hc,'Splitting Calls');
     end
-
+    
     % Get the audio
     WindL=round((begin_time(i)-0.1) .* info.SampleRate);
     pad = [];
@@ -76,7 +78,7 @@ for i=1:length(begin_time)
     noverlap = round(info.SampleRate * 0.01);
     nfft = round(info.SampleRate * 0.02);
     
-    [s, fr, ti] = spectrogram(audio,windowsize,noverlap,nfft,info.SampleRate,'yaxis');    
+    [s, fr, ti] = spectrogram(audio,windowsize,noverlap,nfft,info.SampleRate,'yaxis');
     
     % Get the part of the spectrogram within the frequency bandwidth
     x1 = axes2pix(length(ti),ti,call_duration(i));
@@ -110,7 +112,7 @@ for i=1:length(begin_time)
         repmat(lower_freq(i),length(startime),1),...
         ti(stoptime - startime)',...
         repmat(high_freq_(i)-lower_freq(i),length(startime),1)];
-        
+    
     newScores = [newScores; repmat(merged_scores(i),length(startime),1)];
     newPower = [newScores; repmat(merged_power(i),length(startime),1)];
     
@@ -126,7 +128,7 @@ OverlapsWithOld = any(overlapRatio,2);
 % Re Make Call Structure
 for i=1:size(newBoxes,1)
     if nargin == 3
-    waitbar(i/length(newBoxes),hc,'Remaking Structure');
+        waitbar(i/length(newBoxes),hc,'Remaking Structure');
     end
     
     if ~OverlapsWithOld; continue; end
@@ -141,9 +143,9 @@ for i=1:size(newBoxes,1)
     
     WindR = round( (newBoxes(i,1)+newBoxes(i,3)*2)*info.SampleRate);
     WindR = min(WindR,info.TotalSamples); % Prevent WindR from being greater than total samples
-
-    a = audioread(inputfile,[WindL WindR],'native');
-
+    
+    audio = audioread(inputfile,[WindL WindR],'native');
+    
     
     % Final Structure
     NewCalls(i).Rate=info.SampleRate;
@@ -154,15 +156,15 @@ for i=1:size(newBoxes,1)
     NewCalls(i).Type=categorical({'USV'});
     NewCalls(i).Power=newPower(i);
     NewCalls(i).Accept=1;
-
+    
 end
 
 
 if nargin == 3
     [FileName,PathName] = uiputfile(fullfile(handles.settings.detectionfolder,trainingdata),'Save Merged Detections');
     waitbar(i/length(newBoxes),hc,'Saving...');
-    Calls = NewCalls;
-    save([PathName,FileName],'Calls','-v7.3');
+    Calls = struct2table(NewCalls);
+    save(fullfile(PathName, FileName), 'Calls', '-v7.3');
     update_folders(hObject, eventdata, handles);
     close(hc);
 end

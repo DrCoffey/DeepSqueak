@@ -61,7 +61,6 @@ AllBoxes=[];
 AllScores=[];
 AllClass=[];
 AllPowers=[];
-Calls = [];
 
 % Break the audio file into chunks
 chunks = linspace(1,(DetectLength - overlap) * audio_info.SampleRate,round(DetectLength / chunksize));

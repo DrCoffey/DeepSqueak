@@ -35,9 +35,9 @@ for i=1:length(MUPET.SyllableNumber)
     Calls(i).Type=categorical({'USV'});
     Calls(i).Power = 1;
 end
-[~,name] = fileparts(ravenname)
-[FileName,PathName,FilterIndex] = uiputfile([handles.settings.detectionfolder '/' name '.mat'],'Save Call File');
-save([PathName,FileName],'Calls','-v7.3');
+Calls = struct2table(Calls);
+[~, name] = fileparts(ravenname);
+[FileName, PathName] = uiputfile(fullfile(handles.settings.detectionfolder, [name '.mat']),'Save Call File');
+save([PathName, FileName],'Calls','-v7.3');
 close(hc);
 update_folders(hObject, eventdata, handles);
-handles = guidata(hObject);  % Get newest version of handles

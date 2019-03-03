@@ -22,35 +22,36 @@ new_low_freq = str2double(response{1});
 h = waitbar(0,'Initializing');
 % For each file
 for i = 1:length(fname)
-    load(fullfile(fpath, fname{i}),'Calls');
+    load(fullfile(fpath, fname{i}), 'Calls');
+    % Backwards compatibility with struct format for detection files
+    if isstruct(Calls); Calls = struct2table(Calls); end
+    
     waitbar(i/length(fname),h,['Processing File ' num2str(i) ' of '  num2str(length(fname))]);
     
     % For each call
-    for j = 1:length(Calls)
-        
-        
+    for j = 1:height(Calls)
         
         if ~isnan(new_low_freq)
-            Calls(j).Box(4) = Calls(j).Box(4) + Calls(j).Box(2) - new_low_freq;
-            Calls(j).Box(2) = new_low_freq;
+            Calls.Box(j, 4) = Calls.Box(j, 4) + Calls.Box(j, 2) - new_low_freq;
+            Calls.Box(j, 2) = new_low_freq;
         end
         
         if ~isnan(new_high_freq)
-            Calls(j).Box(4) = new_high_freq - Calls(j).Box(2);
-            Calls(j).Box(4) = max(new_high_freq - Calls(j).Box(2),1);
+            Calls.Box(j, 4) = new_high_freq - Calls.Box(j, 2);
+            Calls.Box(j, 4) = max(new_high_freq - Calls.Box(j, 2), 1);
         end
         
         % Make sure the new high frequency fits within the spectrogram
-        Calls(j).Box(4) = min(Calls(j).Box(4), Calls(j).Rate ./ 2000 - Calls(j).Box(2));
-        Calls(j).Box(4) = max(Calls(j).Box(4), 1);
+        Calls.Box(j, 4) = min(Calls.Box(j, 4), Calls.Rate(j) ./ 2000 - Calls.Box(j, 2));
+        Calls.Box(j, 4) = max(Calls.Box(j, 4), 1);
         
-        Calls(j).RelBox(2) = Calls(j).Box(2);
-        Calls(j).RelBox(4) = Calls(j).Box(4);
+        Calls.RelBox(j, 2) = Calls.Box(j, 2);
+        Calls.RelBox(j, 4) = Calls.Box(j, 4);
         
     end
     
     save(fullfile(fpath, fname{i}),'Calls','-v7.3');
-
+    
 end
 
 close(h);

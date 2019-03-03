@@ -24,16 +24,20 @@ for j = 1:length(trainingdata)
     if isfield(file,'ClusteringData')
         ClusteringData = [ClusteringData; file.ClusteringData];
     else
+        
+        % Backwards compatibility with struct format for detection files
+        if isstruct(file.Calls); file.Calls = struct2table(file.Calls); end
+    
         % for each call in the file, calculate stats for clustering
-        for i = 1:length(file.Calls)
-            waitbar(i/length(file.Calls),h,['Loading File ' num2str(j) ' of '  num2str(length(trainingdata))]);
+        for i = 1:height(file.Calls)
+            waitbar(i/height(file.Calls),h,['Loading File ' num2str(j) ' of '  num2str(length(trainingdata))]);
             
             % Skip if not accepted
-            if file.Calls(i).Accept ~= 1;
+            if ~file.Calls.Accept
                 continue
             end
             
-            call = file.Calls(i);
+            call = file.Calls(i,:);
             
             [I,wind,noverlap,nfft,rate,box] = CreateSpectrogram(call);
             im = mat2gray(flipud(I),[0 max(max(I))/4]); % Set max brightness to 1/4 of max

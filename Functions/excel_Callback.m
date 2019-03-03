@@ -21,22 +21,24 @@ if isnumeric(PathName); return; end
 hc = waitbar(0,'Initializing');
 for j = 1:length(fname) % Do this for each file
     currentfile = fullfile(fpath,fname{j});
-    tmp=load(currentfile);
+    load(currentfile, 'Calls');
+    % Backwards compatibility with struct format for detection files
+    if isstruct(Calls); Calls = struct2table(Calls); end
     
     exceltable = [{'ID'} {'Label'} {'Accepted'} {'Score'}  {'Begin Time (s)'} {'End Time (s)'} {'Call Length (s)'} {'Principal Frequency (kHz)'} {'Low Freq (kHz)'} {'High Freq (kHz)'} {'Delta Freq (kHz)'} {'Frequency Standard Deviation (kHz)'} {'Slope (kHz/s)'} {'Sinuosity'} {'Mean Power (dB/Hz)'} {'Tonality'}];
-    for i = 1:length(tmp.Calls) % Do this for each call
-        waitbar(i/length(tmp.Calls),hc,['Calculating call statistics for file ' num2str(j) ' of ' num2str(length(fname))]);
+    for i = 1:height(Calls) % Do this for each call
+        waitbar(i/height(Calls),hc,['Calculating call statistics for file ' num2str(j) ' of ' num2str(length(fname))]);
         
-        if includereject || tmp.Calls(i).Accept==1;
+        if includereject || Calls.Accept
             % Get spectrogram data
-            [I,windowsize,noverlap,nfft,rate,box] = CreateSpectrogram(tmp.Calls(i));
+            [I,windowsize,noverlap,nfft,rate,box] = CreateSpectrogram(Calls(i, :));
             % Calculate statistics
             stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.settings.EntropyThreshold,handles.settings.AmplitudeThreshold);
             
             ID = i;
-            Label = tmp.Calls(i).Type;
-            Score = tmp.Calls(i).Score;
-            accepted = tmp.Calls(i).Accept;
+            Label = Calls.Type(i);
+            Score = Calls.Score(i);
+            accepted = Calls.Accept(i);
             exceltable = [exceltable; {ID} {Label} {accepted} {Score} {stats.BeginTime} {stats.EndTime} {stats.DeltaTime} {stats.PrincipalFreq} {stats.LowFreq} {stats.HighFreq} {stats.DeltaFreq} {stats.stdev} {stats.Slope} {stats.Sinuosity} {stats.MaxPower} {stats.SignalToNoise}];
         end
         

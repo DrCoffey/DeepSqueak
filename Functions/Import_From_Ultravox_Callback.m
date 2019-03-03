@@ -25,12 +25,12 @@ CallBandwidth = inputdlg('Enter call bandwidth (kHz), because Ultravox doesn''t 
 if isempty(CallBandwidth); return; end
 CallBandwidth = str2double(CallBandwidth);
 
-info = audioinfo(AudioFile);
-if info.NumChannels > 1
+audioInfo = audioinfo(AudioFile);
+if audioInfo.NumChannels > 1
     warning('Audio file contains more than one channel. Use channel 1...')
 end
 
-rate = info.SampleRate;
+rate = audioInfo.SampleRate;
 Calls = struct('Rate',struct,'Box',struct,'RelBox',struct,'Score',struct,'Audio',struct,'Accept',struct,'Type',struct,'Power',struct);
 hc = waitbar(0,'Importing Calls from Ultravox Log');
 
@@ -63,14 +63,14 @@ for i=1:length(ultravox.Call)
     end
     windR = ultravox.StopTime_s_(i) + (ultravox.Duration_ms_(i) / 1000);
     windR = round(windR .* rate);
-    windR = min(windR,info.TotalSamples);
+    windR = min(windR,audioInfo.TotalSamples);
     
     
-    if windL >= info.TotalSamples
+    if windL >= audioInfo.TotalSamples
         disp('Call starts after the file ends')
         continue
     end
-    if windR > info.TotalSamples
+    if windR > audioInfo.TotalSamples
         disp('Call ends after the file ends')
         continue
     end
@@ -82,21 +82,17 @@ for i=1:length(ultravox.Call)
     Calls(i).Power = 0;
 end
 close(hc);
+Calls = struct2table(Calls);
 
-
-[FileName,PathName] = uiputfile([handles.settings.detectionfolder '/*.mat'],'Save Call File');
+[FileName, PathName] = uiputfile(fullfile(handles.settings.detectionfolder, '*.mat'), 'Save Call File');
 filename = fullfile(PathName,FileName);
 
+Calls = merge_boxes(Calls.Box, Calls.Score, Calls.Type, Calls.Power, audioInfo, 1, 0, 0);
 
-Calls = Automerge_Callback(Calls,[],AudioFile);
 h = waitbar(.9,'Saving Output Structures');
-detectiontime=datestr(datetime('now'),'mmm-DD-YYYY HH_MM PM');
+detectiontime = datestr(datetime('now'),'mmm-DD-YYYY HH_MM PM');
 save(filename,'Calls','AudioFile','detectiontime','-v7.3');
 
 close(h);
 
-
 update_folders(hObject, eventdata, handles);
-handles = guidata(hObject);  % Get newest version of handles
-
-

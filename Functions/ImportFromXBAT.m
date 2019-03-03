@@ -64,7 +64,8 @@ for file = fname
         Calls(i).Power = 0;
         
     end
-    save([outpath '/' data.file],'Calls','-v7.3');
+    Calls = struct2table(Calls);
+    save(fullfile(outpath, data.file),'Calls','-v7.3');
 end
     close(hc);
     update_folders(hObject, eventdata, handles);

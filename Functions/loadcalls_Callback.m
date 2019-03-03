@@ -7,7 +7,11 @@ if nargin == 3 % if "Load Calls" button pressed
     handles.current_file_id = get(handles.popupmenuDetectionFiles,'Value');
 end
 handles.current_detection_file = handles.detectionfiles(handles.current_file_id).name;
-tmp=load([handles.detectionfiles(handles.current_file_id).folder '/' handles.detectionfiles(handles.current_file_id).name],'Calls');%get currently selected option from menu
+
+tmp = load(fullfile(handles.detectionfiles(handles.current_file_id).folder, handles.detectionfiles(handles.current_file_id).name), 'Calls'); %get currently selected option from menu
+% Backwards compatibility with struct format for detection files
+if isstruct(tmp.Calls); tmp.Calls = struct2table(tmp.Calls); end
+
 handles.calls=tmp.Calls;
 handles.currentcall=1;
 
@@ -51,8 +55,7 @@ set(handles.axes4,'YTick',[]);
 
 
 % Plot Call Position
-CallTime = vertcat(handles.calls.Box);
-CallTime = CallTime(:,1);
+CallTime = handles.calls.Box(:,1);
 
 line([0 max(CallTime)],[0 0],'LineWidth',1,'Color','w','Parent', handles.axes5);
 line([0 max(CallTime)],[1 1],'LineWidth',1,'Color','w','Parent', handles.axes5);

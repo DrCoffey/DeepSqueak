@@ -74,12 +74,12 @@ for j = 1:length(audioselections)
         NeuralNetwork=load(networkpath);%get currently selected option from menu
         close(h);
         
-        Calls = [Calls, SqueakDetect(AudioFile,NeuralNetwork,handles.audiofiles(CurrentAudioFile).name,Settings(:,k),j,length(audioselections),networkname,handles.optimization_slider.Value)];
+        Calls = [Calls; SqueakDetect(AudioFile,NeuralNetwork,handles.audiofiles(CurrentAudioFile).name,Settings(:,k),j,length(audioselections),networkname,handles.optimization_slider.Value)];
 
     end
     
     if isempty(Calls)
-        fprintf(1,'No Calls found in: %s \n',length(Calls),audioname)
+        fprintf(1,'No Calls found in: %s \n',height(Calls),audioname)
         continue
     end
     
@@ -99,10 +99,10 @@ for j = 1:length(audioselections)
     end
     
     % Display the number of calls
-    fprintf(1,'%d Calls found in: %s \n',length(Calls),audioname)
+    fprintf(1,'%d Calls found in: %s \n',height(Calls),audioname)
     
     if ~isempty(Calls)
-        save(fname,'Calls','settings','AudioFile','detectiontime','networkpath','-v7.3','-mat');
+        save(fname,'Calls','Settings','AudioFile','detectiontime','networkselections','-v7.3','-mat');
     end
     
     delete(h)

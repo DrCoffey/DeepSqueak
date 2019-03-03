@@ -17,21 +17,23 @@ if strcmp(ext,'.mat')
     AllCalls = table([],[],[],[],[],'VariableNames',{'BeginTime_s_','Label','File','Bout','Accepted'});
     for i = 1:length(filename)
         load([filepath filename{i}],'Calls');
-        Calls = Calls([Calls.Accept]' == 1);
-        begintime = [Calls.Box]'; % Get Box Position
-        begintime = begintime(1:4:end); % Every forth element is the begin time
-        CallClass = [Calls.Type]';
+        % Backwards compatibility with struct format for detection files
+        if isstruct(Calls); Calls = struct2table(Calls); end
+        
+        Calls = Calls(Calls.Accept, :);
+        begintime = Calls.Box(:,1); % Get Box Position
+        CallClass = Calls.Type;
         dist = pdist2(begintime,begintime);
         dist(dist > boutlength) = 0;
         G = graph(dist);
         bout = conncomp(G)';
         
         try
-        g = table(begintime, CallClass, repmat(i,length(Calls),1), bout,[Calls.Accept]','VariableNames',{'BeginTime_s_','Label','File','Bout','Accepted'});
-        AllCalls = [AllCalls; g];
-        waitbar(i/length(filename),h)
+            g = table(begintime, CallClass, repmat(i,height(Calls),1), bout, Calls.Accept,'VariableNames',{'BeginTime_s_','Label','File','Bout','Accepted'});
+            AllCalls = [AllCalls; g];
+            waitbar(i/length(filename),h)
         catch
-        warning('No Accepted Calls in File');
+            warning('No Accepted Calls in File');
         end
         
     end
@@ -44,11 +46,11 @@ else
         G = graph(dist);
         bout = conncomp(G)';
         try
-        g = table(bout,repmat(i,height(t),1),'VariableNames',{'Bout','File'});
-        AllCalls = [AllCalls; g t];
-        waitbar(i/length(filename),h)
+            g = table(bout,repmat(i,height(t),1),'VariableNames',{'Bout','File'});
+            AllCalls = [AllCalls; g t];
+            waitbar(i/length(filename),h)
         catch
-        warning('No Accepted Calls in File');
+            warning('No Accepted Calls in File');
         end
         
     end
@@ -113,49 +115,49 @@ cb.Label.Rotation=90;
 [file,path] = uiputfile('*.xlsx','Save Transion Matrix');
 
 if ~isnumeric(file)
-output = [];
-counts = cell(length(cats));
-for i = 1:length(cats)
-    for j = 1:length(cats)
-        %         counts(j,i) = mean((AllCalls{1:end-1,'Label'} == cats{i}) & (AllCalls{2:end,'Label'} == cats{j}));
-        x = sum(...
-            ((AllCalls{1:end-1,'Label'} == cats{i}) & (AllCalls{2:end,'Label'} == cats{j})) & ...
-            (AllCalls{1:end-1,'Bout'} == AllCalls{2:end,'Bout'}) &...
-            (AllCalls{1:end-1,'File'} == AllCalls{2:end,'File'}));
-        n = sum(AllCalls{2:end,'Label'} == cats{j});
-        counts(j,i) = {x / n};
+    output = [];
+    counts = cell(length(cats));
+    for i = 1:length(cats)
+        for j = 1:length(cats)
+            %         counts(j,i) = mean((AllCalls{1:end-1,'Label'} == cats{i}) & (AllCalls{2:end,'Label'} == cats{j}));
+            x = sum(...
+                ((AllCalls{1:end-1,'Label'} == cats{i}) & (AllCalls{2:end,'Label'} == cats{j})) & ...
+                (AllCalls{1:end-1,'Bout'} == AllCalls{2:end,'Bout'}) &...
+                (AllCalls{1:end-1,'File'} == AllCalls{2:end,'File'}));
+            n = sum(AllCalls{2:end,'Label'} == cats{j});
+            counts(j,i) = {x / n};
+        end
     end
-end
-output = [output; [{'Conditional Probability'} cell(1,length(cats))]];
-output = [output; [[{'Category'} cats'] ; [cats, counts]]];
-
-counts = cell(length(cats));
-for i = 1:length(cats)
-    for j = 1:length(cats)
-        %         counts(j,i) = mean((AllCalls{1:end-1,'Label'} == cats{i}) & (AllCalls{2:end,'Label'} == cats{j}));
-        x = sum(...
-            ((AllCalls{1:end-1,'Label'} == cats{i}) & (AllCalls{2:end,'Label'} == cats{j})) & ...
-            (AllCalls{1:end-1,'Bout'} == AllCalls{2:end,'Bout'}) &...
-            (AllCalls{1:end-1,'File'} == AllCalls{2:end,'File'}));
-        counts(j,i) = {x };
+    output = [output; [{'Conditional Probability'} cell(1,length(cats))]];
+    output = [output; [[{'Category'} cats'] ; [cats, counts]]];
+    
+    counts = cell(length(cats));
+    for i = 1:length(cats)
+        for j = 1:length(cats)
+            %         counts(j,i) = mean((AllCalls{1:end-1,'Label'} == cats{i}) & (AllCalls{2:end,'Label'} == cats{j}));
+            x = sum(...
+                ((AllCalls{1:end-1,'Label'} == cats{i}) & (AllCalls{2:end,'Label'} == cats{j})) & ...
+                (AllCalls{1:end-1,'Bout'} == AllCalls{2:end,'Bout'}) &...
+                (AllCalls{1:end-1,'File'} == AllCalls{2:end,'File'}));
+            counts(j,i) = {x };
+        end
     end
-end
-output = [output; cell(3,length(cats)+1)];
-output = [output; [{'Transition Count'} cell(1,length(cats))]];
-output = [output;[[{'Category'} cats'] ; [cats, counts]]];
-
-
-counts = cell(length(cats),1);
-for i = 1:length(cats)
+    output = [output; cell(3,length(cats)+1)];
+    output = [output; [{'Transition Count'} cell(1,length(cats))]];
+    output = [output;[[{'Category'} cats'] ; [cats, counts]]];
+    
+    
+    counts = cell(length(cats),1);
+    for i = 1:length(cats)
         counts(i) = {sum(AllCalls{1:end,'Label'} == cats{i})};
-end
-
-output = [output; cell(3,length(cats)+1)];
-output = [output; [{'Total Count'} cell(1,length(cats))]];
-output = [output; cats, counts, cell(length(cats),length(cats)-1)];
-
-
-writetable(cell2table(output),[path file],'WriteVariableNames',0);
+    end
+    
+    output = [output; cell(3,length(cats)+1)];
+    output = [output; [{'Total Count'} cell(1,length(cats))]];
+    output = [output; cats, counts, cell(length(cats),length(cats)-1)];
+    
+    
+    writetable(cell2table(output),[path file],'WriteVariableNames',0);
 end
 
 
