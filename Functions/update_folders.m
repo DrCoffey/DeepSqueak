@@ -79,5 +79,4 @@ end
 
 %Update settings
 guidata(hObject, handles);
-handles = guidata(hObject);
 

@@ -5,7 +5,7 @@ function set_static_box_height_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 %% Set the frequency of each box to be a single value
 
-response = questdlg('This function sets the upper and/or lower frequency of each detected call to a constant value. This cannot be undone.','Set Static Box Height','Continue','Cancel', 'Continue')
+response = questdlg('This function sets the upper and/or lower frequency of each detected call to a constant value. This cannot be undone.','Set Static Box Height','Continue','Cancel', 'Continue');
 if ~strcmp(response,'Continue'); return; end
 
 response = inputdlg({'New lower frequency (kHz) (leave empty to ignore)', 'New upper frequency (kHz) (leave empty to ignore)'});

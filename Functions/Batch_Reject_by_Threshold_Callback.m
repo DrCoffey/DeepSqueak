@@ -60,7 +60,7 @@ cancelled = d.UserData;
 delete(d)
 clear d
 
-if cancelled; return; end;
+if cancelled; return; end
 
 % Select rules were accept or reject is chosen
 rules = rules(~cellfun(@isempty,rules(:,1)),:);
@@ -104,7 +104,7 @@ for currentfile = selections % Do this for each file
                     testValue = Calls.Score(i);
             end
             
-            if  ~xor(testValue >= rule{4}, rule{3});
+            if  ~xor(testValue >= rule{4}, rule{3})
                 if rule{1}
                     accept(i) = true;
                 else

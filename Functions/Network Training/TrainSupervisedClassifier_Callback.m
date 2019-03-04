@@ -45,7 +45,7 @@ for j = 1:length(trainingdata)  % For Each File
     c = 0;
     
     for i = 1:height(Calls)     % For Each Call
-        if Calls.Accept(i) && (Calls.Type(i) ~= 'Noise'
+        if Calls.Accept(i) && Calls.Type(i) ~= 'Noise'
             waitbar(i/height(Calls),h,['Loading File ' num2str(j) ' of '  num2str(length(trainingdata))]);
             c = c + 1;
             audio = Calls.Audio{i};

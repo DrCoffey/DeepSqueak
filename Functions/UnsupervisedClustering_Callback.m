@@ -35,7 +35,7 @@ while ~finished
             freq = nrm(freq);
             duration = repmat(cell2mat(ClusteringData(:,3)),[1 8]);
             duration = nrm(duration);
- 
+            
             close(hb)
             FromExisting = questdlg('From existing model?','Cluster','Yes','No','No');
             switch FromExisting % Load Model
@@ -46,7 +46,7 @@ while ~finished
                     slope_weight = str2double(clusterParameters{1});
                     freq_weight = str2double(clusterParameters{2});
                     duration_weight = str2double(clusterParameters{3});
-
+                    
                     data = [
                         freq     .*  freq_weight,...
                         slope    .*  slope_weight,...
@@ -73,7 +73,7 @@ while ~finished
                     
                 case 'Yes'
                     [FileName,PathName] = uigetfile(fullfile(handles.squeakfolder,'Clustering Models','*.mat'));
-                    load(fullfile(PathName,FileName),'C','freq_weight','slope_weight','duration_weight');
+                    load(fullfile(PathName,FileName),'C','freq_weight','slope_weight','duration_weight','clusterName');
                     data = [
                         freq     .*  freq_weight,...
                         slope    .*  slope_weight,...
@@ -152,25 +152,29 @@ while ~finished
             [clustAssign] = GetARTwarpClusters(ClusteringData(:,4),ARTnet,settings);
     end
     
-%     data = freq;
-%         epsilon = 0.0001;
-% mu = mean(data); 
-% data = data - mean(data)
-% A = data'*data;
-% [V,D,~] = svd(A);
-% whMat = sqrt(size(data,1)-1)*V*sqrtm(inv(D + eye(size(D))*epsilon))*V';
-% Xwh = data*whMat;  
-% invMat = pinv(whMat);
-% 
-% data = Xwh
-%     
-% data  = (freq-mean(freq)) ./ std(freq)
-% [clustAssign, C]= kmeans(data,10,'Distance','sqeuclidean','Replicates',10);
-
+    %     data = freq;
+    %         epsilon = 0.0001;
+    % mu = mean(data);
+    % data = data - mean(data)
+    % A = data'*data;
+    % [V,D,~] = svd(A);
+    % whMat = sqrt(size(data,1)-1)*V*sqrtm(inv(D + eye(size(D))*epsilon))*V';
+    % Xwh = data*whMat;
+    % invMat = pinv(whMat);
+    %
+    % data = Xwh
+    %
+    % data  = (freq-mean(freq)) ./ std(freq)
+    % [clustAssign, C]= kmeans(data,10,'Distance','sqeuclidean','Replicates',10);
+    
     
     %% Assign Names
+    % If the 
+    if strcmp(choice, 'K-means (recommended)') && strcmp(FromExisting, 'Yes')
+        clustAssign = categorical(clustAssign, 1:size(C,1), cellstr(clusterName));
+    end
+    
     [clusterName, rejected, finished] = clusteringGUI(clustAssign, ClusteringData);
-
     
     
 end
@@ -179,14 +183,14 @@ end
 if FromExisting(1) == 'N'
     switch choice
         case 'K-means (recommended)'
-            [FileName,PathName] = uiputfile(fullfile(handles.squeakfolder,'Clustering Models','K-Means Model.mat'),'Save clustering model');
+            [FileName, PathName] = uiputfile(fullfile(handles.squeakfolder, 'Clustering Models', 'K-Means Model.mat'), 'Save clustering model');
             if ~isnumeric(FileName)
-                save(fullfile(PathName,FileName),'C','freq_weight','slope_weight','duration_weight');
+                save(fullfile(PathName, FileName), 'C', 'freq_weight', 'slope_weight', 'duration_weight', 'clusterName');
             end
         case 'ARTwarp'
-            [FileName,PathName] = uiputfile(fullfile(handles.squeakfolder,'Clustering Models','ARTwarp Model.mat'),'Save clustering model');
+            [FileName, PathName] = uiputfile(fullfile(handles.squeakfolder, 'Clustering Models', 'ARTwarp Model.mat'), 'Save clustering model');
             if ~isnumeric(FileName)
-                save(fullfile(PathName,FileName),'ARTnet','settings');
+                save(fullfile(PathName, FileName), 'ARTnet', 'settings');
             end
     end
 end

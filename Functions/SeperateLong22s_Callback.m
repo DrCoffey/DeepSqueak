@@ -158,12 +158,12 @@ for i=1:size(newBoxes,1)
     NewCalls(i).Accept=1;
     
 end
-
+    NewCalls = struct2table(NewCalls);
 
 if nargin == 3
     [FileName,PathName] = uiputfile(fullfile(handles.settings.detectionfolder,trainingdata),'Save Merged Detections');
     waitbar(i/length(newBoxes),hc,'Saving...');
-    Calls = struct2table(NewCalls);
+    Calls = NewCalls;
     save(fullfile(PathName, FileName), 'Calls', '-v7.3');
     update_folders(hObject, eventdata, handles);
     close(hc);

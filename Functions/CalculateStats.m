@@ -1,5 +1,5 @@
 function stats = CalculateStats(I,windowsize,noverlap,nfft,SampleRate,Box,EntropyThreshold,AmplitudeThreshold,verbose)
-if ~(exist('verbose') == 1)
+if nargin <= 8
     verbose = 1;
 end
 
@@ -17,7 +17,7 @@ greaterthannoise=smooth(stats.Entropy,5)' < 1-EntropyThreshold & (mx>(max(mx*Amp
 iter = 0;
 while sum(greaterthannoise)<5
     iter = iter+1;
-    if iter > 5;
+    if iter > 5
         if verbose
             disp('Could not detect contour');
         end
@@ -25,7 +25,7 @@ while sum(greaterthannoise)<5
         break;
     end
     greaterthannoise=stats.Entropy < 1-EntropyThreshold+iter*.1 & (mx>(max(mx*AmplitudeThreshold - iter*.1))); % Select points greater than 0.2 time max
-    if iter > 10; disp('Help!');end;
+    if iter > 10; disp('Help!'); end
 end
 try
     ridgeFreq=ridgeFreq(greaterthannoise);

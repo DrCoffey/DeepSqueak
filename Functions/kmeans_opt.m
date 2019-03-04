@@ -37,7 +37,7 @@ if nargin>2, Cutoff=cell2mat(varargin(2)); else, Cutoff=0.95; end
 if nargin>3, Repeats=cell2mat(varargin(3)); else, Repeats=3; end
 
 D=zeros(ToTest,1); %initialize the results matrix
-XData=[1:1:ToTest];
+XData= 1:1:ToTest;
 % Create figure
 figure1 = figure('Color',[1 1 1],'Position',[200 200 470 400]);
 axes1 = axes('Parent',figure1,'LineWidth',1,'TickDir','out',...
@@ -64,7 +64,7 @@ for c=1:1:ToTest %for each sample
     drawnow
 end
 
-[res_x, idx_of_result] = knee_pt(D,[1:1:ToTest],1);
+[res_x, idx_of_result] = knee_pt(D, 1:1:ToTest, 1);
 scatter(res_x,D(idx_of_result),50,'MarkerEdgeColor',[1 0 0],...
               'MarkerFaceColor',[1 0 0]);
 title(axes1,['Elbow Location: ' num2str(idx_of_result)]);
