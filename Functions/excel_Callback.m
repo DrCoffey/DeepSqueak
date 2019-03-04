@@ -29,7 +29,7 @@ for j = 1:length(fname) % Do this for each file
     for i = 1:height(Calls) % Do this for each call
         waitbar(i/height(Calls),hc,['Calculating call statistics for file ' num2str(j) ' of ' num2str(length(fname))]);
         
-        if includereject || Calls.Accept
+        if includereject || Calls.Accept(i)
             % Get spectrogram data
             [I,windowsize,noverlap,nfft,rate,box] = CreateSpectrogram(Calls(i, :));
             % Calculate statistics
