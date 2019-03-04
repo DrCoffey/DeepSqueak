@@ -45,7 +45,7 @@ for currentfile =selections % Do this for each file
     % Get tonality
     if tonality_low_checkbox && tonality_low_checkbox
         tonality = [];
-        for i = Calls'
+        for i = Calls
             [I,windowsize,noverlap,nfft,rate,box,s,fr,ti,audio,AudioRange] = CreateSpectrogram(i);
             stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.settings.EntropyThreshold,handles.settings.AmplitudeThreshold);
             tonality = [tonality; stats.SignalToNoise];
