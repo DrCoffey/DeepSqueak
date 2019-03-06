@@ -113,10 +113,9 @@ for i = 1:length(begin_time)
     WindR=round((end_time__(i)+duration__(i)) .* audio_info.SampleRate);
     WindR = min(WindR,audio_info.TotalSamples); % Prevent WindR from being greater than total samples
     
-    audio = audioread(audio_info.Filename,([WindL WindR]),'native');
-    audio=[pad; mean(audio - mean(audio,1,'native'),2,'native')]; % Take the mean of the audio channels
-    
-    
+    audio = audioread(audio_info.Filename,([WindL WindR]));
+    audio = [pad; mean(audio - mean(audio,1) ,2)]; % Take the mean of the audio channels
+    audio = int16(audio * 32767); % Convert to int16
     
     Calls(i,:) = {
         audio_info.SampleRate,...
