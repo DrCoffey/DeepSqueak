@@ -20,7 +20,7 @@ if strcmp(ext,'.mat')
         % Backwards compatibility with struct format for detection files
         if isstruct(Calls); Calls = struct2table(Calls); end
         
-        Calls = Calls(Calls.Accept, :);
+        Calls = Calls(Calls.Accept == 1, :);
         begintime = Calls.Box(:,1); % Get Box Position
         CallClass = Calls.Type;
         dist = pdist2(begintime,begintime);

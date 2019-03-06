@@ -48,7 +48,7 @@ for k = 1:length(trainingdata)
     mkdir(fname);
     
     % Remove Rejects
-    Calls = Calls(Calls.Accept, :);
+    Calls = Calls(Calls.Accept == 1, :);
     
     % Find max call frequency for cutoff
     maxFR = max(sum(Calls.Box(:,[2,4])));

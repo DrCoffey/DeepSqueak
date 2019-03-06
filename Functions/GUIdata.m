@@ -29,6 +29,8 @@ classdef GUIdata < handle
                 obj.settings.EntropyThreshold = 0.3;
                 obj.settings.labels = {'FF','FM','Trill','Split',' ',' ',' ',' ',' ',' '};
                 obj.settings.DisplayTimePadding = 0;
+                disp('Settings file not found. Create a new one...')
+                saveSettings(obj)
             end
         end
         
