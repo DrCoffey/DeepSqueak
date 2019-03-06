@@ -8,6 +8,7 @@ if nargin == 3 % if "Load Calls" button pressed
     handles.current_detection_file = handles.detectionfiles(handles.current_file_id).name;
 end
 
+handles.data.calls = [];
 tmp = load(fullfile(handles.detectionfiles(handles.current_file_id).folder,  handles.current_detection_file), 'Calls'); %get currently selected option from menu
 % Backwards compatibility with struct format for detection files
 if isstruct(tmp.Calls); tmp.Calls = struct2table(tmp.Calls); end

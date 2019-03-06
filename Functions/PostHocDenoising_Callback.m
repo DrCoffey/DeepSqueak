@@ -2,9 +2,6 @@ function PostHocDenoising_Callback(hObject, eventdata, handles)
 
 % This function uses a convolutional neural network, trained in
 % "TrainPostHocDenoiser_Callback.m", to seperate noise from USVs.
-if isfield(handles,'calls')
-    handles = rmfield(handles,'calls');
-end
 
 % Load the network
 try
