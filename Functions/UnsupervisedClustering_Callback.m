@@ -226,8 +226,9 @@ for j = 1:length(files)  % For Each File
         
         % Update the cluster assignment and rejected status
         Calls.Type(ClusteringData{i,7}) = clusterName(clustAssign(i));
-        if rejected(i)
+        if rejected(i) || clusterName(clustAssign(i)) == 'Noise' || clusterName(clustAssign(i)) == 'noise'
             Calls.Accept(ClusteringData{i,7}) = 0;
+            Calls.Type(ClusteringData{i,7}) = categorical({'Noise'});
         end
     end
     % If forgot why I added this line, but I feel like I had a reason... -RM
