@@ -13,8 +13,9 @@ minfreq = str2num(settings{2});
 
 h = waitbar(0,'Loading Files');
 %% Load Files
+AllCalls = table([],[],[],[],[],'VariableNames',{'BeginTime_s_','Label','File','Bout','Accepted'});
+
 if strcmp(ext,'.mat')
-    AllCalls = table([],[],[],[],[],'VariableNames',{'BeginTime_s_','Label','File','Bout','Accepted'});
     for i = 1:length(filename)
         load([filepath filename{i}],'Calls');
         % Backwards compatibility with struct format for detection files
@@ -37,7 +38,7 @@ if strcmp(ext,'.mat')
         end
         
     end
-else
+elseif strcmp(ext,'.xlsx')
     for i = 1:length(filename)
         t = readtable([filepath filename{i}]);
         t = t(t.Accepted == 1,{'Accepted' 'BeginTime_s_','Label'});
@@ -55,6 +56,7 @@ else
         
     end
 end
+AllCalls.Label = categorical(AllCalls.Label);
 AllCalls = sortrows(AllCalls,{'File' 'BeginTime_s_'});
 
 %% Exclude rare classes and rejected calls
