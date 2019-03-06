@@ -69,8 +69,8 @@ for j = 1:length(selections) % Do this for each file
             im = mat2gray(flipud(I),[med*0.1, med*35]); 
                         
             X = imresize(im,imageSize);
-            [Class,score] = classify(ClassifyNet,X);
-            Calls.Score(i) = score(1);
+            [Class, score] = classify(ClassifyNet, X);
+            Calls.Score(i) = max(score);
             Calls.Type(i) = Class;
         end
     end

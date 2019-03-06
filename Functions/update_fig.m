@@ -1,17 +1,17 @@
 function update_fig(hObject, eventdata, handles)
 % profile on
 % Update the display
-if ~isfield(handles,'calls') 
-    return
-end
+% if ~isfield(handles,'calls') 
+%     return
+% end
     
-if isempty(handles.calls)
+if isempty(handles.data.calls)
     errordlg('No calls in file')
     return
 end
 
 % Get spectrogram data
-[I,windowsize,noverlap,nfft,rate,box,s,fr,ti,audio,AudioRange] = CreateSpectrogram(handles.calls(handles.currentcall, :));
+[I,windowsize,noverlap,nfft,rate,box,s,fr,ti,audio,AudioRange] = CreateSpectrogram(handles.data.calls(handles.data.currentcall, :));
 
 % Plot Spectrogram
 set(handles.axes1,'YDir', 'normal','YColor',[1 1 1],'XColor',[1 1 1],'Clim',[0 2*mean(max(I))]);
@@ -19,7 +19,7 @@ set(handles.axes1,'YDir', 'normal','YColor',[1 1 1],'XColor',[1 1 1],'Clim',[0 2
 set(handles.spect,'CData',imgaussfilt(abs(s)),'XData',ti,'YData',fr/1000);
 
 if handles.settings.DisplayTimePadding ~= 0
-    meantime = handles.calls.RelBox(handles.currentcall, 1) + handles.calls.RelBox(handles.currentcall, 3) / 2;
+    meantime = handles.data.calls.RelBox(handles.data.currentcall, 1) + handles.data.calls.RelBox(handles.data.currentcall, 3) / 2;
     set(handles.axes1,'Xlim',[meantime - (handles.settings.DisplayTimePadding / 2), meantime + (handles.settings.DisplayTimePadding / 2)], 'color', 'k')
 else
     set(handles.axes1,'Xlim',[handles.spect.XData(1) handles.spect.XData(end)])
@@ -28,16 +28,16 @@ end
 set(handles.axes1,'ylim',[handles.settings.LowFreq handles.settings.HighFreq]);
 stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.settings.EntropyThreshold,handles.settings.AmplitudeThreshold);
 
-handles.calls.Power(handles.currentcall) = stats.MaxPower;
+handles.data.calls.Power(handles.data.currentcall) = stats.MaxPower;
 
 % Update slider with the call ID 
-set(handles.slider1, 'Value', (handles.currentcall-1) / (height(handles.calls)-1));
+set(handles.slider1, 'Value', (handles.data.currentcall-1) / (height(handles.data.calls)-1));
 
 % Box Creation
-if handles.calls.Accept(handles.currentcall)
-    set(handles.box,'Position',handles.calls.RelBox(handles.currentcall, :),'EdgeColor','g')
+if handles.data.calls.Accept(handles.data.currentcall)
+    set(handles.box,'Position',handles.data.calls.RelBox(handles.data.currentcall, :),'EdgeColor','g')
 else
-    set(handles.box,'Position',handles.calls.RelBox(handles.currentcall, :),'EdgeColor','r')
+    set(handles.box,'Position',handles.data.calls.RelBox(handles.data.currentcall, :),'EdgeColor','r')
 end
 
 % Blur Box
@@ -60,19 +60,19 @@ ContourLine = lsline(handles.axes7);
 set(ContourLine,'LineStyle','--','Color','y');
 
 % Update call statistics text
-set(handles.Ccalls,'String',['Call: ' num2str(handles.currentcall) '/' num2str(height(handles.calls))])
-set(handles.score,'String',['Score: ' num2str(handles.calls.Score(handles.currentcall))])
-if handles.calls.Accept(handles.currentcall)
+set(handles.Ccalls,'String',['Call: ' num2str(handles.data.currentcall) '/' num2str(height(handles.data.calls))])
+set(handles.score,'String',['Score: ' num2str(handles.data.calls.Score(handles.data.currentcall))])
+if handles.data.calls.Accept(handles.data.currentcall)
     set(handles.status,'String','Accepted')
 else
     set(handles.status,'String','Rejected')
 end
-set(handles.text19,'String',['Label: ' char(handles.calls.Type(handles.currentcall))]);
+set(handles.text19,'String',['Label: ' char(handles.data.calls.Type(handles.data.currentcall))]);
 set(handles.freq,'String',['Frequency: ' num2str(stats.PrincipalFreq,'%.1f') ' kHz']);
 set(handles.slope,'String',['Slope: ' num2str(stats.Slope,'%.3f') ' kHz/s']);
 set(handles.duration,'String',['Duration: ' num2str(stats.DeltaTime*1000,'%.0f') ' ms']);
 set(handles.sinuosity,'String',['Sinuosity: ' num2str(stats.Sinuosity,'%.4f')]);
-set(handles.powertext,'String',['Avg. Power: ' num2str(handles.calls.Power(handles.currentcall)) ' dB/Hz'])
+set(handles.powertext,'String',['Avg. Power: ' num2str(handles.data.calls.Power(handles.data.currentcall)) ' dB/Hz'])
 set(handles.tonalitytext,'String',['Avg. Tonality: ' num2str(stats.SignalToNoise,'%.4f')]);
 
 % Waveform
@@ -99,14 +99,14 @@ set(handles.axes3,'Color',[.1 .1 .1],'YColor',[1 1 1],'XColor',[1 1 1],'Box','of
 hold(handles.axes3,'off')
 
 % Plot Call Position
-calltime = handles.calls.Box(handles.currentcall, 1);
+calltime = handles.data.calls.Box(handles.data.currentcall, 1);
 handles.CurrentCallLinePosition.XData = [calltime, calltime];
-if handles.calls.Accept(handles.currentcall)
+if handles.data.calls.Accept(handles.data.currentcall)
     handles.CurrentCallLinePosition.Color = [0,1,0];
 else
     handles.CurrentCallLinePosition.Color = [1,0,0];
 end
 set(handles.CurrentCallLineLext,'Position',[calltime,1.2,0],'String',[num2str(stats.BeginTime,'%.1f') ' s']);
 
-guidata(hObject, handles);
+% guidata(hObject, handles);
 

@@ -152,7 +152,7 @@ handles = guidata(hObject);  % Get newest version of handles
 
 
 set(handles.TonalitySlider,'Value',handles.settings.EntropyThreshold);
-
+handles.data = data;
 guidata(hObject, handles);
 
 % Make the other figures black
@@ -214,38 +214,38 @@ varargout{1} = handles.output;
 % --- Executes on button press in PlayCall.
 function PlayCall_Callback(hObject, eventdata, handles)
 % Play the sound within the boxs
-audio =  handles.calls.Audio{handles.currentcall};
+audio =  handles.data.calls.Audio{handles.data.currentcall};
 if ~isfloat(audio)
     audio = double(audio) / (double(intmax(class(audio)))+1);
 elseif ~isa(audio,'double')
     audio = double(audio);
 end
 
-playbackRate = handles.calls.Rate(handles.currentcall) * handles.settings.playback_rate; % set playback rate
+playbackRate = handles.data.calls.Rate(handles.data.currentcall) * handles.settings.playback_rate; % set playback rate
 
 % Bandpass Filter
-% audio = bandpass(audio,[handles.calls.RelBox(handles.currentcall, 2), handles.calls.RelBox(handles.currentcall, 2) + handles.calls.RelBox(handles.currentcall, 4)] * 1000,handles.calls.Rate(handles.currentcall));
+% audio = bandpass(audio,[handles.data.calls.RelBox(handles.data.currentcall, 2), handles.data.calls.RelBox(handles.data.currentcall, 2) + handles.data.calls.RelBox(handles.data.currentcall, 4)] * 1000,handles.data.calls.Rate(handles.data.currentcall));
 paddedsound = [zeros(3125,1); audio; zeros(3125,1)];
-audiostart = handles.calls.RelBox(handles.currentcall, 1) * handles.calls.Rate(handles.currentcall);
-audiolength = handles.calls.RelBox(handles.currentcall, 3) * handles.calls.Rate(handles.currentcall);
+audiostart = handles.data.calls.RelBox(handles.data.currentcall, 1) * handles.data.calls.Rate(handles.data.currentcall);
+audiolength = handles.data.calls.RelBox(handles.data.currentcall, 3) * handles.data.calls.Rate(handles.data.currentcall);
 soundsc(paddedsound(round(audiostart:audiostart+audiolength + 6249)),playbackRate);
 guidata(hObject, handles);
 
 % --- Executes on button press in NextCall.
 function NextCall_Callback(hObject, eventdata, handles)
-if handles.currentcall < height(handles.calls) % If not the last call
-    handles.currentcall=handles.currentcall+1;
+if handles.data.currentcall < height(handles.data.calls) % If not the last call
+    handles.data.currentcall=handles.data.currentcall+1;
     update_fig(hObject, eventdata, handles);
 end
-guidata(hObject, handles);
+% guidata(hObject, handles);
 
 % --- Executes on button press in PreviousCall.
 function PreviousCall_Callback(hObject, eventdata, handles)
-if handles.currentcall>1 % If not the first call
-    handles.currentcall=handles.currentcall-1;
+if handles.data.currentcall>1 % If not the first call
+    handles.data.currentcall=handles.data.currentcall-1;
     update_fig(hObject, eventdata, handles);
 end
-guidata(hObject, handles);
+% guidata(hObject, handles);
 
 % --- Executes on selection change in Networks Folder Pop up.
 function neuralnetworkspopup_Callback(hObject, eventdata, handles)
@@ -279,13 +279,13 @@ end
 
 % --- Executes on button press in AcceptCall.
 function AcceptCall_Callback(hObject, eventdata, handles)
-handles.calls.Accept(handles.currentcall) = 1;
+handles.data.calls.Accept(handles.data.currentcall) = 1;
 update_fig(hObject, eventdata, handles);
 guidata(hObject, handles);
 
 % --- Executes on button press in RejectCall.
 function RejectCall_Callback(hObject, eventdata, handles)
-handles.calls.Accept(handles.currentcall) = 0;
+handles.data.calls.Accept(handles.data.currentcall) = 0;
 update_fig(hObject, eventdata, handles);
 guidata(hObject, handles);
 
@@ -294,9 +294,9 @@ function axes1_CreateFcn(hObject, eventdata, handles)
 
 % --- Executes on slider movement.
 function slider1_Callback(hObject, eventdata, handles)
-handles.currentcall = ceil(get(hObject,'Value')*height(handles.calls));
-if handles.currentcall < 1
-    handles.currentcall = 1;
+handles.data.currentcall = ceil(get(hObject,'Value')*height(handles.data.calls));
+if handles.data.currentcall < 1
+    handles.data.currentcall = 1;
 end
 update_fig(hObject, eventdata, handles);
 
@@ -327,7 +327,7 @@ function Untitled_2_Callback(hObject, eventdata, handles)
 
 % --- Executes on key press with focus on figure1 or any of its controls.
 function figure1_WindowKeyPressFcn(hObject, eventdata, handles)
-
+tic
 switch eventdata.Character
     case 'p'
         PlayCall_Callback(hObject, eventdata, handles)
@@ -345,9 +345,10 @@ switch eventdata.Character
         %% Update the call labels
         % Index of the shortcut
         idx = contains(handles.LabelShortcuts, eventdata.Character);
-        handles.calls.Type(handles.currentcall) = categorical(handles.settings.labels(idx));
+        handles.data.calls.Type(handles.data.currentcall) = categorical(handles.settings.labels(idx));
         update_fig(hObject, eventdata, handles);
 end
+disp(toc)
 
 function figure1_KeyPressFcn(hObject, eventdata, handles)
 
@@ -416,12 +417,12 @@ function rectangle_Callback(hObject, eventdata, handles)
 fcn = makeConstrainToRectFcn('imrect',[handles.spect.XData(1),handles.spect.XData(end)],[handles.spect.YData(1),handles.spect.YData(end)]); %constrain to edges of window
 newbox=imrect(handles.axes1,'PositionConstraintFcn',fcn);
 handles.pos=getPosition(newbox);
-difference = handles.pos - handles.calls{handles.currentcall, 'RelBox'};
-handles.calls{handles.currentcall, 'RelBox'} = difference + handles.calls{handles.currentcall, 'RelBox'};
-handles.calls{handles.currentcall, 'Box'} = difference + handles.calls{handles.currentcall, 'Box'};
+difference = handles.pos - handles.data.calls{handles.data.currentcall, 'RelBox'};
+handles.data.calls{handles.data.currentcall, 'RelBox'} = difference + handles.data.calls{handles.data.currentcall, 'RelBox'};
+handles.data.calls{handles.data.currentcall, 'Box'} = difference + handles.data.calls{handles.data.currentcall, 'Box'};
 delete(newbox);
 update_fig(hObject, eventdata, handles);
-guidata(hObject, handles);
+% guidata(hObject, handles);
 
 % --------------------------------------------------------------------
 function select_audio_Callback(hObject, eventdata, handles)
@@ -455,17 +456,17 @@ function export_raven_Callback(hObject, eventdata, handles)
 raventable = [{'Selection'} {'View'} {'Channel'} {'Begin Time (s)'} {'End Time (s)'} {'Low Freq (Hz)'} {'High Freq (Hz)'} {'Delta Time (s)'} {'Delta Freq (Hz)'} {'Avg Power Density (dB FS)'} {'Annotation'}];
 View = 'Spectrogram 1';
 Channel = 1;
-for i = 1:height(handles.calls)
-    if handles.calls.Accept(i)
+for i = 1:height(handles.data.calls)
+    if handles.data.calls.Accept(i)
         Selection = i;
-        BeginTime = handles.calls.Box(i, 1);
-        EndTime = sum(handles.calls.Box(i ,[1, 3]));
-        LowFreq = handles.calls.Box(i, 2) * 1000;
-        HighFreq = sum(handles.calls.Box(i, [2, 4])) * 1000;
+        BeginTime = handles.data.calls.Box(i, 1);
+        EndTime = sum(handles.data.calls.Box(i ,[1, 3]));
+        LowFreq = handles.data.calls.Box(i, 2) * 1000;
+        HighFreq = sum(handles.data.calls.Box(i, [2, 4])) * 1000;
         DeltaTime = EndTime - BeginTime;
         DeltaFreq = HighFreq - LowFreq;
         AvgPwr = 1;
-        Annotation = handles.calls.Accept(i);
+        Annotation = handles.data.calls.Accept(i);
         raventable = [raventable; {Selection} {View} {Channel} {BeginTime} {EndTime} {LowFreq} {HighFreq} {DeltaTime} {DeltaFreq} {AvgPwr} {Annotation}];
     end
 end
@@ -487,16 +488,16 @@ function SortCalls(hObject, eventdata, handles, type)
 h = waitbar(0,'Sorting...');
 switch type
     case 'score'
-        [~,idx] = sort(handles.calls.Score);
+        [~,idx] = sort(handles.data.calls.Score);
     case 'time'
-        [~,idx] = sortrows(handles.calls.Box, 1);
+        [~,idx] = sortrows(handles.data.calls.Box, 1);
     case 'duration'
-        [~,idx] = sortrows(handles.calls.Box, 4);
+        [~,idx] = sortrows(handles.data.calls.Box, 4);
     case 'frequency'
-        [~,idx] = sort(sum(handles.calls.Box(:, [2, 2, 4]), 2));
+        [~,idx] = sort(sum(handles.data.calls.Box(:, [2, 2, 4]), 2));
 end
-handles.calls = handles.calls(idx, :);
-handles.currentcall=1;
+handles.data.calls = handles.data.calls(idx, :);
+handles.data.currentcall=1;
 
 update_fig(hObject, eventdata, handles);
 close(h);

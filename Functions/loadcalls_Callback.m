@@ -11,9 +11,9 @@ end
 tmp = load(fullfile(handles.detectionfiles(handles.current_file_id).folder,  handles.current_detection_file), 'Calls'); %get currently selected option from menu
 % Backwards compatibility with struct format for detection files
 if isstruct(tmp.Calls); tmp.Calls = struct2table(tmp.Calls); end
-
-handles.calls=tmp.Calls;
-handles.currentcall=1;
+handles.data = data;
+handles.data.calls=tmp.Calls;
+handles.data.currentcall=1;
 
 
 cla(handles.axes7);
@@ -55,7 +55,7 @@ set(handles.axes4,'YTick',[]);
 
 
 % Plot Call Position
-CallTime = handles.calls.Box(:,1);
+CallTime = handles.data.calls.Box(:,1);
 
 line([0 max(CallTime)],[0 0],'LineWidth',1,'Color','w','Parent', handles.axes5);
 line([0 max(CallTime)],[1 1],'LineWidth',1,'Color','w','Parent', handles.axes5);
