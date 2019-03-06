@@ -4,7 +4,7 @@ function excel_Callback(hObject, eventdata, handles)
 
 %% Select Files
 % Select the files
-[fname, fpath] = uigetfile([char(handles.settings.detectionfolder) '/*.mat'],'Select Files to Export:','MultiSelect', 'on');
+[fname, fpath] = uigetfile([char(handles.data.settings.detectionfolder) '/*.mat'],'Select Files to Export:','MultiSelect', 'on');
 if isnumeric(fname); return; end
 fname = cellstr(fname);
 
@@ -14,7 +14,7 @@ if isempty(includereject); return; end
 includereject = strcmp(includereject,'Yes');
 
 % Specifiy the output folder
-PathName = uigetdir(handles.settings.detectionfolder,'Select Output Folder');
+PathName = uigetdir(handles.data.settings.detectionfolder,'Select Output Folder');
 if isnumeric(PathName); return; end
 
 %% Make the output tables
@@ -33,7 +33,7 @@ for j = 1:length(fname) % Do this for each file
             % Get spectrogram data
             [I,windowsize,noverlap,nfft,rate,box] = CreateSpectrogram(Calls(i, :));
             % Calculate statistics
-            stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.settings.EntropyThreshold,handles.settings.AmplitudeThreshold);
+            stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.data.settings.EntropyThreshold,handles.data.settings.AmplitudeThreshold);
             
             ID = i;
             Label = Calls.Type(i);

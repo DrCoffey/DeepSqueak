@@ -1,4 +1,11 @@
 # Changelog
+## 2.5.0 2019-03-04
+K-means clustering models are now saved with the cluster names, so that when clustering with an existing model, the names don't need to be re-entered.
+
+Improved the "Tools > Automatic Review > Batch Reject by Threshold" menu to allow for better permutations of score, duration, tonality, frequency, and power.
+
+Detection files are now tables instead of structures. Everything should be backwards compatible,
+
 ## 2.4.1 2019-03-01
 Updated threshold rejection to use power instead of amplitude.
 

@@ -72,7 +72,7 @@ while ~finished
                     end
                     
                 case 'Yes'
-                    [FileName,PathName] = uigetfile(fullfile(handles.squeakfolder,'Clustering Models','*.mat'));
+                    [FileName,PathName] = uigetfile(fullfile(handles.data.squeakfolder,'Clustering Models','*.mat'));
                     load(fullfile(PathName,FileName),'C','freq_weight','slope_weight','duration_weight','clusterName');
                     data = [
                         freq     .*  freq_weight,...
@@ -141,7 +141,7 @@ while ~finished
                     end
                     
                 case 'Yes'
-                    [FileName,PathName] = uigetfile(fullfile(handles.squeakfolder,'Clustering Models','*.mat'));
+                    [FileName,PathName] = uigetfile(fullfile(handles.data.squeakfolder,'Clustering Models','*.mat'));
                     load(fullfile(PathName,FileName),'ARTnet','settings');
                     if exist('ARTnet') ~= 1
                         warndlg('ARTnet model could not be found. Is this file a trained ARTwarp2 model?')
@@ -183,12 +183,12 @@ end
 if FromExisting(1) == 'N'
     switch choice
         case 'K-means (recommended)'
-            [FileName, PathName] = uiputfile(fullfile(handles.squeakfolder, 'Clustering Models', 'K-Means Model.mat'), 'Save clustering model');
+            [FileName, PathName] = uiputfile(fullfile(handles.data.squeakfolder, 'Clustering Models', 'K-Means Model.mat'), 'Save clustering model');
             if ~isnumeric(FileName)
                 save(fullfile(PathName, FileName), 'C', 'freq_weight', 'slope_weight', 'duration_weight', 'clusterName');
             end
         case 'ARTwarp'
-            [FileName, PathName] = uiputfile(fullfile(handles.squeakfolder, 'Clustering Models', 'ARTwarp Model.mat'), 'Save clustering model');
+            [FileName, PathName] = uiputfile(fullfile(handles.data.squeakfolder, 'Clustering Models', 'ARTwarp Model.mat'), 'Save clustering model');
             if ~isnumeric(FileName)
                 save(fullfile(PathName, FileName), 'ARTnet', 'settings');
             end

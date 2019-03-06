@@ -8,7 +8,7 @@ if isempty(handles.networkfiles)
     errordlg('No Network Selected')
     return
 end
-if exist(handles.settings.detectionfolder,'dir')==0
+if exist(handles.data.settings.detectionfolder,'dir')==0
     errordlg('Please Select Output Folder')
     uiwait
     load_detectionFolder_Callback(hObject, eventdata, handles)
@@ -38,7 +38,7 @@ for k=1:length(networkselections)
     prompt = {'Total Analysis Length (Seconds; 0 = Full Duration)','Analysis Chunk Length (Seconds; GPU Dependent)','Overlap (Seconds)','Frequency Cut Off High (kHZ)','Frequency Cut Off Low (kHZ)','Score Threshold (0-1)','Append Date to FileName (1 = yes)'};
     dlg_title = ['Settings for ' handles.networkfiles(networkselections(k)).name];
     num_lines=[1 100]; options.Resize='off'; options.WindowStyle='modal'; options.Interpreter='tex';
-    def = handles.settings.detectionSettings;
+    def = handles.data.settings.detectionSettings;
     current_settings = str2double(inputdlg(prompt,dlg_title,num_lines,def,options));
     
     if isempty(current_settings) % Stop if user presses cancel
@@ -46,7 +46,7 @@ for k=1:length(networkselections)
     end
     
     Settings = [Settings, current_settings];
-    handles.settings.detectionSettings = sprintfc('%g',Settings(:,1))';
+    handles.data.settings.detectionSettings = sprintfc('%g',Settings(:,1))';
 end
 
 if isempty(Settings)
@@ -54,8 +54,8 @@ if isempty(Settings)
 end
 
 % Save the new settings
-settings = handles.settings;
-save([handles.squeakfolder '/settings.mat'],'-struct','settings')
+handles.data.saveSettings();
+
 update_folders(hObject, eventdata, handles);
 handles = guidata(hObject);  % Get newest version of handles
 
@@ -93,9 +93,9 @@ for j = 1:length(audioselections)
     
     % Append date to filename
     if Settings(7)
-        fname = fullfile(handles.settings.detectionfolder,[audioname ' ' detectiontime '.mat']);
+        fname = fullfile(handles.data.settings.detectionfolder,[audioname ' ' detectiontime '.mat']);
     else
-        fname = fullfile(handles.settings.detectionfolder,[audioname '.mat']);
+        fname = fullfile(handles.data.settings.detectionfolder,[audioname '.mat']);
     end
     
     % Display the number of calls

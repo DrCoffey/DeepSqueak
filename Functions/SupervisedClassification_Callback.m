@@ -3,7 +3,7 @@ function SupervisedClassification_Callback(hObject, eventdata, handles)
 % This function uses a convolutional neural network, trained in
 % "TrainSupervisedClassifier_Callback.m", to classify USVs.
 
-[FileName,PathName] = uigetfile(fullfile(handles.squeakfolder,'Clustering Models','*.mat'),'Select Network');
+[FileName,PathName] = uigetfile(fullfile(handles.data.squeakfolder,'Clustering Models','*.mat'),'Select Network');
 load([PathName FileName],'ClassifyNet','wind','noverlap','nfft','lowFreq','highFreq','imageSize');
 
 if exist('ClassifyNet') ~= 1
@@ -13,7 +13,7 @@ end
 
 
 
-if exist(handles.settings.detectionfolder,'dir')==0
+if exist(handles.data.settings.detectionfolder,'dir')==0
     errordlg('Please Select Detection Folder')
     uiwait
     load_detectionFolder_Callback(hObject, eventdata, handles)

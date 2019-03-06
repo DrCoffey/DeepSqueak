@@ -8,13 +8,13 @@ end
 
 % Load the network
 try
-    load(fullfile(handles.squeakfolder,'Denoising Networks','CleaningNet.mat'),'DenoiseNet','wind','noverlap','nfft','lowFreq','highFreq','imageSize');
+    load(fullfile(handles.data.squeakfolder,'Denoising Networks','CleaningNet.mat'),'DenoiseNet','wind','noverlap','nfft','lowFreq','highFreq','imageSize');
 catch
     errordlg(sprintf('Denoising network not found. \nNetwork must be named "CleaningNet.mat" \n In folder: "Denoising Networks"'))
     return
 end
 
-if exist(handles.settings.detectionfolder,'dir') == 0
+if exist(handles.data.settings.detectionfolder,'dir') == 0
     errordlg('Please Select Detection Folder')
     uiwait
     load_detectionFolder_Callback(hObject, eventdata, handles)

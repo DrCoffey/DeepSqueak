@@ -1,8 +1,8 @@
 function NewCalls = SeperateLong22s_Callback(hObject, eventdata, handles, inputfile, Calls)
 %% Get if clicked through menu, or using the long call network
 if nargin == 3
-    [trainingdata, trainingpath] = uigetfile([handles.settings.detectionfolder '/*.mat'],'Select Detection File','MultiSelect', 'off');
-    [audiodata, audiopath] = uigetfile({'*.wav;*.wmf;*.flac;*.UVD' 'Audio File';'*.wav' 'WAV (*.wav)'; '*.wmf' 'WMF (*.wmf)'; '*.flac' 'FLAC (*.flac)'; '*.UVD' 'Ultravox File (*.UVD)'},['Select Corresponding Audio File for ' trainingdata],handles.settings.audiofolder);
+    [trainingdata, trainingpath] = uigetfile([handles.data.settings.detectionfolder '/*.mat'],'Select Detection File','MultiSelect', 'off');
+    [audiodata, audiopath] = uigetfile({'*.wav;*.wmf;*.flac;*.UVD' 'Audio File';'*.wav' 'WAV (*.wav)'; '*.wmf' 'WMF (*.wmf)'; '*.flac' 'FLAC (*.flac)'; '*.UVD' 'Ultravox File (*.UVD)'},['Select Corresponding Audio File for ' trainingdata],handles.data.settings.audiofolder);
     inputfile = [audiopath audiodata];
     hc = waitbar(0,'Loading File');
     load([trainingpath trainingdata],'Calls');
@@ -161,7 +161,7 @@ end
     NewCalls = struct2table(NewCalls);
 
 if nargin == 3
-    [FileName,PathName] = uiputfile(fullfile(handles.settings.detectionfolder,trainingdata),'Save Merged Detections');
+    [FileName,PathName] = uiputfile(fullfile(handles.data.settings.detectionfolder,trainingdata),'Save Merged Detections');
     waitbar(i/length(newBoxes),hc,'Saving...');
     Calls = NewCalls;
     save(fullfile(PathName, FileName), 'Calls', '-v7.3');

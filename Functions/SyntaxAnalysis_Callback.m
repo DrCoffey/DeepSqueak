@@ -1,6 +1,6 @@
 function SyntaxAnalysis_Callback(hObject, eventdata, handles)
 
-[filename, filepath] = uigetfile({'*.mat;*.xlsx'},'Select Detection Files OR Exported Detections','MultiSelect', 'on',char(handles.settings.detectionfolder));
+[filename, filepath] = uigetfile({'*.mat;*.xlsx'},'Select Detection Files OR Exported Detections','MultiSelect', 'on',char(handles.data.settings.detectionfolder));
 if isnumeric(filename); return; end
 filename = cellstr(filename);
 

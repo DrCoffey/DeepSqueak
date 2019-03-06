@@ -8,8 +8,8 @@ function TrainSupervisedClassifier_Callback(hObject, eventdata, handles)
 
 %% Prepare the data
 % Select files
-cd(handles.squeakfolder);
-[trainingdata, trainingpath] = uigetfile([handles.settings.detectionfolder '/*.mat'],'Select Detection File(s) for Training ','MultiSelect', 'on');
+cd(handles.data.squeakfolder);
+[trainingdata, trainingpath] = uigetfile([handles.data.settings.detectionfolder '/*.mat'],'Select Detection File(s) for Training ','MultiSelect', 'on');
 if isnumeric(trainingdata)  % If user cancels
     return
 end

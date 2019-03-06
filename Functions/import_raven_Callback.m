@@ -3,9 +3,9 @@ function import_raven_Callback(hObject, eventdata, handles)
 % Requires a Raven table and audio file.
 % (http://www.birds.cornell.edu/brp/raven/RavenOverview.html)
 
-[ravenname,ravenpath] = uigetfile([handles.squeakfolder '/*.txt'],'Select Raven Log');
+[ravenname,ravenpath] = uigetfile([handles.data.squeakfolder '/*.txt'],'Select Raven Log');
 raven = tdfread([ravenpath ravenname]);
-[audioname, audiopath] = uigetfile({'*.wav;*.wmf;*.flac;*.UVD' 'Audio File';'*.wav' 'WAV (*.wav)'; '*.wmf' 'WMF (*.wmf)'; '*.flac' 'FLAC (*.flac)'; '*.UVD' 'Ultravox File (*.UVD)'},'Select Audio File',handles.settings.audiofolder);
+[audioname, audiopath] = uigetfile({'*.wav;*.wmf;*.flac;*.UVD' 'Audio File';'*.wav' 'WAV (*.wav)'; '*.wmf' 'WMF (*.wmf)'; '*.flac' 'FLAC (*.flac)'; '*.UVD' 'Ultravox File (*.UVD)'},'Select Audio File',handles.data.settings.audiofolder);
 
 info = audioinfo([audiopath audioname]);
 if info.NumChannels > 1
@@ -37,7 +37,7 @@ end
 Calls = struct2table(Calls);
 
 [~ ,name] = fileparts(audioname);
-[FileName, PathName] = uiputfile(fullfile(handles.settings.detectionfolder, [name '.mat']),'Save Call File');
+[FileName, PathName] = uiputfile(fullfile(handles.data.settings.detectionfolder, [name '.mat']),'Save Call File');
 save([PathName,FileName],'Calls','-v7.3');
 close(hc);
 update_folders(hObject, eventdata, handles);

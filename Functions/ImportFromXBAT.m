@@ -2,7 +2,7 @@ function ImportFromXBAT(hObject, eventdata, handles)
 
 [fname, fpath] = uigetfile('*.mat','multiselect','on','Select X-BAT logs');
 if isnumeric(fpath); return; end
-[outpath] = uigetdir(handles.settings.detectionfolder,'Select Output Folder');
+[outpath] = uigetdir(handles.data.settings.detectionfolder,'Select Output Folder');
 if isnumeric(outpath); return; end
 
 if ischar(fname)
@@ -21,7 +21,7 @@ for file = fname
     clear Calls
     
     if exist(audiofile,'file') == 0
-        [audioname, audiopath] = uigetfile({'*.wav;*.wmf;*.flac;*.UVD' 'Audio File';'*.wav' 'WAV (*.wav)'; '*.wmf' 'WMF (*.wmf)'; '*.flac' 'FLAC (*.flac)'; '*.UVD' 'Ultravox File (*.UVD)'},'Select Audio File',handles.settings.audiofolder);
+        [audioname, audiopath] = uigetfile({'*.wav;*.wmf;*.flac;*.UVD' 'Audio File';'*.wav' 'WAV (*.wav)'; '*.wmf' 'WMF (*.wmf)'; '*.flac' 'FLAC (*.flac)'; '*.UVD' 'Ultravox File (*.UVD)'},'Select Audio File',handles.data.settings.audiofolder);
         audiofile = [audiopath, audioname];
     end
         

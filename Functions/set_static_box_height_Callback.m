@@ -11,7 +11,7 @@ if ~strcmp(response,'Continue'); return; end
 response = inputdlg({'New lower frequency (kHz) (leave empty to ignore)', 'New upper frequency (kHz) (leave empty to ignore)'});
 if isempty(response); return; end
 
-[fname, fpath] = uigetfile(fullfile(handles.settings.detectionfolder,'*.mat'),'Select Detection File(s)','MultiSelect', 'on');
+[fname, fpath] = uigetfile(fullfile(handles.data.settings.detectionfolder,'*.mat'),'Select Detection File(s)','MultiSelect', 'on');
 if isnumeric(fname); return; end
 fname = cellstr(fname);
 

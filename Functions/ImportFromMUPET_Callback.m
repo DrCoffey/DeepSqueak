@@ -3,7 +3,7 @@ function ImportFromMUPET_Callback(hObject, eventdata, handles)
 [ravenname, ravenpath] = uigetfile('*.csv','Select MUPET Log');
 MUPET = readtable([ravenpath ravenname]);
 
-[audioname, audiopath] = uigetfile({'*.wav;*.wmf;*.flac;*.UVD' 'Audio File';'*.wav' 'WAV (*.wav)'; '*.wmf' 'WMF (*.wmf)'; '*.flac' 'FLAC (*.flac)'; '*.UVD' 'Ultravox File (*.UVD)'},['Select Audio File for ' ravenname],handles.settings.audiofolder);
+[audioname, audiopath] = uigetfile({'*.wav;*.wmf;*.flac;*.UVD' 'Audio File';'*.wav' 'WAV (*.wav)'; '*.wmf' 'WMF (*.wmf)'; '*.flac' 'FLAC (*.flac)'; '*.UVD' 'Ultravox File (*.UVD)'},['Select Audio File for ' ravenname],handles.data.settings.audiofolder);
 
 
 
@@ -37,7 +37,7 @@ for i=1:length(MUPET.SyllableNumber)
 end
 Calls = struct2table(Calls);
 [~, name] = fileparts(ravenname);
-[FileName, PathName] = uiputfile(fullfile(handles.settings.detectionfolder, [name '.mat']),'Save Call File');
+[FileName, PathName] = uiputfile(fullfile(handles.data.settings.detectionfolder, [name '.mat']),'Save Call File');
 save([PathName, FileName],'Calls','-v7.3');
 close(hc);
 update_folders(hObject, eventdata, handles);

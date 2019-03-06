@@ -23,8 +23,8 @@ end
 function [ClusteringData, clustAssign]= CreateClusteringData(hObject, eventdata, handles)
 % For each file selected, create a cell array with the image, and contour
 % of calls where Calls.Accept == 1
-cd(handles.squeakfolder);
-[trainingdata, trainingpath] = uigetfile([handles.settings.detectionfolder '/*.mat'],'Select Detection File(s) for Clustering ','MultiSelect', 'on');
+cd(handles.data.squeakfolder);
+[trainingdata, trainingpath] = uigetfile([handles.data.settings.detectionfolder '/*.mat'],'Select Detection File(s) for Clustering ','MultiSelect', 'on');
 if isnumeric(trainingdata)
     return
 end
@@ -51,7 +51,7 @@ for j = 1:length(trainingdata)  % For Each File
         [I,wind,noverlap,nfft,rate,box] = CreateSpectrogram(call);
         im = mat2gray(flipud(I),[0 max(max(I))/4]); % Set max brightness to 1/4 of max
         
-        stats = CalculateStats(I,wind,noverlap,nfft,rate,box,handles.settings.EntropyThreshold,handles.settings.AmplitudeThreshold);
+        stats = CalculateStats(I,wind,noverlap,nfft,rate,box,handles.data.settings.EntropyThreshold,handles.data.settings.AmplitudeThreshold);
         
         spectrange = call.Rate / 2000; % get frequency range of spectrogram in KHz
         FreqScale = spectrange / (1 + floor(nfft / 2)); % size of frequency pixels

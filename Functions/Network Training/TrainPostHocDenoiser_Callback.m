@@ -11,8 +11,8 @@ msgbox('This function will overwrite "DeepSqueak/Denoising Networks/CleaningNet.
 
 %% Prepare the data
 % Select files
-cd(handles.squeakfolder);
-[trainingdata, trainingpath] = uigetfile([handles.settings.detectionfolder '/*.mat'],'Select Detection File(s) for Training ','MultiSelect', 'on');
+cd(handles.data.squeakfolder);
+[trainingdata, trainingpath] = uigetfile([handles.data.settings.detectionfolder '/*.mat'],'Select Detection File(s) for Training ','MultiSelect', 'on');
 if isnumeric(trainingdata)  % If user cancels
     return
 end
@@ -156,7 +156,7 @@ h.YLabel = 'True Class';
 h.ColorbarVisible = 'off';
 
 % [FileName,PathName] = uiputfile('CleaningNet.mat','Save Network');
-save(fullfile(handles.squeakfolder,'Denoising Networks','CleaningNet.mat'),'DenoiseNet','wind','noverlap','nfft','lowFreq','highFreq','imageSize','layers');
+save(fullfile(handles.data.squeakfolder,'Denoising Networks','CleaningNet.mat'),'DenoiseNet','wind','noverlap','nfft','lowFreq','highFreq','imageSize','layers');
 msgbox('The new network is now saved.','Saved','help')
 
 

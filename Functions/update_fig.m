@@ -1,12 +1,7 @@
 function update_fig(hObject, eventdata, handles)
-% profile on
 % Update the display
-% if ~isfield(handles,'calls') 
-%     return
-% end
-    
+
 if isempty(handles.data.calls)
-    errordlg('No calls in file')
     return
 end
 
@@ -15,18 +10,17 @@ end
 
 % Plot Spectrogram
 set(handles.axes1,'YDir', 'normal','YColor',[1 1 1],'XColor',[1 1 1],'Clim',[0 2*mean(max(I))]);
-% colormap(handles.axes1,handles.cmap);
 set(handles.spect,'CData',imgaussfilt(abs(s)),'XData',ti,'YData',fr/1000);
 
-if handles.settings.DisplayTimePadding ~= 0
+if handles.data.settings.DisplayTimePadding ~= 0
     meantime = handles.data.calls.RelBox(handles.data.currentcall, 1) + handles.data.calls.RelBox(handles.data.currentcall, 3) / 2;
-    set(handles.axes1,'Xlim',[meantime - (handles.settings.DisplayTimePadding / 2), meantime + (handles.settings.DisplayTimePadding / 2)], 'color', 'k')
+    set(handles.axes1,'Xlim',[meantime - (handles.data.settings.DisplayTimePadding / 2), meantime + (handles.data.settings.DisplayTimePadding / 2)], 'color', 'k')
 else
     set(handles.axes1,'Xlim',[handles.spect.XData(1) handles.spect.XData(end)])
 end
 
-set(handles.axes1,'ylim',[handles.settings.LowFreq handles.settings.HighFreq]);
-stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.settings.EntropyThreshold,handles.settings.AmplitudeThreshold);
+set(handles.axes1,'ylim',[handles.data.settings.LowFreq handles.data.settings.HighFreq]);
+stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.data.settings.EntropyThreshold,handles.data.settings.AmplitudeThreshold);
 
 handles.data.calls.Power(handles.data.currentcall) = stats.MaxPower;
 
@@ -43,7 +37,6 @@ end
 % Blur Box
 set(handles.filtered_image_plot,'CData',flipud(stats.FilteredImage))
 set(handles.axes4,'Color',[.1 .1 .1],'YColor',[1 1 1],'XColor',[1 1 1],'Box','off','Clim',[.2*min(min(stats.FilteredImage)) .2*max(max(stats.FilteredImage))],'XLim',[1 size(stats.FilteredImage,2)],'YLim',[1 size(stats.FilteredImage,1)]);
-colormap(handles.axes4,handles.cmap);
 set(handles.axes4,'YTickLabel',[]);
 set(handles.axes4,'XTickLabel',[]);
 set(handles.axes4,'XTick',[]);
@@ -86,7 +79,7 @@ plot(handles.axes3,length(stats.Entropy) * ((1:length(PlotAudio)) / length(PlotA
 y = 0-stats.Entropy;
 x = 1:length(stats.Entropy);
 z = zeros(size(x));
-col = double(stats.Entropy < 1-handles.settings.EntropyThreshold);  % This is the color, vary with x in this case.
+col = double(stats.Entropy < 1-handles.data.settings.EntropyThreshold);  % This is the color, vary with x in this case.
 surface(handles.axes3,[x;x],[y;y],[z;z],[col;col],...
     'facecol','r',...
     'edgecol','interp',...
@@ -107,6 +100,3 @@ else
     handles.CurrentCallLinePosition.Color = [1,0,0];
 end
 set(handles.CurrentCallLineLext,'Position',[calltime,1.2,0],'String',[num2str(stats.BeginTime,'%.1f') ' s']);
-
-% guidata(hObject, handles);
-

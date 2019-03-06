@@ -1,8 +1,8 @@
 % --------------------------------------------------------------------
 function Import_From_Ultravox_Callback(hObject, eventdata, handles)
 
-[ultravoxName,ultravoxPath] = uigetfile([handles.squeakfolder '/*.txt'],'Select Ultravox Log');
-[audioname, audiopath] = uigetfile({'*.wav;*.wmf;*.flac;*.UVD' 'Audio File';'*.wav' 'WAV (*.wav)'; '*.wmf' 'WMF (*.wmf)'; '*.flac' 'FLAC (*.flac)'; '*.UVD' 'Ultravox File (*.UVD)'},'Select Audio File',handles.settings.audiofolder);
+[ultravoxName,ultravoxPath] = uigetfile([handles.data.squeakfolder '/*.txt'],'Select Ultravox Log');
+[audioname, audiopath] = uigetfile({'*.wav;*.wmf;*.flac;*.UVD' 'Audio File';'*.wav' 'WAV (*.wav)'; '*.wmf' 'WMF (*.wmf)'; '*.flac' 'FLAC (*.flac)'; '*.UVD' 'Ultravox File (*.UVD)'},'Select Audio File',handles.data.settings.audiofolder);
 AudioFile = fullfile(audiopath,audioname);
 
 
@@ -84,7 +84,7 @@ end
 close(hc);
 Calls = struct2table(Calls);
 
-[FileName, PathName] = uiputfile(fullfile(handles.settings.detectionfolder, '*.mat'), 'Save Call File');
+[FileName, PathName] = uiputfile(fullfile(handles.data.settings.detectionfolder, '*.mat'), 'Save Call File');
 filename = fullfile(PathName,FileName);
 
 Calls = merge_boxes(Calls.Box, Calls.Score, Calls.Type, Calls.Power, audioInfo, 1, 0, 0);

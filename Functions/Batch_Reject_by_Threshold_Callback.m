@@ -88,7 +88,7 @@ for currentfile = selections % Do this for each file
     for i = 1:height(Calls)
         
         [I,windowsize,noverlap,nfft,rate,box] = CreateSpectrogram(Calls(i, :));
-        stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.settings.EntropyThreshold,handles.settings.AmplitudeThreshold);
+        stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.data.settings.EntropyThreshold,handles.data.settings.AmplitudeThreshold);
         
         for rule = rules'
             switch rule{2}

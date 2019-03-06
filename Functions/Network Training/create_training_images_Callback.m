@@ -2,8 +2,8 @@ function create_training_images_Callback(hObject, eventdata, handles)
 % hObject    handle to create_training_images (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-cd(handles.squeakfolder);
-[trainingdata, trainingpath] = uigetfile([char(handles.settings.detectionfolder) '/*.mat'],'Select Detection File for Training ','MultiSelect', 'on');
+cd(handles.data.squeakfolder);
+[trainingdata, trainingpath] = uigetfile([char(handles.data.settings.detectionfolder) '/*.mat'],'Select Detection File for Training ','MultiSelect', 'on');
 if isnumeric(trainingdata); return; end
 trainingdata = cellstr(trainingdata);
 
@@ -28,7 +28,7 @@ if bout ~= 0
         warndlg('Creating images from bouts is only possible with single files at a time. Please select a single detection file, or set bout length to 0.');
         return
     end
-    [audioname, audiopath] = uigetfile({'*.wav;*.wmf;*.flac;*.UVD' 'Audio File';'*.wav' 'WAV (*.wav)'; '*.wmf' 'WMF (*.wmf)'; '*.flac' 'FLAC (*.flac)'; '*.UVD' 'Ultravox File (*.UVD)'},['Select Audio File for ' trainingdata{1}] ,handles.settings.audiofolder);
+    [audioname, audiopath] = uigetfile({'*.wav;*.wmf;*.flac;*.UVD' 'Audio File';'*.wav' 'WAV (*.wav)'; '*.wmf' 'WMF (*.wmf)'; '*.flac' 'FLAC (*.flac)'; '*.UVD' 'Ultravox File (*.UVD)'},['Select Audio File for ' trainingdata{1}] ,handles.data.settings.audiofolder);
     if isnumeric(audioname); return; end
 end
 
@@ -44,7 +44,7 @@ for k = 1:length(trainingdata)
     if isstruct(Calls); Calls = struct2table(Calls); end
     
     [p, filename] = fileparts(trainingdata{k});
-    fname = fullfile(handles.squeakfolder,'Training','Images',filename);
+    fname = fullfile(handles.data.squeakfolder,'Training','Images',filename);
     mkdir(fname);
     
     % Remove Rejects
@@ -136,7 +136,7 @@ for k = 1:length(trainingdata)
             waitbar(i/height(Calls),h,['Processing File ' num2str(k) ' of '  num2str(length(trainingdata))]);
         end
     end
-    save(fullfile(handles.squeakfolder,'Training',[filename '.mat']),'TTable','wind','noverlap','nfft');
+    save(fullfile(handles.data.squeakfolder,'Training',[filename '.mat']),'TTable','wind','noverlap','nfft');
     disp(['Created ' num2str(height(TTable)) ' Training Images']);
 end
 close(h)

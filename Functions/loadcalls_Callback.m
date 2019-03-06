@@ -11,7 +11,12 @@ end
 tmp = load(fullfile(handles.detectionfiles(handles.current_file_id).folder,  handles.current_detection_file), 'Calls'); %get currently selected option from menu
 % Backwards compatibility with struct format for detection files
 if isstruct(tmp.Calls); tmp.Calls = struct2table(tmp.Calls); end
-handles.data = data;
+
+if isempty(tmp.Calls)
+    errordlg('No calls in file')
+    return
+end
+
 handles.data.calls=tmp.Calls;
 handles.data.currentcall=1;
 
@@ -47,7 +52,6 @@ handles.box=rectangle('Position',[1 1 1 1],'Curvature',0.2,'EdgeColor','g',...
 % Filtered image
 handles.filtered_image_plot = imagesc([],'Parent', handles.axes4);
 set(handles.axes4,'Color',[.1 .1 .1],'YColor',[1 1 1],'XColor',[1 1 1],'Box','off');
-colormap(handles.axes4,handles.cmap);
 set(handles.axes4,'YTickLabel',[]);
 set(handles.axes4,'XTickLabel',[]);
 set(handles.axes4,'XTick',[]);
@@ -74,10 +78,9 @@ handles.axes5.XAxis.TickLength = [0.035 1];
 handles.CurrentCallLinePosition = line([CallTime(1) CallTime(1)],[0 1],'LineWidth',3,'Color','g','Parent', handles.axes5);
 handles.CurrentCallLineLext= text((CallTime(1)),1.2,[num2str(1,'%.1f') ' s'],'Color','W', 'HorizontalAlignment', 'center','Parent',handles.axes5);
 
-colormap(handles.axes1,handles.cmap);
-colormap(handles.axes4,handles.cmap);
+colormap(handles.axes1,handles.data.cmap);
+colormap(handles.axes4,handles.data.cmap);
 
 close(h);
 update_fig(hObject, eventdata, handles);
 guidata(hObject, handles);
-
