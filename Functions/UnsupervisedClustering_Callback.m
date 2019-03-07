@@ -2,7 +2,7 @@ function UnsupervisedClustering_Callback(hObject, eventdata, handles)
 % Cluster with k-means or adaptive
 
 % Get the data
-[ClusteringData] = CreateClusteringData(hObject, eventdata, handles);
+[ClusteringData] = CreateClusteringData(handles.data, 1);
 if isempty(ClusteringData); return; end
 
 [FileName,PathName] = uiputfile('Extracted Contours.mat','Save contours for faster loading');
