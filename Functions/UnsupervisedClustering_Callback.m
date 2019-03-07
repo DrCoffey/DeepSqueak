@@ -206,41 +206,6 @@ switch saveChoice
 end
 end
 
-
-
-%% Save new data
-function UpdateCluster(ClusteringData, clustAssign, clusterName, rejected)
-[files, ia, ic] = unique(ClusteringData(:,6),'stable');
-h = waitbar(0,'Initializing');
-for j = 1:length(files)  % For Each File
-    load(files{j}, 'Calls');
-    % Backwards compatibility with struct format for detection files
-    if isstruct(Calls); Calls = struct2table(Calls); end
-    
-    for i = (1:sum(ic==j)) + ia(j) - 1   % For Each Call
-        waitbar(j/length(files),h,['Processing File ' num2str(j) ' of '  num2str(length(files))]);
-        
-        if isnan(clustAssign(i))
-            continue
-        end
-        
-        % Update the cluster assignment and rejected status
-        Calls.Type(ClusteringData{i,7}) = clusterName(clustAssign(i));
-        if rejected(i) || clusterName(clustAssign(i)) == 'Noise' || clusterName(clustAssign(i)) == 'noise'
-            Calls.Accept(ClusteringData{i,7}) = 0;
-            Calls.Type(ClusteringData{i,7}) = categorical({'Noise'});
-        end
-    end
-    % If forgot why I added this line, but I feel like I had a reason... -RM
-    Calls = Calls(1:length(Calls.Rate), :);
-    waitbar(j/length(files),h,['Saving File ' num2str(j) ' of '  num2str(length(files))]);
-    save(files{j},'Calls','-v7.3');
-end
-close(h)
-end
-
-
-
 %% Dyanamic Time Warping
 % for use as a custom distance function for pdist, kmedoids
 function D = dtw2(ZI,ZJ)
