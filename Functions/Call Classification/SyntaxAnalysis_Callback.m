@@ -102,7 +102,9 @@ axis off
 g.ArrowSize = 15;
 g.LineWidth = 15*G.Edges.Weight;
 g.EdgeAlpha = .8;
-g.NodeFontSize = 12;
+if isfield(g, 'NodeFontSize')
+    g.NodeFontSize = 12;
+end
 g.NodeColor = [.2 .2 .2];
 layout(g,'circle');
 set(gcf,'Colormap',inferno);
