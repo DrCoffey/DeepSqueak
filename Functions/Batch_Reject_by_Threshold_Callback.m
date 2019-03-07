@@ -70,16 +70,8 @@ rules(:,3) = num2cell(contains(rules(:,3),'Greater'));
 %% Loop
 h = waitbar(0,'Initializing');
 for currentfile = selections % Do this for each file
-    % Load the file, skip files if variable: 'Calls' doesn't exist
-    lastwarn('');
-    load(fullfile(handles.detectionfiles(currentfile).folder, handles.detectionfiles(currentfile).name),'Calls');
-    if ~isempty(lastwarn)
-        disp([handles.detectionfiles(currentfile).name ' is not a Call file, skipping...'])
-        continue
-    end
-    % Backwards compatibility with struct format for detection files
-    if isstruct(Calls); Calls = struct2table(Calls); end
-    
+    Calls = handles.data.loadCalls(fullfile(handles.detectionfiles(currentfile).folder, handles.detectionfiles(currentfile).name));
+
     waitbar(find(selections == currentfile) ./ length(selections), h, ['Processing file ' num2str(find(selections == currentfile)) ' of ' num2str(length(selections))]);
     
     reject = false(height(Calls),1);

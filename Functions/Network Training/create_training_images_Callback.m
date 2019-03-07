@@ -39,9 +39,9 @@ h = waitbar(0,'Initializing');
 c=0;
 for k = 1:length(trainingdata)
     TTable = table({},{},'VariableNames',{'imageFilename','USV'});
-    load([trainingpath trainingdata{k}], 'Calls');
-    % Backwards compatibility with struct format for detection files
-    if isstruct(Calls); Calls = struct2table(Calls); end
+    
+    Calls = handles.data.loadCalls([trainingpath trainingdata{k}]);
+
     
     [p, filename] = fileparts(trainingdata{k});
     fname = fullfile(handles.data.squeakfolder,'Training','Images',filename);

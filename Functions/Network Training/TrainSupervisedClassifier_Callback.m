@@ -37,8 +37,8 @@ TrainingImages = {};
 Class = [];
 for j = 1:length(trainingdata)  % For Each File
     load(fullfile(trainingpath, trainingdata{j}),'Calls');
-    % Backwards compatibility with struct format for detection files
-    if isstruct(Calls); Calls = struct2table(Calls); end
+    Calls = handles.data.loadCalls(fullfile(trainingpath, trainingdata{j}));
+
     
     Xtemp = [];
     Classtemp = [];

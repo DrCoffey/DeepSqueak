@@ -20,9 +20,7 @@ AllPower = [];
 AllAccept = [];
 
 for j = 1:length(detectionFilename)
-    load(fullfile(detectionFilepath, detectionFilename{j}), 'Calls');
-    % Backwards compatibility with struct format for detection files
-    if isstruct(Calls); Calls = struct2table(Calls); end
+    Calls = handles.data.loadCalls(fullfile(detectionFilepath, detectionFilename{j}));
     
     AllBoxes = [AllBoxes; Calls.Box];
     AllScores = [AllScores; Calls.Score];

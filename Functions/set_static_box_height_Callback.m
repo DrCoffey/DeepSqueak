@@ -22,9 +22,7 @@ new_low_freq = str2double(response{1});
 h = waitbar(0,'Initializing');
 % For each file
 for i = 1:length(fname)
-    load(fullfile(fpath, fname{i}), 'Calls');
-    % Backwards compatibility with struct format for detection files
-    if isstruct(Calls); Calls = struct2table(Calls); end
+    Calls = handles.data.loadCalls(fullfile(fpath, fname{i}));
     
     waitbar(i/length(fname),h,['Processing File ' num2str(i) ' of '  num2str(length(fname))]);
     

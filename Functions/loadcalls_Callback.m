@@ -9,16 +9,7 @@ if nargin == 3 % if "Load Calls" button pressed
 end
 
 handles.data.calls = [];
-tmp = load(fullfile(handles.detectionfiles(handles.current_file_id).folder,  handles.current_detection_file), 'Calls'); %get currently selected option from menu
-% Backwards compatibility with struct format for detection files
-if isstruct(tmp.Calls); tmp.Calls = struct2table(tmp.Calls); end
-
-if isempty(tmp.Calls)
-    errordlg('No calls in file')
-    return
-end
-
-handles.data.calls=tmp.Calls;
+handles.data.calls = handles.data.loadCalls(fullfile(handles.detectionfiles(handles.current_file_id).folder,  handles.current_detection_file));
 handles.data.currentcall=1;
 
 

@@ -30,15 +30,8 @@ for j = 1:length(selections) % Do this for each file
     currentfile = selections(j);
     lastwarn(''); % Skip files if variable: 'Calls' doesn't exist
     fname = fullfile(handles.detectionfiles(currentfile).folder, handles.detectionfiles(currentfile).name);
-    load(fname, 'Calls');
-    
-    if ~isempty(lastwarn)
-        disp([handles.detectionfiles(currentfile).name ' is not a Call file, skipping...'])
-        continue
-    end
-    
-    % Backwards compatibility with struct format for detection files
-    if isstruct(Calls); Calls = struct2table(Calls); end
+    Calls = handles.data.loadCalls(fname);
+
     
     for i = 1:height(Calls)   % For Each Call
         waitbar(((i/height(Calls)) + j - 1) / length(selections), h, ['Denoising file ' num2str(j) ' of ' num2str(length(selections))]);

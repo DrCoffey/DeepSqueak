@@ -35,9 +35,7 @@ c=0;
 TrainingImages = {};
 Class = [];
 for j = 1:length(trainingdata)  % For Each File
-    load([trainingpath trainingdata{j}],'Calls');
-    % Backwards compatibility with struct format for detection files
-    if isstruct(Calls); Calls = struct2table(Calls); end
+    Calls = handles.data.loadCalls([trainingpath trainingdata{j}]);
     
     for i = 1:height(Calls)     % For Each Call
         waitbar(i/height(Calls),h,['Loading File ' num2str(j) ' of '  num2str(length(trainingdata))]);
@@ -148,8 +146,8 @@ DenoiseNet = trainNetwork(auimds,layers,options);
 
 % Plot the confusion matrix
 figure('color','w')
-[C,order] = confusionmat(classify(DenoiseNet,ValX),ValY)
-h = heatmap(order,order,C)
+[C,order] = confusionmat(classify(DenoiseNet,ValX),ValY);
+h = heatmap(order,order,C);
 h.Title = 'Confusion Matrix';
 h.XLabel = 'Predicted class';
 h.YLabel = 'True Class';

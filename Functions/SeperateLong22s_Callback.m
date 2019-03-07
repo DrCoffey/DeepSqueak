@@ -5,9 +5,8 @@ if nargin == 3
     [audiodata, audiopath] = uigetfile({'*.wav;*.wmf;*.flac;*.UVD' 'Audio File';'*.wav' 'WAV (*.wav)'; '*.wmf' 'WMF (*.wmf)'; '*.flac' 'FLAC (*.flac)'; '*.UVD' 'Ultravox File (*.UVD)'},['Select Corresponding Audio File for ' trainingdata],handles.data.settings.audiofolder);
     inputfile = [audiopath audiodata];
     hc = waitbar(0,'Loading File');
-    load([trainingpath trainingdata],'Calls');
-    % Backwards compatibility with struct format for detection files
-    if isstruct(Calls); Calls = struct2table(Calls); end
+    Calls = handles.data.loadCalls([trainingpath trainingdata]);
+
 end
 
 info = audioinfo(inputfile);

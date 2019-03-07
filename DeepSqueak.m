@@ -634,11 +634,11 @@ while isvalid(handle_image)
         D = mod(D+1,4);
     else
         D = mod(D-1,4);
-    end;
+    end
     P = P+T(:,D+1);
     handle_image.CData = A;
     pause(.01)
-end;
+end
 
 
 % --- Executes on slider movement.
