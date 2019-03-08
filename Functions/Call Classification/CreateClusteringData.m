@@ -43,7 +43,7 @@ for j = 1:length(fileName)
             waitbar(i/height(file.Calls),h,['Loading File ' num2str(j) ' of '  num2str(length(fileName))]);
             
             % Skip if not accepted
-            if ~file.Calls.Accept(i) || ismember(file.Calls.Accept(i),'Noise')
+            if ~file.Calls.Accept(i) || ismember(file.Calls.Type(i),'Noise')
                 continue
             end
             
