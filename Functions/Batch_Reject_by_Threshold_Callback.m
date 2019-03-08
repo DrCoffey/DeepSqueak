@@ -70,7 +70,7 @@ rules(:,3) = num2cell(contains(rules(:,3),'Greater'));
 %% Loop
 h = waitbar(0,'Initializing');
 for currentfile = selections % Do this for each file
-    Calls = handles.data.loadCalls(fullfile(handles.detectionfiles(currentfile).folder, handles.detectionfiles(currentfile).name));
+    Calls = loadCallfile(fullfile(handles.detectionfiles(currentfile).folder, handles.detectionfiles(currentfile).name));
 
     waitbar(find(selections == currentfile) ./ length(selections), h, ['Processing file ' num2str(find(selections == currentfile)) ' of ' num2str(length(selections))]);
     

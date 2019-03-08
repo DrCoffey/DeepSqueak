@@ -37,7 +37,7 @@ TrainingImages = {};
 Class = [];
 for j = 1:length(trainingdata)  % For Each File
     load(fullfile(trainingpath, trainingdata{j}),'Calls');
-    Calls = handles.data.loadCalls(fullfile(trainingpath, trainingdata{j}));
+    Calls = loadCallfile(fullfile(trainingpath, trainingdata{j}));
 
     
     Xtemp = [];

@@ -9,7 +9,7 @@ if nargin == 3 % if "Load Calls" button pressed
 end
 
 handles.data.calls = [];
-handles.data.calls = handles.data.loadCalls(fullfile(handles.detectionfiles(handles.current_file_id).folder,  handles.current_detection_file));
+handles.data.calls = loadCallfile(fullfile(handles.detectionfiles(handles.current_file_id).folder,  handles.current_detection_file));
 handles.data.currentcall=1;
 
 

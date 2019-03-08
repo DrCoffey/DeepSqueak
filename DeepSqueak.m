@@ -549,7 +549,7 @@ if ~isempty(LowFreq) && ~isempty(HighFreq) && ~isempty(DisplayTimePadding)
         handles.data.saveSettings();
         update_folders(hObject, eventdata, handles);
         update_fig(hObject, eventdata, handles);
-
+        
     else
         errordlg('High cutoff must be greater than low cutoff.')
     end
@@ -672,9 +672,9 @@ if exist(fullfile(handles.data.squeakfolder,'Manifestos',[hObject.Text '.txt']),
     fprintf(1,'\n\n\n\n\n\n\n\n\n');
     fprintf(1,'%c',chr);
     fprintf(1,'\n\n');
-
+    
     fclose(fid);
-
+    
     % Display
     S.fh = figure('units','pixels',...
         'position',[40 40 760 640],...
@@ -714,3 +714,8 @@ web('https://github.com/DrCoffey/DeepSqueak/issues','-browser');
 % --- Executes on slider movement.
 function optimization_slider_Callback(hObject, eventdata, handles)
 hObject.Value = round(hObject.Value);
+
+function Calls = loadCalls(filename)
+load(filename, 'Calls');
+% Backwards compatibility with struct format for detection files
+if isstruct(Calls); Calls = struct2table(Calls, 'AsArray', true); end

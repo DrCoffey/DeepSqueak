@@ -36,7 +36,7 @@ for j = 1:length(fileName)
     else
         
         % Backwards compatibility with struct format for detection files
-        if isstruct(file.Calls); file.Calls = struct2table(file.Calls); end
+        if isstruct(file.Calls); file.Calls = struct2table(file.Calls, 'AsArray', true); end
     
         % for each call in the file, calculate stats for clustering
         for i = 1:height(file.Calls)

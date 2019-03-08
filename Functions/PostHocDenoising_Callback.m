@@ -30,7 +30,7 @@ for j = 1:length(selections) % Do this for each file
     currentfile = selections(j);
     lastwarn(''); % Skip files if variable: 'Calls' doesn't exist
     fname = fullfile(handles.detectionfiles(currentfile).folder, handles.detectionfiles(currentfile).name);
-    Calls = handles.data.loadCalls(fname);
+    Calls = loadCallfile(fname);
 
     
     for i = 1:height(Calls)   % For Each Call

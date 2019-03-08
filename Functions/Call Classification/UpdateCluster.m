@@ -22,7 +22,7 @@ rejected(clustAssign == 'Noise') = 1;
 
 for i = 1:length(files)
     
-    Calls = handles.data.loadCalls(files{i});
+    Calls = loadCallfile(files{i});
    
     % Find the index of the clustering data that belongs to the file
     cluster_idx = find(file_idx == i);

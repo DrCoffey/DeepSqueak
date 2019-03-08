@@ -20,7 +20,7 @@ AllPower = [];
 AllAccept = [];
 
 for j = 1:length(detectionFilename)
-    Calls = handles.data.loadCalls(fullfile(detectionFilepath, detectionFilename{j}));
+    Calls = loadCallfile(fullfile(detectionFilepath, detectionFilename{j}));
     
     AllBoxes = [AllBoxes; Calls.Box];
     AllScores = [AllScores; Calls.Score];

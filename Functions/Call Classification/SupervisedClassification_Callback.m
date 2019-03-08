@@ -32,7 +32,7 @@ h = waitbar(0,'Initializing');
 for j = 1:length(selections) % Do this for each file
     currentfile = selections(j);
     fname = fullfile(handles.detectionfiles(currentfile).folder,handles.detectionfiles(currentfile).name);
-    Calls = handles.data.loadCalls(fname);
+    Calls = loadCallfile(fname);
     
     for i = 1:height(Calls)   % For Each Call
         waitbar(((i/height(Calls)) + j - 1) / length(selections), h, ['Classifying file ' num2str(j) ' of ' num2str(length(selections))]);

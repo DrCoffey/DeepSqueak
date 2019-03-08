@@ -21,7 +21,7 @@ if isnumeric(PathName); return; end
 hc = waitbar(0,'Initializing');
 for j = 1:length(fname) % Do this for each file
     currentfile = fullfile(fpath,fname{j});
-    Calls = handles.data.loadCalls(currentfile);
+    Calls = loadCallfile(currentfile);
     
     exceltable = [{'ID'} {'Label'} {'Accepted'} {'Score'}  {'Begin Time (s)'} {'End Time (s)'} {'Call Length (s)'} {'Principal Frequency (kHz)'} {'Low Freq (kHz)'} {'High Freq (kHz)'} {'Delta Freq (kHz)'} {'Frequency Standard Deviation (kHz)'} {'Slope (kHz/s)'} {'Sinuosity'} {'Mean Power (dB/Hz)'} {'Tonality'}];
     for i = 1:height(Calls) % Do this for each call

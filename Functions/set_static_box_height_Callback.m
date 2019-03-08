@@ -22,7 +22,7 @@ new_low_freq = str2double(response{1});
 h = waitbar(0,'Initializing');
 % For each file
 for i = 1:length(fname)
-    Calls = handles.data.loadCalls(fullfile(fpath, fname{i}));
+    Calls = loadCallfile(fullfile(fpath, fname{i}));
     
     waitbar(i/length(fname),h,['Processing File ' num2str(i) ' of '  num2str(length(fname))]);
     
