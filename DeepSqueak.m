@@ -714,8 +714,3 @@ web('https://github.com/DrCoffey/DeepSqueak/issues','-browser');
 % --- Executes on slider movement.
 function optimization_slider_Callback(hObject, eventdata, handles)
 hObject.Value = round(hObject.Value);
-
-function Calls = loadCalls(filename)
-load(filename, 'Calls');
-% Backwards compatibility with struct format for detection files
-if isstruct(Calls); Calls = struct2table(Calls, 'AsArray', true); end
