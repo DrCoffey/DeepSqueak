@@ -1,5 +1,6 @@
 function  Calls=SqueakDetect(inputfile,networkfile,fname,Settings,currentFile,totalFiles,networkname,number_of_repeats)
 % Find Squeaks
+Calls = table();
 h = waitbar(0,'Initializing');
 
 % Get the audio info

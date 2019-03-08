@@ -102,20 +102,11 @@ Calls = mergevars(Calls,{'RelBox1', 'RelBox2', 'RelBox3', 'RelBox4'},'NewVariabl
 for i = 1:length(begin_time)
     % Audio beginning and end time
     WindL=round((begin_time(i)-duration__(i)) .* audio_info.SampleRate);
-    
-    % If the call starts at the very beginning of the file, pad the audio with zeros
-    pad = [];
-    if WindL<=1
-        pad=zeros(abs(WindL),1);
-        WindL = 1;
-    end
-    
     WindR=round((end_time__(i)+duration__(i)) .* audio_info.SampleRate);
     WindR = min(WindR,audio_info.TotalSamples); % Prevent WindR from being greater than total samples
     
-    audio = audioread(audio_info.Filename,([WindL WindR]));
-    audio = [pad; mean(audio - mean(audio,1) ,2)]; % Take the mean of the audio channels
-    audio = int16(audio * 32767); % Convert to int16
+    audio = mergeAudio(audio_info.Filename, [WindL WindR]);
+
     
     Calls(i,:) = {
         audio_info.SampleRate,...

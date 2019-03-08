@@ -70,7 +70,7 @@ for i=1:length(begin_time)
     WindR = min(WindR,info.TotalSamples); % Prevent WindR from being greater than total samples
     
     audio = audioread(inputfile,[WindL WindR]); % Take channel 1
-    audio = [pad; mean(audio - mean(audio,1,'native'),2,'native')];
+    audio = [pad; mean(audio - mean(audio,1),2)];
     
     % Make the spectrogram
     windowsize = round(info.SampleRate * 0.02);
@@ -133,25 +133,18 @@ for i=1:size(newBoxes,1)
     if ~OverlapsWithOld; continue; end
     
     % Get the audio around the new call
-    WindL=round( (newBoxes(i,1)-newBoxes(i,3))*info.SampleRate);
-    pad = [];
-    if WindL<=1
-        pad=zeros(abs(WindL),1);
-        WindL = 1;
-    end
-    
-    WindR = round( (newBoxes(i,1)+newBoxes(i,3)*2)*info.SampleRate);
+    WindL = round((newBoxes(i,1)-newBoxes(i,3))*info.SampleRate);
+    WindR = round((newBoxes(i,1)+newBoxes(i,3)*2)*info.SampleRate);
     WindR = min(WindR,info.TotalSamples); % Prevent WindR from being greater than total samples
-    
-    audio = audioread(inputfile,[WindL WindR],'native');
-    
+
+    audio = mergeAudio(inputfile, ([WindL WindR]));
     
     % Final Structure
     NewCalls(i).Rate=info.SampleRate;
     NewCalls(i).Box=newBoxes(i,:);
     NewCalls(i).RelBox=[newBoxes(i,3) newBoxes(i,2) newBoxes(i,3) newBoxes(i,4)];
     NewCalls(i).Score=newScores(i);
-    NewCalls(i).Audio=[pad; mean(audio - mean(audio,1,'native'),2,'native')]; % Take channel 1
+    NewCalls(i).Audio=audio;
     NewCalls(i).Type=categorical({'USV'});
     NewCalls(i).Power=newPower(i);
     NewCalls(i).Accept=1;

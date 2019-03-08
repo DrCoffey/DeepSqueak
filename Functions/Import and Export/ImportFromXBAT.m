@@ -24,7 +24,7 @@ for file = fname
         [audioname, audiopath] = uigetfile({'*.wav;*.wmf;*.flac;*.UVD' 'Audio File';'*.wav' 'WAV (*.wav)'; '*.wmf' 'WMF (*.wmf)'; '*.flac' 'FLAC (*.flac)'; '*.UVD' 'Ultravox File (*.UVD)'},'Select Audio File',handles.data.settings.audiofolder);
         audiofile = [audiopath, audioname];
     end
-        
+    
     for i = 1:length(data.event)
         waitbar(i/length(data.event),hc);
         deltaT = data.event(i).selection(3) - data.event(i).selection(1);
@@ -38,12 +38,9 @@ for file = fname
             data.event(i).selection(4)/1000 - data.event(i).selection(2)/1000
             ];
         
-        windL = Calls(i).Box(1) - deltaT;
-        windR = Calls(i).Box(1) + Calls(i).Box(3) + deltaT;
+        WindL = Calls(i).Box(1) - deltaT;
+        WindR = Calls(i).Box(1) + Calls(i).Box(3) + deltaT;
         
-        if windL < 0
-            windL = 1 / rate;
-        end
         Calls(i).RelBox=[
             deltaT,...
             data.event(i).selection(2)/1000,...
@@ -52,8 +49,9 @@ for file = fname
             ];
         Calls(i).Score = data.event(i).score;
         
-        audio = audioread(audiofile,round([windL windR]*rate),'native');
-        Calls(i).Audio = mean(audio - mean(audio,1,'native'),2,'native');
+        audio = mergeAudio(audiofile, round([WindL WindR]*rate));
+        
+        Calls(i).Audio = audio;
         
         if contains(data.event(i).tags,'Accept')
             Calls(i).Accept=1;
@@ -67,13 +65,5 @@ for file = fname
     Calls = struct2table(Calls);
     save(fullfile(outpath, data.file),'Calls','-v7.3');
 end
-    close(hc);
-    update_folders(hObject, eventdata, handles);
-
-
-    
-    
-    
-    
-    
-    
+close(hc);
+update_folders(hObject, eventdata, handles);

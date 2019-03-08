@@ -53,32 +53,28 @@ for i=1:length(ultravox.Call)
     
     Calls(i).Score = 1;
     
-    windL = ultravox.StartTime_s_(i) - (ultravox.Duration_ms_(i) / 1000);
-    windL = round(windL .* rate);
-    % If the call starts at the very beginning of the file, pad the audio with zeros
-    pad = [];
-    if windL<=1
-        pad=zeros(abs(windL),1);
-        windL = 1;
-    end
-    windR = ultravox.StopTime_s_(i) + (ultravox.Duration_ms_(i) / 1000);
-    windR = round(windR .* rate);
-    windR = min(windR,audioInfo.TotalSamples);
+    WindL = ultravox.StartTime_s_(i) - (ultravox.Duration_ms_(i) / 1000);
+    WindL = round(WindL .* rate);
+
+    WindR = ultravox.StopTime_s_(i) + (ultravox.Duration_ms_(i) / 1000);
+    WindR = round(WindR .* rate);
+    WindR = min(WindR,audioInfo.TotalSamples);
     
     
-    if windL >= audioInfo.TotalSamples
+    if WindL >= audioInfo.TotalSamples
         disp('Call starts after the file ends')
         continue
     end
-    if windR > audioInfo.TotalSamples
+    if WindR > audioInfo.TotalSamples
         disp('Call ends after the file ends')
         continue
     end
     
-    audio = audioread(AudioFile,[windL, windR],'native');
-    Calls(i).Audio=[pad; mean(audio - mean(audio,1,'native'),2,'native')];
-    Calls(i).Accept=1;
-    Calls(i).Type=categorical(ultravox.CallName(i));
+    audio = mergeAudio(AudioFile, [WindL WindR]);
+    
+    Calls(i).Audio= audio;
+    Calls(i).Accept = 1;
+    Calls(i).Type = categorical(ultravox.CallName(i));
     Calls(i).Power = 0;
 end
 close(hc);

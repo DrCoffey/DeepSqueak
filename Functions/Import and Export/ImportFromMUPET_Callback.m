@@ -21,15 +21,13 @@ for i=1:length(MUPET.SyllableNumber)
     Calls(i).Rate = rate;
     Calls(i).Box = [MUPET.SyllableStartTime_sec_(i), MUPET.minimumFrequency_kHz_(i), MUPET.syllableDuration_msec_(i)/1000, MUPET.frequencyBandwidth_kHz_(i)];
     windL = Calls(i).Box(1) - Calls(i).Box(3);
-    if windL < 0
-        windL = 1 / rate;
-    end
     windR = Calls(i).Box(1) + 2*Calls(i).Box(3);
     Calls(i).RelBox=[MUPET.syllableDuration_msec_(i)/1000, MUPET.minimumFrequency_kHz_(i), MUPET.syllableDuration_msec_(i)/1000, MUPET.frequencyBandwidth_kHz_(i)];
     Calls(i).Score = 1;
     
-    audio = audioread([audiopath audioname],round([windL windR]*rate),'native');
-    Calls(i).Audio = mean(audio - mean(audio,1,'native'),2,'native');
+    audio = mergeAudio([audiopath audioname], round([windL windR]*rate));
+    
+    Calls(i).Audio = audio;
     
     Calls(i).Accept=1;
     Calls(i).Type=categorical({'USV'});

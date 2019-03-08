@@ -78,8 +78,11 @@ for j = 1:length(audioselections)
 
     end
     
+    [~,audioname] = fileparts(AudioFile);
+    detectiontime=datestr(datetime('now'),'mmm-DD-YYYY HH_MM PM');
+    
     if isempty(Calls)
-        fprintf(1,'No Calls found in: %s \n',height(Calls),audioname)
+        fprintf(1,'No Calls found in: %s \n',audioname)
         continue
     end
     
@@ -88,8 +91,7 @@ for j = 1:length(audioselections)
     
     %% Save the file
     
-    [~,audioname] = fileparts(AudioFile);
-    detectiontime=datestr(datetime('now'),'mmm-DD-YYYY HH_MM PM');
+
     
     % Append date to filename
     if Settings(7)
