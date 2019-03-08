@@ -1,5 +1,6 @@
 function  Calls=SqueakDetect(inputfile,networkfile,fname,Settings,currentFile,totalFiles,networkname,number_of_repeats)
 % Find Squeaks
+Calls = table();
 h = waitbar(0,'Initializing');
 
 % Get the audio info
@@ -61,7 +62,6 @@ AllBoxes=[];
 AllScores=[];
 AllClass=[];
 AllPowers=[];
-Calls = [];
 
 % Break the audio file into chunks
 chunks = linspace(1,(DetectLength - overlap) * audio_info.SampleRate,round(DetectLength / chunksize));
@@ -163,7 +163,7 @@ for i = 1:length(chunks)-1
         waitbar(...
             i/(length(chunks)-1),...
             h,...
-            sprintf(['Error in Network, Skiping Audio Chunk']));
+            sprintf('Error in Network, Skiping Audio Chunk'));
         disp('Error in Network, Skiping Audio Chunk');
         warning( getReport( ME, 'extended', 'hyperlinks', 'on' ) );
     end

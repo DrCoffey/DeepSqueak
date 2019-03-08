@@ -1,4 +1,19 @@
 # Changelog
+## 2.5.0 2019-03-04
+Fixed possible bug when updating files after clustering.
+
+Made syntax analysis compatible with exported excel files.
+
+Generally cleaned the code.
+
+Made box merging much faster, detected audio is now always stored ad 16-bit.
+
+K-means clustering models are now saved with the cluster names, so that when clustering with an existing model, the names don't need to be re-entered.
+
+Improved the "Tools > Automatic Review > Batch Reject by Threshold" menu to allow for more permutations of score, duration, tonality, frequency, and power.
+
+Detection files are now tables instead of structures. Everything should be backwards compatible.
+
 ## 2.4.1 2019-03-01
 Updated threshold rejection to use power instead of amplitude.
 

@@ -2,8 +2,8 @@ function create_training_images_Callback(hObject, eventdata, handles)
 % hObject    handle to create_training_images (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-cd(handles.squeakfolder);
-[trainingdata trainingpath] = uigetfile([char(handles.settings.detectionfolder) '/*.mat'],'Select Detection File for Training ','MultiSelect', 'on');
+cd(handles.data.squeakfolder);
+[trainingdata, trainingpath] = uigetfile([char(handles.data.settings.detectionfolder) '/*.mat'],'Select Detection File for Training ','MultiSelect', 'on');
 if isnumeric(trainingdata); return; end
 trainingdata = cellstr(trainingdata);
 
@@ -28,7 +28,7 @@ if bout ~= 0
         warndlg('Creating images from bouts is only possible with single files at a time. Please select a single detection file, or set bout length to 0.');
         return
     end
-    [audioname, audiopath] = uigetfile({'*.wav;*.wmf;*.flac;*.UVD' 'Audio File';'*.wav' 'WAV (*.wav)'; '*.wmf' 'WMF (*.wmf)'; '*.flac' 'FLAC (*.flac)'; '*.UVD' 'Ultravox File (*.UVD)'},['Select Audio File for ' trainingdata{1}] ,handles.settings.audiofolder);
+    [audioname, audiopath] = uigetfile({'*.wav;*.wmf;*.flac;*.UVD' 'Audio File';'*.wav' 'WAV (*.wav)'; '*.wmf' 'WMF (*.wmf)'; '*.flac' 'FLAC (*.flac)'; '*.UVD' 'Ultravox File (*.UVD)'},['Select Audio File for ' trainingdata{1}] ,handles.data.settings.audiofolder);
     if isnumeric(audioname); return; end
 end
 
@@ -39,29 +39,31 @@ h = waitbar(0,'Initializing');
 c=0;
 for k = 1:length(trainingdata)
     TTable = table({},{},'VariableNames',{'imageFilename','USV'});
-    load([trainingpath trainingdata{k}]);
+    
+    Calls = loadCallfile([trainingpath trainingdata{k}]);
+
+    
     [p, filename] = fileparts(trainingdata{k});
-    fname = fullfile(handles.squeakfolder,'Training','Images',filename);
+    fname = fullfile(handles.data.squeakfolder,'Training','Images',filename);
     mkdir(fname);
     
     % Remove Rejects
-    Calls = Calls([Calls.Accept] == 1);
+    Calls = Calls(Calls.Accept == 1, :);
     
     % Find max call frequency for cutoff
-    CallBoxes = reshape([Calls.Box],4,[]);
-    maxFR = max(CallBoxes(:,2) + CallBoxes(:,4));
+    maxFR = max(sum(Calls.Box(:,[2,4])));
     %cutoff = min([Calls.Rate, maxFR*2000]) / 2;
     
     if bout ~= 0
         %% Calculate Groups of Calls
         Distance = [];
-        for i = 1:length(Calls)
-            for j = 1:length(Calls)
+        for i = 1:height(Calls)
+            for j = 1:height(Calls)
                 Distance(i,j) = min([
-                    abs(Calls(i).Box(1) - Calls(j).Box(1))
-                    abs(Calls(i).Box(1) - Calls(j).Box(1) - Calls(j).Box(3))
-                    abs(Calls(i).Box(1) + Calls(i).Box(3) - Calls(j).Box(1))
-                    abs(Calls(i).Box(1) + Calls(i).Box(3) - Calls(j).Box(1)-Calls(j).Box(3))
+                    abs(Calls.Box(i, 1) - Calls.Box(j, 1))
+                    abs(Calls.Box(i, 1) - Calls.Box(j, 1) - Calls.Box(j, 3))
+                    abs(Calls.Box(i, 1) + Calls.Box(i, 3) - Calls.Box(j, 1))
+                    abs(Calls.Box(i, 1) + Calls.Box(i, 3) - Calls.Box(j, 1) - Calls.Box(j, 3))
                     ]);
             end
         end
@@ -79,8 +81,8 @@ for k = 1:length(trainingdata)
         rate = info.SampleRate;
             
         for i = 1:length(unique(bins))
-            CurrentSet = Calls(bins==i);
-            Boxes =reshape([CurrentSet.Box],4,[])';
+            CurrentSet = Calls(bins == i, :);
+            Boxes = CurrentSet.Box;
             
             Start = min(Boxes(:,1));
             Finish = max(Boxes(:,1) + Boxes(:,3));
@@ -99,7 +101,7 @@ for k = 1:length(trainingdata)
             for j = 1:repeats
                 IMname = [num2str(c) '_' num2str(j) '.png'];
                 [~,box] = CreateTrainingData(...
-                    mean(audio - mean(audio,1,'native'),2,'native'),...
+                    mean(audio - mean(audio,1),2),...
                     rate,...
                     Boxes,...
                     1,...
@@ -114,37 +116,35 @@ for k = 1:length(trainingdata)
         end
         
     elseif bout == 0
-        for i = 1:length(Calls)
+        for i = 1:height(Calls)
             c=c+1;
             
             % Augment audio by adding write noise, and change the amplitude
             for j = 1:repeats
                 IMname = [num2str(c) '_' num2str(j) '.png'];
                 [~,box] = CreateTrainingData(...
-                    Calls(i).Audio,...
-                    Calls(i).Rate,...
-                    Calls(i).RelBox,...
-                    Calls(i).Accept,...
-                    wind,noverlap,nfft,Calls(i).Rate/2,fullfile(fname,IMname),AmplitudeRange,j,StretchRange);
+                    Calls.Audio{i},...
+                    Calls.Rate(i),...
+                    Calls.RelBox(i, :),...
+                    Calls.Accept(i),...
+                    wind, noverlap, nfft, Calls.Rate(i) / 2, fullfile(fname, IMname), AmplitudeRange, j, StretchRange);
                 
                 %                 imwrite(im,filename,'BitDepth',8)
                 TTable = [TTable;{fullfile('Training','Images',filename,IMname), box}];
             end
             
-            waitbar(i/length(Calls),h,['Processing File ' num2str(k) ' of '  num2str(length(trainingdata))]);
+            waitbar(i/height(Calls),h,['Processing File ' num2str(k) ' of '  num2str(length(trainingdata))]);
         end
     end
-    save(fullfile(handles.squeakfolder,'Training',[filename '.mat']),'TTable','wind','noverlap','nfft');
+    save(fullfile(handles.data.squeakfolder,'Training',[filename '.mat']),'TTable','wind','noverlap','nfft');
     disp(['Created ' num2str(height(TTable)) ' Training Images']);
 end
 close(h)
-handles = guidata(hObject);  % Get newest version of handles
-
 end
 
 
 % Create training images and boxes
-function [im,box] = CreateTrainingData(audio,rate,RelBox,Accept,wind,noverlap,nfft,cutoff,filename,AmplitudeRange,replicatenumber,StretchRange)
+function [im, box] = CreateTrainingData(audio,rate,RelBox,Accept,wind,noverlap,nfft,cutoff,filename,AmplitudeRange,replicatenumber,StretchRange)
 
 % Convert audio to double, if it is not already
 if ~isfloat(audio)
@@ -182,17 +182,17 @@ maxfreq = find(fr<cutoff,1,'last');
 
 fr = fr(1:maxfreq);
 s = s(1:maxfreq,:);
-if Accept == 1;
+if Accept
     box = round([x1 (length(fr)-y1-y2) x2 y2]);
 else
     box = [];
 end
 
-s=flipud(abs(s));
-med=median(s(:))*AmplitudeFactor;
+s = flipud(abs(s));
+med = median(s(:))*AmplitudeFactor;
 im = mat2gray(s,[med*.1 med*35]);
 while size(im,2)<25
-   box=[box;[box(:,1)+size(im,2) box(:,2:4)]];
+   box = [box;[box(:,1)+size(im,2) box(:,2:4)]];
    im = [im im];
 end
 %im = insertObjectAnnotation(im, 'rectangle', box, ' ');

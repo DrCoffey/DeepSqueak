@@ -1,6 +1,6 @@
 function trainnew_Callback(hObject, eventdata, handles)
 %% Train a new neural network
-cd(handles.squeakfolder);
+cd(handles.data.squeakfolder);
 
 % Apparently, "wind" is a function name, so initialize it as empty
 wind = [];
@@ -34,7 +34,7 @@ choice = questdlg(['Train from existing network?'], ...
     'Yes', 'No');
 switch choice
     case 'Yes'
-        [NetName NetPath] = uigetfile(handles.settings.networkfolder,'Select Existing Network');
+        [NetName NetPath] = uigetfile(handles.data.settings.networkfolder,'Select Existing Network');
         load([NetPath NetName],'detector');
         [detector, layers, options] = TrainSqueakDetector(TrainingTables,detector);
     case 'No'
@@ -42,7 +42,7 @@ switch choice
 end
 
 %% Save the new network
-[FileName,PathName] = uiputfile(fullfile(handles.settings.networkfolder,'*.mat'),'Save New Network');
+[FileName,PathName] = uiputfile(fullfile(handles.data.settings.networkfolder,'*.mat'),'Save New Network');
 wind = max(AllSettings(:,1));
 noverlap = max(AllSettings(:,2));
 nfft = max(AllSettings(:,3));
