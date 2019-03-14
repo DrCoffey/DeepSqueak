@@ -22,8 +22,7 @@ uitText = uicontrol('Parent',d,...
 
 uit = uitable('Parent',d,...
     'ColumnFormat',{
-    {' ','Reject calls with','Accept calls with'}, {'Tonality','Frequency (kHz)','Power (dB/Hz)','Duration (s)', 'Score'}, {'Greater than','Less then'}, 'numeric'
-    },...
+    {' ','Reject calls with','Accept calls with'}, {'Tonality','Frequency (kHz)','Power (dB/Hz)','Duration (s)', 'Score', 'Category'}, {'Greater than','Less then','Equals'}, 'char'},...
     'ColumnWidth',{130,130,130,70},...
     'Data',[{'Reject calls with', 'Score', 'Less than', 0.5}; cell(6,4)],...
     'ColumnEditable', true,...
@@ -65,23 +64,23 @@ if cancelled; return; end
 % Select rules were accept or reject is chosen
 rules = rules(~cellfun(@isempty,rules(:,1)),:);
 rules(:,1) = num2cell(contains(rules(:,1),'Accept'));
-rules(:,3) = num2cell(contains(rules(:,3),'Greater'));
 
 %% Loop
 h = waitbar(0,'Initializing');
 for currentfile = selections % Do this for each file
     Calls = loadCallfile(fullfile(handles.detectionfiles(currentfile).folder, handles.detectionfiles(currentfile).name));
 
-    waitbar(find(selections == currentfile) ./ length(selections), h, ['Processing file ' num2str(find(selections == currentfile)) ' of ' num2str(length(selections))]);
     
     reject = false(height(Calls),1);
     accept = false(height(Calls),1);
     
     for i = 1:height(Calls)
-        
+        waitbar(i ./ height(Calls), h, ['Processing file ' num2str(find(selections == currentfile)) ' of ' num2str(length(selections))]);
+
         [I,windowsize,noverlap,nfft,rate,box] = CreateSpectrogram(Calls(i, :));
         stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.data.settings.EntropyThreshold,handles.data.settings.AmplitudeThreshold);
         
+        % For each rule, test the appropriate value, and accept or reject.
         for rule = rules'
             switch rule{2}
                 case 'Tonality'
@@ -94,16 +93,28 @@ for currentfile = selections % Do this for each file
                     testValue = stats.DeltaTime;
                 case 'Score'
                     testValue = Calls.Score(i);
+                case 'Category'
+                    testValue = Calls.Type(i);
             end
             
-            if  ~xor(testValue >= rule{4}, rule{3})
+            change = false;
+            switch rule{3}
+                case 'Greater than'
+                    change = testValue >= rule{4};
+                case 'Less than'
+                    change = testValue <= rule{4};
+                case 'Equals'
+                    change = testValue == num2str(rule{4});
+            end
+            
+            if change
                 if rule{1}
                     accept(i) = true;
                 else
                     reject(i) = true;
                 end
             end
-            
+                
         end
     end
     
