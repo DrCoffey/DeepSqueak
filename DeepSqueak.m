@@ -65,19 +65,22 @@ disp '  '
 % Set Handles
 hFig = hObject;
 handles.hFig=hFig;
+% Create a class to hold the data
+squeakfolder = fileparts(mfilename('fullpath'));
+handles.data = GUIdata(squeakfolder);
+
 set ( hFig, 'Color', [.1 .1 .1] );
 handles.output = hObject;
-[handles.squeakfolder] = fileparts(mfilename('fullpath'));
-cd(handles.squeakfolder);
+cd(handles.data.squeakfolder);
 
 % Display version
 try
-    fid = fopen(fullfile(handles.squeakfolder,'CHANGELOG.md'));
+    fid = fopen(fullfile(handles.data.squeakfolder,'CHANGELOG.md'));
     txt = fscanf(fid,'%c');
     txt = strsplit(txt);
     changes = find(contains(txt,'##'),1); % Get the values after the bold heading
-    DSVersion = txt{changes+1};
-    disp(['DeepSqueak version ' DSVersion]);
+    handles.DSVersion = txt{changes+1};
+    disp(['DeepSqueak version ' handles.DSVersion]);
     fclose(fid);
 end
 % Check if a new version is avaliable by comparing changelog to whats online
@@ -86,7 +89,7 @@ try
     WebChangelog = strsplit(WebChangelogTxt);
     changes = find(contains(WebChangelog,'##')); % Get the values after the bold heading
     WebVersion = WebChangelog{changes+1};
-    if ~strcmp(WebVersion,DSVersion)
+    if ~strcmp(WebVersion,handles.DSVersion)
         disp ' '
         disp 'A new version of DeepSqueak is avaliable.'
         disp('<a href="https://github.com/DrCoffey/DeepSqueak">Download link</a>')
@@ -95,34 +98,9 @@ try
     end
 end
 
-
-    
-handles.cmap ='inferno';
-handles.cmapname = {'inferno'};
 handles.spect = imagesc(1,1,1,'Parent', handles.axes1);
 
-% Check for missing files, create setting file if it doens't exist
-if ~(exist(fullfile(handles.squeakfolder, 'settings.mat'), 'file')==2)
-    handles.settings.detectionfolder = fullfile(handles.squeakfolder, 'Detections/');
-    handles.settings.networkfolder = fullfile(handles.squeakfolder, 'Networks/');
-    handles.settings.audiofolder = fullfile(handles.squeakfolder, 'Audio/');
-    handles.settings.detectionSettings = {'0' '6' '.1' '100' '18' '0' '1'};
-    handles.settings.playback_rate = 0.05;
-    handles.settings.LowFreq = 15;
-    handles.settings.HighFreq = 115;
-    handles.settings.AmplitudeThreshold = 0;
-    handles.settings.EntropyThreshold = 0.3;
-    handles.settings.labels = {'FF','FM','Trill','Split',' ',' ',' ',' ',' ',' '};
-    handles.settings.DisplayTimePadding = 0;
-    settings = handles.settings;
-    save(fullfile(handles.squeakfolder, 'settings.mat'),'-struct','settings')
-    disp('Settings not found. New settings file created.')
-end
-
-% Keyboard shortcuts for labelling calls
-handles.LabelShortcuts = {'1','2','3','4','5','6','7','8','9','0','hyphen','equal'};
-
-if ~(exist(fullfile(handles.squeakfolder,'Background.png'), 'file')==2)
+if ~(exist(fullfile(handles.data.squeakfolder,'Background.png'), 'file')==2)
     disp('Background image not found')
     background = zeros(280);
     fonts = listTrueTypeFonts;
@@ -134,13 +112,13 @@ if ~(exist(fullfile(handles.squeakfolder,'Background.png'), 'file')==2)
 else
     handles.background=imread('Background.png');
 end
-if ~(exist(fullfile(handles.squeakfolder,'DeepSqueak.fig'), 'file')==2)
+if ~(exist(fullfile(handles.data.squeakfolder,'DeepSqueak.fig'), 'file')==2)
     errordlg('"DeepSqueak.fig" not found');
 end
 
 % Add DeepSqueak to the path
-addpath(handles.squeakfolder);
-addpath(genpath(fullfile(handles.squeakfolder, 'Functions')));
+addpath(handles.data.squeakfolder);
+addpath(genpath(fullfile(handles.data.squeakfolder, 'Functions')));
 savepath
 
 % Cool Background Image
@@ -151,8 +129,7 @@ update_folders(hObject, eventdata, handles);
 handles = guidata(hObject);  % Get newest version of handles
 
 
-set(handles.TonalitySlider,'Value',handles.settings.EntropyThreshold);
-
+set(handles.TonalitySlider,'Value',handles.data.settings.EntropyThreshold);
 guidata(hObject, handles);
 
 % Make the other figures black
@@ -214,32 +191,37 @@ varargout{1} = handles.output;
 % --- Executes on button press in PlayCall.
 function PlayCall_Callback(hObject, eventdata, handles)
 % Play the sound within the boxs
-audio =  handles.calls(handles.currentcall).Audio;
-if ~isa(audio,'double')
+audio =  handles.data.calls.Audio{handles.data.currentcall};
+if ~isfloat(audio)
     audio = double(audio) / (double(intmax(class(audio)))+1);
+elseif ~isa(audio,'double')
+    audio = double(audio);
 end
-rate = handles.calls(handles.currentcall).Rate * handles.settings.playback_rate; % set playback rate
+
+playbackRate = handles.data.calls.Rate(handles.data.currentcall) * handles.data.settings.playback_rate; % set playback rate
+
+% Bandpass Filter
+% audio = bandpass(audio,[handles.data.calls.RelBox(handles.data.currentcall, 2), handles.data.calls.RelBox(handles.data.currentcall, 2) + handles.data.calls.RelBox(handles.data.currentcall, 4)] * 1000,handles.data.calls.Rate(handles.data.currentcall));
 paddedsound = [zeros(3125,1); audio; zeros(3125,1)];
-audiostart = handles.calls(handles.currentcall).RelBox(1) * handles.calls(handles.currentcall).Rate;
-audiolength = handles.calls(handles.currentcall).RelBox(3) * handles.calls(handles.currentcall).Rate;
-soundsc(paddedsound(round(audiostart:audiostart+audiolength + 6249)),rate);
+audiostart = handles.data.calls.RelBox(handles.data.currentcall, 1) * handles.data.calls.Rate(handles.data.currentcall);
+audiolength = handles.data.calls.RelBox(handles.data.currentcall, 3) * handles.data.calls.Rate(handles.data.currentcall);
+soundsc(paddedsound(round(audiostart:audiostart+audiolength + 6249)),playbackRate);
 guidata(hObject, handles);
 
 % --- Executes on button press in NextCall.
 function NextCall_Callback(hObject, eventdata, handles)
-if handles.currentcall<length(handles.calls) % If not the last call
-    handles.currentcall=handles.currentcall+1;
+if handles.data.currentcall < height(handles.data.calls) % If not the last call
+    handles.data.currentcall=handles.data.currentcall+1;
     update_fig(hObject, eventdata, handles);
 end
-guidata(hObject, handles);
+% guidata(hObject, handles);
 
 % --- Executes on button press in PreviousCall.
 function PreviousCall_Callback(hObject, eventdata, handles)
-if handles.currentcall>1 % If not the first call
-    handles.currentcall=handles.currentcall-1;
+if handles.data.currentcall>1 % If not the first call
+    handles.data.currentcall=handles.data.currentcall-1;
     update_fig(hObject, eventdata, handles);
 end
-guidata(hObject, handles);
 
 % --- Executes on selection change in Networks Folder Pop up.
 function neuralnetworkspopup_Callback(hObject, eventdata, handles)
@@ -273,13 +255,13 @@ end
 
 % --- Executes on button press in AcceptCall.
 function AcceptCall_Callback(hObject, eventdata, handles)
-handles.calls(handles.currentcall).Accept=1;
+handles.data.calls.Accept(handles.data.currentcall) = 1;
 update_fig(hObject, eventdata, handles);
 guidata(hObject, handles);
 
 % --- Executes on button press in RejectCall.
 function RejectCall_Callback(hObject, eventdata, handles)
-handles.calls(handles.currentcall).Accept=0;
+handles.data.calls.Accept(handles.data.currentcall) = 0;
 update_fig(hObject, eventdata, handles);
 guidata(hObject, handles);
 
@@ -288,9 +270,9 @@ function axes1_CreateFcn(hObject, eventdata, handles)
 
 % --- Executes on slider movement.
 function slider1_Callback(hObject, eventdata, handles)
-handles.currentcall=ceil(get(hObject,'Value')*length(handles.calls));
-if handles.currentcall<1
-    handles.currentcall=1;
+handles.data.currentcall = ceil(get(hObject,'Value')*height(handles.data.calls));
+if handles.data.currentcall < 1
+    handles.data.currentcall = 1;
 end
 update_fig(hObject, eventdata, handles);
 
@@ -321,13 +303,12 @@ function Untitled_2_Callback(hObject, eventdata, handles)
 
 % --- Executes on key press with focus on figure1 or any of its controls.
 function figure1_WindowKeyPressFcn(hObject, eventdata, handles)
-
-switch eventdata.Key
+switch eventdata.Character
     case 'p'
         PlayCall_Callback(hObject, eventdata, handles)
-    case {'rightarrow','e'}
+    case {'e', char(29)} % char(29) is right arrow key
         NextCall_Callback(hObject, eventdata, handles)
-    case {'leftarrow','q'}
+    case {'q', char(28)} % char(28) is left arrow key
         PreviousCall_Callback(hObject, eventdata, handles)
     case 'a'
         AcceptCall_Callback(hObject, eventdata, handles)
@@ -335,62 +316,61 @@ switch eventdata.Key
         RejectCall_Callback(hObject, eventdata, handles)
     case 'd'
         rectangle_Callback(hObject, eventdata, handles)
-    case handles.LabelShortcuts
+    case handles.data.labelShortcuts
         %% Update the call labels
         % Index of the shortcut
-        idx = contains(handles.LabelShortcuts, eventdata.Key);
-        handles.calls(handles.currentcall).Type=categorical(handles.settings.labels(idx));
+        idx = contains(handles.data.labelShortcuts, eventdata.Character);
+        handles.data.calls.Type(handles.data.currentcall) = categorical(handles.data.settings.labels(idx));
         update_fig(hObject, eventdata, handles);
 end
+% drawnow
 
 function figure1_KeyPressFcn(hObject, eventdata, handles)
 
 % --- Executes on selection change in popupmenuColorMap.
 function popupmenuColorMap_Callback(hObject, eventdata, handles)
-handles.cmapname=get(hObject,'String');
-handles.cmapname=handles.cmapname(get(hObject,'Value'));
-switch handles.cmapname{1,1}
+handles.data.cmapName=get(hObject,'String');
+handles.data.cmapName=handles.data.cmapName(get(hObject,'Value'));
+switch handles.data.cmapName{1,1}
     case 'magma'
-        handles.cmap=magma;
+        handles.data.cmap=magma;
     case 'inferno'
-        handles.cmap=inferno;
+        handles.data.cmap=inferno;
     case 'viridis'
-        handles.cmap=viridis;
+        handles.data.cmap=viridis;
     case 'plasma'
-        handles.cmap=plasma;
+        handles.data.cmap=plasma;
     case 'hot'
-        handles.cmap=hot;
+        handles.data.cmap=hot;
     case 'cubehelix'
-        handles.cmap=cubehelix;
+        handles.data.cmap=cubehelix;
     case 'parula'
-        handles.cmap=parula;
+        handles.data.cmap=parula;
     case 'jet'
-        handles.cmap=jet;
+        handles.data.cmap=jet;
     case 'hsv'
-        handles.cmap=hsv;
+        handles.data.cmap=hsv;
     case 'cool'
-        handles.cmap=cool;
+        handles.data.cmap=cool;
     case 'spring'
-        handles.cmap=spring;
+        handles.data.cmap=spring;
     case 'summer'
-        handles.cmap=summer;
+        handles.data.cmap=summer;
     case 'autumn'
-        handles.cmap=autumn;
+        handles.data.cmap=autumn;
     case 'winter'
-        handles.cmap=winter;
+        handles.data.cmap=winter;
     case 'gray'
-        handles.cmap=gray;
+        handles.data.cmap=gray;
     case 'bone'
-        handles.cmap=bone;
+        handles.data.cmap=bone;
     case 'copper'
-        handles.cmap=copper;
+        handles.data.cmap=copper;
     case 'pink'
-        handles.cmap=pink;
+        handles.data.cmap=pink;
 end
-colormap(handles.axes1,handles.cmap);
-colormap(handles.axes4,handles.cmap);
-update_fig(hObject, eventdata, handles);
-guidata(hObject, handles);
+colormap(handles.axes1,handles.data.cmap);
+colormap(handles.axes4,handles.data.cmap);
 
 % --- Executes during object creation, after setting all properties.
 function popupmenuColorMap_CreateFcn(hObject, eventdata, handles)
@@ -410,34 +390,37 @@ function rectangle_Callback(hObject, eventdata, handles)
 fcn = makeConstrainToRectFcn('imrect',[handles.spect.XData(1),handles.spect.XData(end)],[handles.spect.YData(1),handles.spect.YData(end)]); %constrain to edges of window
 newbox=imrect(handles.axes1,'PositionConstraintFcn',fcn);
 handles.pos=getPosition(newbox);
-difference = handles.pos - handles.calls(handles.currentcall).RelBox;
-handles.calls(handles.currentcall).RelBox=difference + handles.calls(handles.currentcall).RelBox;
-handles.calls(handles.currentcall).Box=difference + handles.calls(handles.currentcall).Box;
+difference = handles.pos - handles.data.calls{handles.data.currentcall, 'RelBox'};
+handles.data.calls{handles.data.currentcall, 'RelBox'} = difference + handles.data.calls{handles.data.currentcall, 'RelBox'};
+handles.data.calls{handles.data.currentcall, 'Box'} = difference + handles.data.calls{handles.data.currentcall, 'Box'};
 delete(newbox);
 update_fig(hObject, eventdata, handles);
-guidata(hObject, handles);
 
 % --------------------------------------------------------------------
 function select_audio_Callback(hObject, eventdata, handles)
 % Find audio in folder
-path=uigetdir(handles.settings.audiofolder,'Select Audio File Folder');
+path=uigetdir(handles.data.settings.audiofolder,'Select Audio File Folder');
 if isnumeric(path);return;end
-handles.settings.audiofolder = path;
-settings = handles.settings;
-save([handles.squeakfolder '/settings.mat'],'-struct','settings')
+handles.data.settings.audiofolder = path;
+handles.data.saveSettings();
 update_folders(hObject, eventdata, handles);
-handles = guidata(hObject);  % Get newest version of handles
 
 % --------------------------------------------------------------------
 function load_networks_Callback(hObject, eventdata, handles)
 % Find networks
-path=uigetdir(handles.settings.networkfolder,'Select Network Folder');
+path=uigetdir(handles.data.settings.networkfolder,'Select Network Folder');
 if isnumeric(path);return;end
-handles.settings.networkfolder = path;
-settings = handles.settings;
-save([handles.squeakfolder '/settings.mat'],'-struct','settings')
+handles.data.settings.networkfolder = path;
+handles.data.saveSettings();
 update_folders(hObject, eventdata, handles);
-handles = guidata(hObject);  % Get newest version of handles
+
+function load_detectionFolder_Callback(hObject, eventdata, handles)
+% Find audio in folder
+path=uigetdir(handles.data.settings.detectionfolder,'Select Detection File Folder');
+if isnumeric(path);return;end
+handles.data.settings.detectionfolder = path;
+handles.data.saveSettings();
+update_folders(hObject, eventdata, handles);
 
 % --------------------------------------------------------------------
 function folders_Callback(hObject, eventdata, handles)
@@ -449,17 +432,17 @@ function export_raven_Callback(hObject, eventdata, handles)
 raventable = [{'Selection'} {'View'} {'Channel'} {'Begin Time (s)'} {'End Time (s)'} {'Low Freq (Hz)'} {'High Freq (Hz)'} {'Delta Time (s)'} {'Delta Freq (Hz)'} {'Avg Power Density (dB FS)'} {'Annotation'}];
 View = 'Spectrogram 1';
 Channel = 1;
-for i = 1:length(handles.calls)
-    if handles.calls(i).Accept
+for i = 1:height(handles.data.calls)
+    if handles.data.calls.Accept(i)
         Selection = i;
-        BeginTime = handles.calls(i).Box(1);
-        EndTime = handles.calls(i).Box(1) + handles.calls(i).Box(3);
-        LowFreq = (handles.calls(i).Box(2))*1000;
-        HighFreq = (handles.calls(i).Box(2)+handles.calls(i).Box(4))*1000;
+        BeginTime = handles.data.calls.Box(i, 1);
+        EndTime = sum(handles.data.calls.Box(i ,[1, 3]));
+        LowFreq = handles.data.calls.Box(i, 2) * 1000;
+        HighFreq = sum(handles.data.calls.Box(i, [2, 4])) * 1000;
         DeltaTime = EndTime - BeginTime;
         DeltaFreq = HighFreq - LowFreq;
         AvgPwr = 1;
-        Annotation = handles.calls(i).Accept;
+        Annotation = handles.data.calls.Accept(i);
         raventable = [raventable; {Selection} {View} {Channel} {BeginTime} {EndTime} {LowFreq} {HighFreq} {DeltaTime} {DeltaFreq} {AvgPwr} {Annotation}];
     end
 end
@@ -474,35 +457,24 @@ guidata(hObject, handles);
 % --------------------------------------------------------------------
 function export_Callback(hObject, eventdata, handles)
 
-% --------------------------------------------------------------------
 function training_Callback(hObject, eventdata, handles)
 
-% --- Executes on button press in sortbytime.
-function sortbytime_Callback(hObject, eventdata, handles)
-% Sort current file by time
-h = waitbar(0,'Sorting...');
-A = [handles.calls.Box];
-[sorted,ix] = sort(A(1:4:end));
-handles.calls = handles.calls(ix);
-handles.currentcall=1;
-for i=1:length(handles.calls);
-    handles.CallTime(i,1)=handles.calls(i).Box(1);
-end
-update_fig(hObject, eventdata, handles);
-close(h);
-guidata(hObject, handles);
-
-% --- Executes on button press in sortbyscore.
-function sortbyscore_Callback(hObject, eventdata, handles)
+function SortCalls(hObject, eventdata, handles, type)
 % Sort current file by score
 h = waitbar(0,'Sorting...');
-% A = struct2cell(handles.calls);
-[sorted,ix] = sort([handles.calls.Score]);
-handles.calls = handles.calls(ix);
-handles.currentcall=1;
-for i=1:length(handles.calls)
-    handles.CallTime(i,1)=handles.calls(i).Box(1);
+switch type
+    case 'score'
+        [~,idx] = sort(handles.data.calls.Score);
+    case 'time'
+        [~,idx] = sortrows(handles.data.calls.Box, 1);
+    case 'duration'
+        [~,idx] = sortrows(handles.data.calls.Box, 4);
+    case 'frequency'
+        [~,idx] = sort(sum(handles.data.calls.Box(:, [2, 2, 4]), 2));
 end
+handles.data.calls = handles.data.calls(idx, :);
+handles.data.currentcall=1;
+
 update_fig(hObject, eventdata, handles);
 close(h);
 guidata(hObject, handles);
@@ -526,12 +498,11 @@ prompt = {
     };
 dlg_title = 'Set Custom Label Names';
 num_lines=[1,60]; options.Resize='off'; options.WindowStyle='modal'; options.Interpreter='tex';
-old_labels = handles.settings.labels;
+old_labels = handles.data.settings.labels;
 new_labels = inputdlg(prompt,dlg_title,num_lines,old_labels,options);
 if ~isempty(new_labels)
-    handles.settings.labels = new_labels;
-    settings = handles.settings;
-    save([handles.squeakfolder '/settings.mat'],'-struct','settings');
+    handles.data.settings.labels = new_labels;
+    handles.data.saveSettings();
     update_folders(hObject, eventdata, handles);
 end
 guidata(hObject, handles);
@@ -541,16 +512,15 @@ function Change_Playback_Rate_Callback(hObject, eventdata, handles)
 prompt = {'Playback Rate: (default = 0.0.5)'};
 dlg_title = 'Change Playback Rate';
 num_lines=1; options.Resize='off'; options.WindowStyle='modal'; options.Interpreter='tex';
-defaultans = {num2str(handles.settings.playback_rate)};
+defaultans = {num2str(handles.data.settings.playback_rate)};
 rate = inputdlg(prompt,dlg_title,num_lines,defaultans);
 if isempty(rate); return; end
 
 [newrate,~,errmsg] = sscanf(rate{1},'%f',1);
 disp(errmsg);
 if ~isempty(newrate)
-    handles.settings.playback_rate = newrate;
-    settings = handles.settings;
-    save([handles.squeakfolder '/settings.mat'],'-struct','settings')
+    handles.data.settings.playback_rate = newrate;
+    handles.data.saveSettings();
     update_folders(hObject, eventdata, handles);
 end
 guidata(hObject, handles);
@@ -561,7 +531,7 @@ function Change_Display_Range_Callback(hObject, eventdata, handles)
 prompt = {'Low Frequency (kHz):', 'High Frequency (kHz):', 'Fixed Display Range (s) (Set to 0 to autoscale)'};
 dlg_title = 'New Display Range:';
 num_lines=[1 80]; options.Resize='off'; options.WindowStyle='modal'; options.Interpreter='tex';
-defaultans = {num2str(handles.settings.LowFreq),num2str(handles.settings.HighFreq),num2str(handles.settings.DisplayTimePadding)};
+defaultans = {num2str(handles.data.settings.LowFreq),num2str(handles.data.settings.HighFreq),num2str(handles.data.settings.DisplayTimePadding)};
 dispRange = inputdlg(prompt,dlg_title,num_lines,defaultans);
 if isempty(dispRange); return; end
 
@@ -573,11 +543,10 @@ disp(errmsg);
 disp(errmsg);
 if ~isempty(LowFreq) && ~isempty(HighFreq) && ~isempty(DisplayTimePadding)
     if HighFreq > LowFreq
-        handles.settings.LowFreq = LowFreq;
-        handles.settings.HighFreq = HighFreq;
-        handles.settings.DisplayTimePadding = DisplayTimePadding;
-        settings = handles.settings;
-        save([handles.squeakfolder '/settings.mat'],'-struct','settings')
+        handles.data.settings.LowFreq = LowFreq;
+        handles.data.settings.HighFreq = HighFreq;
+        handles.data.settings.DisplayTimePadding = DisplayTimePadding;
+        handles.data.saveSettings();
         update_folders(hObject, eventdata, handles);
         update_fig(hObject, eventdata, handles);
         
@@ -602,7 +571,7 @@ function ChangeContourThreshold_Callback(hObject, eventdata, handles)
 prompt = {'Tonality Threshold: (default = 0.25)', 'Amplitude Threshold: (default = 0.075)'};
 dlg_title = 'New Contour Threshold:';
 num_lines=[1 50]; options.Resize='off'; options.WindowStyle='modal'; options.Interpreter='tex';
-defaultans = {num2str(handles.settings.EntropyThreshold),num2str(handles.settings.AmplitudeThreshold)};
+defaultans = {num2str(handles.data.settings.EntropyThreshold),num2str(handles.data.settings.AmplitudeThreshold)};
 threshold = inputdlg(prompt,dlg_title,num_lines,defaultans);
 if isempty(threshold); return; end
 
@@ -612,10 +581,9 @@ disp(errmsg);
 disp(errmsg);
 
 if ~isempty(Tonality) && ~isempty(Amplitude)
-    handles.settings.EntropyThreshold = Tonality;
-    handles.settings.AmplitudeThreshold = Amplitude;
-    settings = handles.settings;
-    save([handles.squeakfolder '/settings.mat'],'-struct','settings')
+    handles.data.settings.EntropyThreshold = Tonality;
+    handles.data.settings.AmplitudeThreshold = Amplitude;
+    handles.data.saveSettings();
     update_folders(hObject, eventdata, handles);
     try
         update_fig(hObject, eventdata, handles);
@@ -627,34 +595,56 @@ guidata(hObject, handles);
 
 % --------------------------------------------------------------------
 function ViewManual_Callback(hObject, eventdata, handles)
-system('start https://github.com/DrCoffey/DeepSqueak/wiki');
+web('https://github.com/DrCoffey/DeepSqueak/wiki','-browser');
 
 % --------------------------------------------------------------------
 function AboutDeepSqueak_Callback(hObject, eventdata, handles)
 title = 'About DeepSqueak';
-message = [
-    {'DeepSqueak Version 1.0'}
-    {'\copyright 2018'}
-    ];
-d = dialog('Position',[300 350 250  300],'Name',title,'WindowStyle','Normal','Visible', 'off');
+
+d = dialog('Position',[300 350 500  600],'Name',title,'WindowStyle','Normal','Visible', 'off','Color', [0,0,0]);
 movegui(d,'center');
-tx = axes(d,'Units','Normalized','Position',[.2 .7 .6 .4],'Visible', 'off');
-text(tx,.5,.5,message,'HorizontalAlignment','Center')
-ha = axes(d,'Units','Normalized','Position',[.1 .15 .8 .6]);
-handle_image = image(handles.background,'parent',ha);
-axis off;
+ha = axes(d,'Units','Normalized','Position',[0,0,1,1]);
+
+A = zeros(128);
+A = insertText(A,[64,20],'Coffey & Marx, 2019','TextColor','white','BoxColor','Black','AnchorPoint','Center','FontSize',11);
+A = insertText(A,[64,64],'DeepSqueak','TextColor','white','BoxColor','Black','AnchorPoint','Center');
+A = insertText(A,[64,80],['Version ' handles.DSVersion],'TextColor','white','BoxColor','Black','AnchorPoint','Center','FontSize',11);
+
+A = A(:,:,1);
+
+P = [64, 64];
+D = 3;
+T = [1,0,-1,0;0,1,0,-1];	% 4 directions
+k = 0;
+
+handle_image = imshow(A,[0,1],'parent',ha);
+
 btn = uicontrol('Parent',d,...
-    'Position',[100 10 50 25],...
-    'String','Ok',...
+    'Units','Normalized',...
+    'Position',[.42 .01 .16 .06],...
+    'String','Okay',...
     'Callback','delete(gcf)');
 set(d,'Visible','on')
+
+while isvalid(handle_image)
+    k = k+1;
+    a = A(P(1),P(2));
+    A(P(1),P(2)) = ~a;
+    if ( a )
+        D = mod(D+1,4);
+    else
+        D = mod(D-1,4);
+    end
+    P = P+T(:,D+1);
+    handle_image.CData = A;
+    pause(.01)
+end
 
 
 % --- Executes on slider movement.
 function TonalitySlider_Callback(hObject, eventdata, handles)
-handles.settings.EntropyThreshold=(get(hObject,'Value'));
-settings = handles.settings;
-save([handles.squeakfolder '/settings.mat'],'-struct','settings')
+handles.data.settings.EntropyThreshold=(get(hObject,'Value'));
+handles.data.saveSettings();
 update_fig(hObject, eventdata, handles);
 
 
@@ -669,15 +659,12 @@ if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColo
     set(hObject,'BackgroundColor',[.9 .9 .9]);
 end
 
-
-
-
 function Manifesto_Callback(hObject, eventdata, handles)
 % Open the file
 
 % If a text file
-if exist(fullfile(handles.squeakfolder,'Manifestos',[hObject.Text '.txt']),'file') == 2
-    fname = fullfile(handles.squeakfolder,'Manifestos',[hObject.Text '.txt']);
+if exist(fullfile(handles.data.squeakfolder,'Manifestos',[hObject.Text '.txt']),'file') == 2
+    fname = fullfile(handles.data.squeakfolder,'Manifestos',[hObject.Text '.txt']);
     fid = fopen(fname);
     chr = fscanf(fid,'%c');
     % Remove extra line end chars
@@ -708,8 +695,11 @@ if exist(fullfile(handles.squeakfolder,'Manifestos',[hObject.Text '.txt']),'file
         'ForegroundColor',[.6,1,1],...
         'enable','inactive');
     % If a pdf
-elseif  exist(fullfile(handles.squeakfolder,'Manifestos',[hObject.Text '.pdf']),'file') == 2
-    fname = fullfile(handles.squeakfolder,'Manifestos',[hObject.Text '.pdf']);
+elseif  exist(fullfile(handles.data.squeakfolder,'Manifestos',[hObject.Text '.pdf']),'file') == 2
+    fname = fullfile(handles.data.squeakfolder,'Manifestos',[hObject.Text '.pdf']);
+    open(fname)
+elseif  strcmp(hObject.Text,'Read the Paper')
+    fname = fullfile(handles.data.squeakfolder,'DeepSqueak.pdf');
     open(fname)
 end
 
@@ -719,5 +709,8 @@ function submit_a_bug_Callback(hObject, eventdata, handles)
 % hObject    handle to submit_a_bug (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-system('start https://github.com/DrCoffey/DeepSqueak/issues');
+web('https://github.com/DrCoffey/DeepSqueak/issues','-browser');
 
+% --- Executes on slider movement.
+function optimization_slider_Callback(hObject, eventdata, handles)
+hObject.Value = round(hObject.Value);

@@ -1,4 +1,46 @@
 # Changelog
+## 2.5.0 2019-03-04
+Fixed possible bug when updating files after clustering.
+
+Made syntax analysis compatible with exported excel files.
+
+Generally cleaned the code.
+
+Made box merging much faster, detected audio is now always stored ad 16-bit.
+
+K-means clustering models are now saved with the cluster names, so that when clustering with an existing model, the names don't need to be re-entered.
+
+Improved the "Tools > Automatic Review > Batch Reject by Threshold" menu to allow for more permutations of score, duration, tonality, frequency, power, and category.
+
+Detection files are now tables instead of structures. Everything should be backwards compatible.
+
+## 2.4.1 2019-03-01
+Updated threshold rejection to use power instead of amplitude.
+
+Added buttons to sort calls by frequency and duration.
+
+Improved support for multichannel audio by taking the mean of all audio channels.
+Alternatively, a max intensity projection can be applied to the audio, or a single channel can be used.
+See line 79 of SqueakDetect.m for details.
+
+## 2.3.0 2019-02-20
+Detection is now no longer limited to two Networks.
+
+Improved separation of densely packed calls.
+
+## 2.2.0 2019-01-25
+
+Drastically improved detection of low signal vocalizations!
+- New slider to set precision to recall tradeoff
+- When slider is set to high precision, USV detection will be fast and accurate but may miss some quiet calls
+- When slider is set to high recall, USV detection is slightly slower but will detect even extremely low signal calls
+- When slider is set to high recall, DeepSqueak will likely detect more noise
+- Default slider position is in the middle, and balances both approaches
+
+Added a link to the "Issues" section of our GitHub in the Help Menu
+
+Included a pdf of the published paper
+
 ## 2.1.2 2019-01-14
 Multichannel audio no longer breaks DeepSqueak.
 If audio files have more than one channel, only the first channel is used.

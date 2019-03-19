@@ -11,78 +11,125 @@ else
     currentfile = 1;
 end
 
-% Get the settings
-[...
-    power_low_checkbox,...
-    power_low,...
-    power_max_checkbox,...
-    power_max,...
-    score_low_checkbox,...
-    score_low,...
-    score_max_checkbox,...
-    score_max,...
-    tonality_low_checkbox,...
-    tonality_low,...
-    tonality_max_checkbox,...
-    tonality_max,...
-    selections,...
-    cancelled] = thresholds(handles.detectionfilesnames,currentfile);
+%% Selection GUI
+d = dialog('Position',[200,200,500,600]);
+d.UserData = 2;
 
-if cancelled; return; end;
+uitText = uicontrol('Parent',d,...
+    'Style','text',...
+    'Position', [10 570 480 20],...
+    'String',{'Set rules for accepting/rejecting calls'});
 
+uit = uitable('Parent',d,...
+    'ColumnFormat',{
+    {' ','Reject calls with','Accept calls with'}, {'Tonality','Frequency (kHz)','Power (dB/Hz)','Duration (s)', 'Score', 'Category'}, {'Greater than','Less then','Equals'}, 'char'},...
+    'ColumnWidth',{130,130,130,70},...
+    'Data',[{'Reject calls with', 'Score', 'Less than', 0.5}; cell(6,4)],...
+    'ColumnEditable', true,...
+    'RowName',[],...
+    'ColumnName',[],...
+    'Position', [10 420 480 150]);
+
+listboxText = uicontrol('Parent',d,...
+    'Style','text',...
+    'Position', [10 380 480 30],...
+    'String','Select file(s) to process');
+
+listbox = uicontrol('Parent',d,...
+    'Style','listbox',...
+    'Position',[10 70 480 310],...
+    'Max',inf,...
+    'String', handles.detectionfilesnames,...
+    'Value', currentfile);
+
+btnProceed = uicontrol('Parent',d,...
+    'Position',[100 10 100 50],...
+    'String','Process Files',...
+    'Callback',@(popup,event) set(d,'UserData',0));
+
+btnCancel = uicontrol('Parent',d,...
+    'Position',[300 10 100 50],...
+    'String','Close',...
+    'Callback',@(popup,event) set(d,'UserData',1));
+
+waitfor(d,'UserData')
+selections  = listbox.Value;
+rules = uit.Data;
+cancelled = d.UserData;
+delete(d)
+clear d
+
+if cancelled; return; end
+
+% Select rules were accept or reject is chosen
+rules = rules(~cellfun(@isempty,rules(:,1)),:);
+rules(:,1) = num2cell(contains(rules(:,1),'Accept'));
+
+%% Loop
 h = waitbar(0,'Initializing');
-for currentfile =selections % Do this for each file
-    % Load the file, skip files if variable: 'Calls' doesn't exist
-    lastwarn('');
-    load([handles.detectionfiles(currentfile).folder '/' handles.detectionfiles(currentfile).name],'Calls');
-    if ~isempty(lastwarn)
-        disp([handles.detectionfiles(currentfile).name ' is not a Call file, skipping...'])
-        continue
-    end
+for currentfile = selections % Do this for each file
+    Calls = loadCallfile(fullfile(handles.detectionfiles(currentfile).folder, handles.detectionfiles(currentfile).name));
+
     
-    % Reject calls where reject == true, accept calls where accept == true
-    
-    % Get tonality
-    if tonality_low_checkbox && tonality_low_checkbox
-        tonality = [];
-        for i = Calls'
-            [I,windowsize,noverlap,nfft,rate,box,s,fr,ti,audio,AudioRange] = CreateSpectrogram(i);
-            stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.settings.EntropyThreshold,handles.settings.AmplitudeThreshold);
-            tonality = [tonality; stats.SignalToNoise];
-        end
-    end
-    
-    Calls = struct2table(Calls);
     reject = false(height(Calls),1);
     accept = false(height(Calls),1);
     
-    reject = reject | (Calls.Power < power_low) & power_low_checkbox;
-    accept = accept | (Calls.Power > power_max) & power_max_checkbox;
-    
-    reject = reject | (Calls.Score < score_low) & score_low_checkbox;
-    accept = accept | (Calls.Score > score_max) & score_max_checkbox;
-    
-    if tonality_low_checkbox && tonality_low_checkbox
-        reject = reject | (tonality < tonality_low) & tonality_low_checkbox;
-        accept = accept | (tonality > tonality_max) & tonality_max_checkbox;
+    for i = 1:height(Calls)
+        waitbar(i ./ height(Calls), h, ['Processing file ' num2str(find(selections == currentfile)) ' of ' num2str(length(selections))]);
+
+        [I,windowsize,noverlap,nfft,rate,box] = CreateSpectrogram(Calls(i, :));
+        stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.data.settings.EntropyThreshold,handles.data.settings.AmplitudeThreshold);
+        
+        % For each rule, test the appropriate value, and accept or reject.
+        for rule = rules'
+            switch rule{2}
+                case 'Tonality'
+                    testValue = stats.SignalToNoise;
+                case 'Frequency (kHz)'
+                    testValue = stats.PrincipalFreq;
+                case 'Power (dB/Hz)'
+                    testValue = stats.MaxPower;
+                case 'Duration (s)'
+                    testValue = stats.DeltaTime;
+                case 'Score'
+                    testValue = Calls.Score(i);
+                case 'Category'
+                    testValue = Calls.Type(i);
+            end
+            
+            change = false;
+            switch rule{3}
+                case 'Greater than'
+                    change = testValue >= rule{4};
+                case 'Less than'
+                    change = testValue <= rule{4};
+                case 'Equals'
+                    change = testValue == num2str(rule{4});
+            end
+            
+            if change
+                if rule{1}
+                    accept(i) = true;
+                else
+                    reject(i) = true;
+                end
+            end
+                
+        end
     end
     
-    Calls.Accept(accept) = true;
-    Calls.Accept(reject) = false;
     
-    Calls = table2struct(Calls);
+    Calls.Accept(reject) = false;
+    Calls.Accept(accept) = true;
+
     save(fullfile(handles.detectionfiles(currentfile).folder,handles.detectionfiles(currentfile).name),'Calls','-v7.3');
     
-    %update the display
-    if isfield(handles,'current_file_id') && currentfile == handles.current_file_id
-        handles.calls = Calls;
-    end
-    waitbar(find(selections == currentfile) ./ length(selections), h, ['Processing file ' num2str(find(selections == currentfile)) ' of ' num2str(length(selections))]);
-    
 end
-
 close(h);
-update_fig(hObject, eventdata, handles);
-guidata(hObject, handles);
 
+
+%update the display
+if isfield(handles,'current_detection_file') && any(ismember(handles.detectionfilesnames(selections),handles.current_detection_file))
+    loadcalls_Callback(hObject, eventdata, handles, handles.current_file_id)
+end
 

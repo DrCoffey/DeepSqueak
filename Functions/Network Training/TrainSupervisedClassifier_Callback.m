@@ -8,8 +8,8 @@ function TrainSupervisedClassifier_Callback(hObject, eventdata, handles)
 
 %% Prepare the data
 % Select files
-cd(handles.squeakfolder);
-[trainingdata, trainingpath] = uigetfile([handles.settings.detectionfolder '/*.mat'],'Select Detection File(s) for Training ','MultiSelect', 'on');
+cd(handles.data.squeakfolder);
+[trainingdata, trainingpath] = uigetfile([handles.data.settings.detectionfolder '/*.mat'],'Select Detection File(s) for Training ','MultiSelect', 'on');
 if isnumeric(trainingdata)  % If user cancels
     return
 end
@@ -36,35 +36,40 @@ X = [];
 TrainingImages = {};
 Class = [];
 for j = 1:length(trainingdata)  % For Each File
-    load([trainingpath trainingdata{j}],'Calls');
+    load(fullfile(trainingpath, trainingdata{j}),'Calls');
+    Calls = loadCallfile(fullfile(trainingpath, trainingdata{j}));
+
+    
     Xtemp = [];
     Classtemp = [];
     c = 0;
-
-    for i = 1:length(Calls)     % For Each Call
-        if (Calls(i).Accept == 1) && (Calls(i).Type ~= 'Noise');
-            waitbar(i/length(Calls),h,['Loading File ' num2str(j) ' of '  num2str(length(trainingdata))]);
-            c=c+1;
-            audio =  Calls(i).Audio;
-            if ~isa(audio,'double')
+    
+    for i = 1:height(Calls)     % For Each Call
+        if Calls.Accept(i) && Calls.Type(i) ~= 'Noise'
+            waitbar(i/height(Calls),h,['Loading File ' num2str(j) ' of '  num2str(length(trainingdata))]);
+            c = c + 1;
+            audio = Calls.Audio{i};
+            if ~isfloat(audio)
                 audio = double(audio) / (double(intmax(class(audio)))+1);
+            elseif ~isa(audio,'double')
+                audio = double(audio);
             end
             
-            [s, fr, ti] = spectrogram((audio),round(Calls(i).Rate * wind),round(Calls(i).Rate * noverlap),round(Calls(i).Rate * nfft),Calls(i).Rate,'yaxis');
+            [s, fr, ti] = spectrogram((audio),round(Calls.Rate(i) * wind),round(Calls.Rate(i) * noverlap),round(Calls.Rate(i) * nfft),Calls.Rate(i),'yaxis');
             
-            x1 = axes2pix(length(ti),ti,Calls(i).RelBox(1));
-            x2 = axes2pix(length(ti),ti,Calls(i).RelBox(3)) + x1;
-%             y1 = axes2pix(length(fr),fr./1000,Calls(i).RelBox(2)-10);
-%             y2 = axes2pix(length(fr),fr./1000,Calls(i).RelBox(4)+20) + y1;
-                    y1 = axes2pix(length(fr),fr./1000,lowFreq);
-                    y2 = axes2pix(length(fr),fr./1000,highFreq);
+            x1 = axes2pix(length(ti),ti,Calls.RelBox(i, 1));
+            x2 = axes2pix(length(ti),ti,Calls.RelBox(i, 3)) + x1;
+            %             y1 = axes2pix(length(fr),fr./1000,Calls.RelBox(i, 2)-10);
+            %             y2 = axes2pix(length(fr),fr./1000,Calls.RelBox(i, 4)+20) + y1;
+            y1 = axes2pix(length(fr),fr./1000,lowFreq);
+            y2 = axes2pix(length(fr),fr./1000,highFreq);
             I=abs(s(round(y1:min(y2,size(s,1))),round(x1:x2))); % Get the pixels in the box
             % Use median scaling
             med = median(abs(s(:)));
-            im = mat2gray(flipud(I),[med*0.1, med*35]); 
+            im = mat2gray(flipud(I),[med*0.1, med*35]);
             
             Xtemp(:,:,:,c) = single(imresize(im,imageSize));
-            Classtemp = [Classtemp; categorical(Calls(i).Type)];
+            Classtemp = [Classtemp; categorical(Calls.Type(i))];
         end
     end
     X = cat(4,X,Xtemp);
@@ -74,8 +79,15 @@ Class = removecats(Class);
 
 close(h)
 
-X = X(:,:,:,~isundefined(Class));
-Class = Class(~isundefined(Class));
+%% Select the categories to train the neural network with
+call_categories = categories(Class);
+idx = listdlg('ListString',call_categories,'Name','Select categories for training','ListSize',[300,300]);
+calls_to_train_with = ismember(Class,call_categories(idx));
+X = X(:,:,:,calls_to_train_with);
+Class = Class(calls_to_train_with);
+Class = removecats(Class);
+
+
 %% Train
 
 % Divide the data into training and validation data.
@@ -141,7 +153,7 @@ ClassifyNet = trainNetwork(auimds,layers,options);
 
 % Plot the confusion matrix
 figure('color','w')
-[C,order] = confusionmat(classify(DenoiseNet,ValX),ValY)
+[C,order] = confusionmat(classify(ClassifyNet,ValX),ValY)
 h = heatmap(order,order,C)
 h.Title = 'Confusion Matrix';
 h.XLabel = 'Predicted class';

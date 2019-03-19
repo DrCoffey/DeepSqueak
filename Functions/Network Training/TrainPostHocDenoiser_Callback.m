@@ -11,8 +11,8 @@ msgbox('This function will overwrite "DeepSqueak/Denoising Networks/CleaningNet.
 
 %% Prepare the data
 % Select files
-cd(handles.squeakfolder);
-[trainingdata, trainingpath] = uigetfile([handles.settings.detectionfolder '/*.mat'],'Select Detection File(s) for Training ','MultiSelect', 'on');
+cd(handles.data.squeakfolder);
+[trainingdata, trainingpath] = uigetfile([handles.data.settings.detectionfolder '/*.mat'],'Select Detection File(s) for Training ','MultiSelect', 'on');
 if isnumeric(trainingdata)  % If user cancels
     return
 end
@@ -35,21 +35,24 @@ c=0;
 TrainingImages = {};
 Class = [];
 for j = 1:length(trainingdata)  % For Each File
-    load([trainingpath trainingdata{j}],'Calls');
-    for i = 1:length(Calls)     % For Each Call
-        waitbar(i/length(Calls),h,['Loading File ' num2str(j) ' of '  num2str(length(trainingdata))]);
+    Calls = loadCallfile([trainingpath trainingdata{j}]);
+    
+    for i = 1:height(Calls)     % For Each Call
+        waitbar(i/height(Calls),h,['Loading File ' num2str(j) ' of '  num2str(length(trainingdata))]);
         c=c+1;
         
-        audio =  Calls(i).Audio;
-        if ~isa(audio,'double')
+        audio =  Calls.Audio{i};
+        if ~isfloat(audio)
             audio = double(audio) / (double(intmax(class(audio)))+1);
+        elseif ~isa(audio,'double')
+            audio = double(audio);
         end
 
-        [s, fr, ti] = spectrogram(audio,round(Calls(i).Rate * wind),round(Calls(i).Rate * noverlap),round(Calls(i).Rate * nfft),Calls(i).Rate,'yaxis');
-            x1 = axes2pix(length(ti),ti,Calls(i).RelBox(1));
-            x2 = axes2pix(length(ti),ti,Calls(i).RelBox(3)) + x1;
-%             y1 = axes2pix(length(fr),fr./1000,Calls(i).RelBox(2));
-%             y2 = axes2pix(length(fr),fr./1000,Calls(i).RelBox(4)) + y1;
+        [s, fr, ti] = spectrogram(audio,round(Calls.Rate(i) * wind),round(Calls.Rate(i) * noverlap),round(Calls.Rate(i) * nfft),Calls.Rate(i),'yaxis');
+            x1 = axes2pix(length(ti),ti,Calls.RelBox(i,1));
+            x2 = axes2pix(length(ti),ti,Calls.RelBox(i,3)) + x1;
+%             y1 = axes2pix(length(fr),fr./1000,Calls.RelBox(i,2));
+%             y2 = axes2pix(length(fr),fr./1000,Calls.RelBox(i,4)) + y1;
             y1 = axes2pix(length(fr),fr./1000,lowFreq);
             y2 = axes2pix(length(fr),fr./1000,highFreq);
             I=abs(s(round(y1:min(y2,size(s,1))),round(x1:x2))); % Get the pixels in the box
@@ -61,10 +64,10 @@ for j = 1:length(trainingdata)  % For Each File
             % Duplicate the image with random gaussian noise.
             im2 = imnoise(im,'gaussian',.4*rand()+.1,.1*rand());
             
-        if categorical(Calls(i).Type) == 'Noise';
+        if categorical(Calls.Type(i)) == 'Noise'
             TrainingImages = [TrainingImages; {im}; {im2}];
             Class = [Class; categorical({'Noise'}); categorical({'Noise'})];
-        elseif Calls(i).Accept == 1;
+        elseif Calls.Accept(i)
             TrainingImages = [TrainingImages; {im}; {im2}];
             Class = [Class; categorical({'USV'}); categorical({'USV'})];
         end
@@ -143,15 +146,15 @@ DenoiseNet = trainNetwork(auimds,layers,options);
 
 % Plot the confusion matrix
 figure('color','w')
-[C,order] = confusionmat(classify(DenoiseNet,ValX),ValY)
-h = heatmap(order,order,C)
+[C,order] = confusionmat(classify(DenoiseNet,ValX),ValY);
+h = heatmap(order,order,C);
 h.Title = 'Confusion Matrix';
 h.XLabel = 'Predicted class';
 h.YLabel = 'True Class';
 h.ColorbarVisible = 'off';
 
 % [FileName,PathName] = uiputfile('CleaningNet.mat','Save Network');
-save(fullfile(handles.squeakfolder,'Denoising Networks','CleaningNet.mat'),'DenoiseNet','wind','noverlap','nfft','lowFreq','highFreq','imageSize','layers');
+save(fullfile(handles.data.squeakfolder,'Denoising Networks','CleaningNet.mat'),'DenoiseNet','wind','noverlap','nfft','lowFreq','highFreq','imageSize','layers');
 msgbox('The new network is now saved.','Saved','help')
 
 
