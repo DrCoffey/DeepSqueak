@@ -82,6 +82,8 @@ try
     handles.DSVersion = txt{changes+1};
     disp(['DeepSqueak version ' handles.DSVersion]);
     fclose(fid);
+catch
+    handles.DSVersion = '?';
 end
 % Check if a new version is avaliable by comparing changelog to whats online
 try
@@ -116,11 +118,6 @@ if ~(exist(fullfile(handles.data.squeakfolder,'DeepSqueak.fig'), 'file')==2)
     errordlg('"DeepSqueak.fig" not found');
 end
 
-% Add DeepSqueak to the path
-addpath(handles.data.squeakfolder);
-addpath(genpath(fullfile(handles.data.squeakfolder, 'Functions')));
-savepath
-
 % Cool Background Image
 imshow(handles.background, 'Parent', handles.axes1);
 set(handles.axes1,'XTick',[]);
@@ -149,39 +146,46 @@ set(handles.axes3,'XTick',[]);
 set(handles.axes3,'YTick',[]);
 
 
-%% Display error message if running on matlab before 2017b or toolboxes not found
-if verLessThan('matlab','9.3')
-    errordlg(['Warning, DeepSqueak requires MATLAB 2017b or later. It looks like you are use MATLAB ' version('-release')],'upgrade your matlab')
-end
-
-try
-    verLessThan('nnet','1');
-catch
-    warning('Deep Learning Toolbox not found')
-end
-
-try
-    verLessThan('curvefit','1');
-catch
-    warning('Curve Fitting Toolbox not found')
-end
-
-try
-    verLessThan('vision','1');
-catch
-    warning('Computer Vision System Toolbox not found')
-end
-
-try
-    verLessThan('images','1');
-catch
-    warning('Image Processing Toolbox not found')
-end
-
-try
-    verLessThan('distcomp','1');
-catch
-    warning('Parallel Computing Toolbox not found')
+if ~isdeployed
+    % Add DeepSqueak to the path
+    addpath(handles.data.squeakfolder);
+    addpath(genpath(fullfile(handles.data.squeakfolder, 'Functions')));
+    savepath
+    
+    %% Display error message if running on matlab before 2017b or toolboxes not found
+    if verLessThan('matlab','9.3')
+        errordlg(['Warning, DeepSqueak requires MATLAB 2017b or later. It looks like you are use MATLAB ' version('-release')],'upgrade your matlab')
+    end
+    
+    try
+        verLessThan('nnet','1');
+    catch
+        warning('Deep Learning Toolbox not found')
+    end
+    
+    try
+        verLessThan('curvefit','1');
+    catch
+        warning('Curve Fitting Toolbox not found')
+    end
+    
+    try
+        verLessThan('vision','1');
+    catch
+        warning('Computer Vision System Toolbox not found')
+    end
+    
+    try
+        verLessThan('images','1');
+    catch
+        warning('Image Processing Toolbox not found')
+    end
+    
+    try
+        verLessThan('distcomp','1');
+    catch
+        warning('Parallel Computing Toolbox not found')
+    end
 end
 
 function varargout = DeepSqueak_OutputFcn(hObject, eventdata, handles)
