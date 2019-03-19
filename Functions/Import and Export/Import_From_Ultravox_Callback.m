@@ -74,7 +74,7 @@ for i=1:length(ultravox.Call)
     
     Calls(i).Audio= audio;
     Calls(i).Accept = 1;
-    Calls(i).Type = categorical(ultravox.CallName(i));
+    Calls(i).Type = categorical(ultravox.PatternLabel(i));
     Calls(i).Power = 0;
 end
 close(hc);
