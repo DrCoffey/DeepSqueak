@@ -17,8 +17,20 @@ cla(handles.axes7);
 cla(handles.axes5);
 cla(handles.axes1);
 cla(handles.axes4);
-
+cla(handles.axes3);
 %% Create plots for update_fig to update
+
+% Waveform
+handles.Waveform = line(handles.axes3,1,1,'Color',[.1 .75 .75]);
+handles.SNR = surface(handles.axes3,[],[],[],[],...
+    'facecol','r',...
+    'edgecol','interp',...
+    'linew',2);
+set(handles.axes3,'YTickLabel',[]);
+set(handles.axes3,'XTickLabel',[]);
+set(handles.axes3,'XTick',[]);
+set(handles.axes3,'YTick',[]);
+set(handles.axes3,'Color',[.1 .1 .1],'YColor',[1 1 1],'XColor',[1 1 1],'Box','off','Ylim',[-1 0],'Clim',[0 1]);
 
 % Contour
 handles.ContourScatter = scatter(1:5,1:5,'LineWidth',1.5,'Parent',handles.axes7,'XDataSource','x','YDataSource','y');
@@ -27,7 +39,7 @@ set(handles.axes7,'YTickLabel',[]);
 set(handles.axes7,'XTickLabel',[]);
 set(handles.axes7,'XTick',[]);
 set(handles.axes7,'YTick',[]);
-handles.ContourLine = lsline(handles.axes7);
+handles.ContourLine = line(handles.axes7,[1,5],[1,5],'LineStyle','--','Color','y');
 
 % Spectrogram
 handles.spect = imagesc([],[],handles.background,'Parent', handles.axes1);

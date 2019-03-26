@@ -3,56 +3,82 @@ if nargin <= 8
     verbose = 1;
 end
 
-spectrange = SampleRate / 2000; % get frequency range of spectrogram in KHz
-FreqScale = spectrange / (1 + floor(nfft / 2)); % size of frequency pixels
-TimeScale = (windowsize - noverlap) / SampleRate; % size of time pixels
-[~, gy] = imgradientxy(I);
-stats.FilteredImage =  gy;
+
+
+
+%% Ridge Detection
+% Calculate entropy at each time point
 stats.Entropy = geomean(I,1) ./ mean(I,1);
+stats.Entropy = smooth(stats.Entropy,3)';
+% Find maximum amplitude and corresponding at each time point
+[amplitude,ridgeFreq] = max((I));
+amplitude = smooth(amplitude,3)';
 
-% Ridge Detection
-[mx,ridgeFreq] = max((I));
-
-greaterthannoise=smooth(stats.Entropy,5)' < 1-EntropyThreshold & (mx>(max(mx*AmplitudeThreshold))); % Select points greater than 0.2 time max
+% Get index of the time points where entropy and aplitude are greater than their thesholds
+% iteratively lower threshholds until at least 6 points are selected
 iter = 0;
+greaterthannoise = false(1, size(I, 2));
 while sum(greaterthannoise)<5
-    iter = iter+1;
-    if iter > 5
-        if verbose
-            disp('Could not detect contour');
-        end
-        greaterthannoise = [1 1];
+    greaterthannoise = greaterthannoise | 1-stats.Entropy > EntropyThreshold   / 1.1 ^ iter;
+    greaterthannoise = greaterthannoise & amplitude       > AmplitudeThreshold / 1.1 ^ iter;
+    if iter > 10
+%         disp('Could not detect contour')
+        greaterthannoise = true(1, size(I, 2));
         break;
     end
-    greaterthannoise=stats.Entropy < 1-EntropyThreshold+iter*.1 & (mx>(max(mx*AmplitudeThreshold - iter*.1))); % Select points greater than 0.2 time max
-    if iter > 10; disp('Help!'); end
-end
-try
-    ridgeFreq=ridgeFreq(greaterthannoise);
-catch
-    ridgeFreq = [1 2];
-end
-stats.ridgeTime=find(greaterthannoise==1);
-try
-    stats.ridgeFreq_smooth=smooth(stats.ridgeTime,ridgeFreq,7,'sgolay'); % Smooth fitted lime
-catch
-    if verbose
-        disp('Cannot apply smoothing. The line is probably too short');
+    iter = iter + 1;
+    if iter > 1
+        disp('lowering threshold')
     end
-    stats.ridgeFreq_smooth=ridgeFreq';
 end
-% Signal to Noise Ratio
+
+% index of time points
+stats.ridgeTime = find(greaterthannoise);
+stats.ridgeFreq = ridgeFreq(greaterthannoise);
+% Smoothed frequency of the call contour
+try
+    stats.ridgeFreq_smooth = smooth(stats.ridgeTime,stats.ridgeFreq,7,'sgolay');
+catch
+    disp('Cannot apply smoothing. The line is probably too short');
+    stats.ridgeFreq_smooth=stats.ridgeFreq';
+end
+
+
+%% Calculate the scaling factors of the spectrogram
+spectrange = SampleRate / 2000; % get frequency range of spectrogram in KHz
+FreqScale = spectrange / (1 + floor(nfft / 2)); % kHz per pixel
+TimeScale = (windowsize - noverlap) / SampleRate; % seconds per pixel
+
+
+%% Frequency gradient of spectrogram
+[~, stats.FilteredImage] = imgradientxy(I);
+
+
+%% Signal to Noise Ratio
 stats.SignalToNoise = mean(1 - stats.Entropy(stats.ridgeTime));
 
+%% Time Stats
+stats.BeginTime = Box(1) + min(stats.ridgeTime)*TimeScale;
+stats.EndTime = Box(1) + max(stats.ridgeTime)*TimeScale;
+stats.DeltaTime = stats.EndTime - stats.BeginTime;
 
-% Frequency Stats
-stats.PrincipalFreq= FreqScale * median(stats.ridgeFreq_smooth) + Box(2); % median frequency
+%% Frequency Stats
+% Median frequency of the call contour
+stats.PrincipalFreq= FreqScale * median(stats.ridgeFreq_smooth) + Box(2);
+
+% Low frequency of the call contour
 stats.LowFreq = FreqScale * min(stats.ridgeFreq_smooth) + Box(2);
+
+% High frequency of the call contour
 stats.HighFreq = FreqScale * max(stats.ridgeFreq_smooth) + Box(2);
+
+% Delta frequency of the call contour
 stats.DeltaFreq = stats.HighFreq - stats.LowFreq;
+
+% Frequency standard deviation of the call contour
 stats.stdev = std(FreqScale*stats.ridgeFreq_smooth);
 
-% Slope
+% Slope of the call contour
 try
     X = [ones(length(stats.ridgeTime),1), TimeScale*stats.ridgeTime.'];
     ls = X \ (FreqScale*stats.ridgeFreq_smooth);
@@ -61,26 +87,21 @@ catch
     stats.Slope = 0;
 end
 
-% Max Power ( PSD )
+%% Max Power ( PSD )
 % Magnitude
-ridgePower = mx(stats.ridgeTime);
-
+ridgePower = amplitude(stats.ridgeTime);
 % Magnitude sqaured divided by sum of squares of hamming window
 ridgePower = ridgePower.^2 / sum(hamming(windowsize).^2);
 ridgePower = 2*ridgePower / SampleRate;
-
 % Convert power to db
 ridgePower = 10 * log10(ridgePower);
 
+% Mean power of the call contour
 stats.MaxPower = mean(ridgePower);
+% Power of the call contour
 stats.Power = ridgePower;
 
-% Time Stats
-stats.BeginTime = Box(1) + min(stats.ridgeTime)*TimeScale;
-stats.EndTime = Box(1) + max(stats.ridgeTime)*TimeScale;
-stats.DeltaTime = stats.EndTime - stats.BeginTime;
-
-% Sinuosity
+%% Sinuosity - path length / duration
 try
     D = pdist([stats.ridgeTime' stats.ridgeFreq_smooth],'Euclidean');
     Z = squareform(D);
@@ -94,6 +115,7 @@ try
 catch
     stats.Sinuosity = 1;
 end
+
 end
 
 

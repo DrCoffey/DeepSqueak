@@ -44,13 +44,14 @@ set(handles.axes4,'YTick',[]);
 
 % plot Ridge Detection
 set(handles.ContourScatter,'XData',stats.ridgeTime','YData',stats.ridgeFreq_smooth);
-set(handles.axes7,'Xlim',[1 length(stats.FilteredImage(1,:))],'Ylim',[1 length(stats.FilteredImage(:,1))]);
+set(handles.axes7,'Xlim',[1 size(I,2)],'Ylim',[1 size(I,1)]);
 
+% Plot Slope
+X = [ones(size(stats.ridgeTime)); stats.ridgeTime]';
+ls = X \ (stats.ridgeFreq_smooth);
+handles.ContourLine.XData = [1 size(I,2)];
+handles.ContourLine.YData = [ls(1), ls(1) + ls(2) * size(I,2)];
 
-% Delete everything except the scatter
-delete(handles.axes7.Children(1:end-1));
-ContourLine = lsline(handles.axes7);
-set(ContourLine,'LineStyle','--','Color','y');
 
 % Update call statistics text
 set(handles.Ccalls,'String',['Call: ' num2str(handles.data.currentcall) '/' num2str(height(handles.data.calls))])
@@ -69,27 +70,18 @@ set(handles.powertext,'String',['Avg. Power: ' num2str(handles.data.calls.Power(
 set(handles.tonalitytext,'String',['Avg. Tonality: ' num2str(stats.SignalToNoise,'%.4f')]);
 
 % Waveform
-cla(handles.axes3)
-hold(handles.axes3,'on')
 PlotAudio = audio(AudioRange(1):AudioRange(2));
-plot(handles.axes3,length(stats.Entropy) * ((1:length(PlotAudio)) / length(PlotAudio)),(.5*PlotAudio/max(PlotAudio)-.5),'Color',[.1 .75 .75]);
-
-
+set(handles.Waveform,...
+    'XData', length(stats.Entropy) * ((1:length(PlotAudio)) / length(PlotAudio)),...
+    'YData', (.5*PlotAudio/max(PlotAudio)-.5))
+    
 % SNR
 y = 0-stats.Entropy;
 x = 1:length(stats.Entropy);
 z = zeros(size(x));
 col = double(stats.Entropy < 1-handles.data.settings.EntropyThreshold);  % This is the color, vary with x in this case.
-surface(handles.axes3,[x;x],[y;y],[z;z],[col;col],...
-    'facecol','r',...
-    'edgecol','interp',...
-    'linew',2);
-set(handles.axes3,'YTickLabel',[]);
-set(handles.axes3,'XTickLabel',[]);
-set(handles.axes3,'XTick',[]);
-set(handles.axes3,'YTick',[]);
-set(handles.axes3,'Color',[.1 .1 .1],'YColor',[1 1 1],'XColor',[1 1 1],'Box','off','Xlim',[0 length(stats.Entropy)],'Ylim',[-1 0],'Clim',[0 1]);
-hold(handles.axes3,'off')
+set(handles.SNR, 'XData', [x;x], 'YData', [y;y], 'ZData', [z;z], 'CData', [col;col]);
+set(handles.axes3, 'XLim', [x(1), x(end)]);
 
 % Plot Call Position
 calltime = handles.data.calls.Box(handles.data.currentcall, 1);
