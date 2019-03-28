@@ -39,11 +39,11 @@ for j = 1:length(trainingdata)  % For Each File
     load(fullfile(trainingpath, trainingdata{j}),'Calls');
     Calls = loadCallfile(fullfile(trainingpath, trainingdata{j}));
 
-    
+
     Xtemp = [];
     Classtemp = [];
     c = 0;
-    
+
     for i = 1:height(Calls)     % For Each Call
         if Calls.Accept(i) && Calls.Type(i) ~= 'Noise'
             waitbar(i/height(Calls),h,['Loading File ' num2str(j) ' of '  num2str(length(trainingdata))]);
@@ -54,9 +54,9 @@ for j = 1:length(trainingdata)  % For Each File
             elseif ~isa(audio,'double')
                 audio = double(audio);
             end
-            
+
             [s, fr, ti] = spectrogram((audio),round(Calls.Rate(i) * wind),round(Calls.Rate(i) * noverlap),round(Calls.Rate(i) * nfft),Calls.Rate(i),'yaxis');
-            
+
             x1 = axes2pix(length(ti),ti,Calls.RelBox(i, 1));
             x2 = axes2pix(length(ti),ti,Calls.RelBox(i, 3)) + x1;
             %             y1 = axes2pix(length(fr),fr./1000,Calls.RelBox(i, 2)-10);
@@ -67,7 +67,7 @@ for j = 1:length(trainingdata)  % For Each File
             % Use median scaling
             med = median(abs(s(:)));
             im = mat2gray(flipud(I),[med*0.1, med*35]);
-            
+
             Xtemp(:,:,:,c) = single(imresize(im,imageSize));
             Classtemp = [Classtemp; categorical(Calls.Type(i))];
         end
@@ -109,13 +109,13 @@ auimds = augmentedImageDatastore(imageSize,TrainX,TrainY,'DataAugmentation',aug)
 
 layers = [
     imageInputLayer([imageSize 1],'Name','input','normalization','none')
-    
+
     convolution2dLayer(3,16,'Padding','same','stride',[2 2])
     batchNormalizationLayer
     reluLayer
     maxPooling2dLayer(2,'Stride',2)
-    
-    
+
+
     convolution2dLayer(5,16,'Padding','same','stride',2)
     batchNormalizationLayer
     reluLayer
@@ -127,11 +127,11 @@ layers = [
     convolution2dLayer(3,31,'Padding','same','stride',1)
     batchNormalizationLayer
     reluLayer
-    
+
     fullyConnectedLayer(64)
     batchNormalizationLayer
     reluLayer
-    
+
     fullyConnectedLayer(length(categories(TrainY)))
     softmaxLayer
     classificationLayer];
@@ -153,8 +153,8 @@ ClassifyNet = trainNetwork(auimds,layers,options);
 
 % Plot the confusion matrix
 figure('color','w')
-[C,order] = confusionmat(classify(ClassifyNet,ValX),ValY)
-h = heatmap(order,order,C)
+[C,order] = confusionmat(classify(ClassifyNet,ValX),ValY);
+h = heatmap(order,order,C);
 h.Title = 'Confusion Matrix';
 h.XLabel = 'Predicted class';
 h.YLabel = 'True Class';

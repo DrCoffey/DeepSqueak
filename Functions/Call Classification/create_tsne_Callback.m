@@ -23,7 +23,7 @@ padding = 1000;
 
 % Get the data
 % a = ClusteringData
-[a] = CreateClusteringData(hObject, eventdata, handles);
+a = CreateClusteringData(handles.data, 1);
 
 
 
