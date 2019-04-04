@@ -36,7 +36,6 @@ X = [];
 TrainingImages = {};
 Class = [];
 for j = 1:length(trainingdata)  % For Each File
-    load(fullfile(trainingpath, trainingdata{j}),'Calls');
     Calls = loadCallfile(fullfile(trainingpath, trainingdata{j}));
 
 
