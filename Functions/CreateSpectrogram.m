@@ -14,7 +14,11 @@ end
 
 %% Make Spectrogram and box
 % Spectrogram Settings
-if (call.RelBox(3) < .4 ) || call.RelBox(2) > 25 && (call.RelBox(3) < .4 )% Spect settings for short calls
+if  call.RelBox(2)+call.RelBox(4) < 10 % For audible calls
+    windowsize = round(rate * 0.01);
+    noverlap = round(rate * 0.009);
+    nfft = round(rate * 0.02);
+elseif (call.RelBox(3) < .4 ) % Spect settings for short calls
     windowsize = round(rate * 0.0032);
     noverlap = round(rate * 0.0028);
     nfft = round(rate * 0.0032);
