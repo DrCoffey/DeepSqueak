@@ -111,7 +111,7 @@ if ~isdeployed
     end
 end
 
-handles.data = GUIdata(squeakfolder);
+handles.data = squeakData(squeakfolder);
 
 set ( hFig, 'Color', [.1 .1 .1] );
 handles.output = hObject;

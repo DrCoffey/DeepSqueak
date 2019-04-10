@@ -1,4 +1,4 @@
-classdef GUIdata < handle
+classdef squeakData < handle
     properties
         calls
         currentcall = 1
@@ -10,7 +10,7 @@ classdef GUIdata < handle
         labelShortcuts = {'1','2','3','4','5','6','7','8','9','0','-','='}
     end
     methods
-        function obj = GUIdata(squeakfolder)
+        function obj = squeakData(squeakfolder)
             obj.squeakfolder = squeakfolder;
             createSettings(obj);
         end
