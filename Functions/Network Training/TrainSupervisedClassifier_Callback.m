@@ -74,9 +74,18 @@ for j = 1:length(trainingdata)  % For Each File
     X = cat(4,X,Xtemp);
     Class = [Class; Classtemp];
 end
+close(h)
+
+%% Make all categories 'Title Case'
+cats = categories(Class);
+for i = 1:length(cats)
+    newstr = lower(cats{i}); % Make everything lowercase
+    idx = regexp([' ' newstr],'[\ \-\_]'); % Find the start of each word
+    newstr(idx) = upper(newstr(idx)); % Make the start of each word uppercase
+    Class = mergecats(Class, cats{i}, newstr);
+end
 Class = removecats(Class);
 
-close(h)
 
 %% Select the categories to train the neural network with
 call_categories = categories(Class);
