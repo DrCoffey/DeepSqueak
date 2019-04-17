@@ -39,14 +39,14 @@ if nargin>3, Repeats=cell2mat(varargin(3)); else, Repeats=3; end
 D=zeros(ToTest,1); %initialize the results matrix
 XData= 1:1:ToTest;
 % Create figure
-figure1 = figure('Color',[1 1 1],'Position',[200 200 470 400]);
-axes1 = axes('Parent',figure1,'LineWidth',1,'TickDir','out',...
+figure1 = figure('Color',[1 1 1],'Position',[200 200 600 500]);
+axes1 = axes('Parent',figure1,'LineWidth',1.5,'TickDir','out',...
     'FontSmoothing','on',...
-    'FontSize',10);
+    'FontSize',12);
 ylabel(axes1,'Normalized Error');
 xlabel(axes1,'Number of Clusters');
 hold on
-h=plot(XData,D,'LineWidth',2,'Marker','o','MarkerSize',2);
+h=plot(XData,D,'LineWidth',0.5,'Marker','o','MarkerSize',3);
 h.XDataSource='XData';
 h.YDataSource='D';
 for c=1:1:ToTest %for each sample

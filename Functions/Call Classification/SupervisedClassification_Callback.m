@@ -49,15 +49,15 @@ for j = 1:length(selections) % Do this for each file
             [s, fr, ti] = spectrogram(audio,round(Calls.Rate(i) * wind),round(Calls.Rate(i) * noverlap),round(Calls.Rate(i) * nfft),Calls.Rate(i),'yaxis');
             x1 = axes2pix(length(ti),ti,Calls.RelBox(i, 1));
             x2 = axes2pix(length(ti),ti,Calls.RelBox(i, 3)) + x1;
-%                 y1 = axes2pix(length(fr),fr./1000,Calls.RelBox(i, 2));
-%                 y2 = axes2pix(length(fr),fr./1000,Calls.RelBox(i, 4)) + y1;
-            y1 = axes2pix(length(fr),fr./1000,lowFreq);
-            y2 = axes2pix(length(fr),fr./1000,highFreq);
+                        y1 = axes2pix(length(fr),fr./1000,Calls.RelBox(i, 2)-10);
+                        y2 = axes2pix(length(fr),fr./1000,Calls.RelBox(i, 4)+20) + y1;
+            %y1 = axes2pix(length(fr),fr./1000,lowFreq);
+            %y2 = axes2pix(length(fr),fr./1000,highFreq);
             I=abs(s(round(y1:y2),round(x1:x2))); % Get the pixels in the box
             
             % Scale the iages from the median
             med = median(abs(s(:)));
-            im = mat2gray(flipud(I),[med*0.1, med*35]); 
+            im = mat2gray(flipud(I),[med*0.6, med*20]); 
                         
             X = imresize(im,imageSize);
             [Class, score] = classify(ClassifyNet, X);

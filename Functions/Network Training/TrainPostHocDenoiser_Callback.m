@@ -28,8 +28,6 @@ lowFreq = 15;
 highFreq = 110;
 imageSize = [193 100];
 
-
-
 h = waitbar(0,'Initializing');
 c=0;
 TrainingImages = {};
@@ -51,51 +49,47 @@ for j = 1:length(trainingdata)  % For Each File
         [s, fr, ti] = spectrogram(audio,round(Calls.Rate(i) * wind),round(Calls.Rate(i) * noverlap),round(Calls.Rate(i) * nfft),Calls.Rate(i),'yaxis');
             x1 = axes2pix(length(ti),ti,Calls.RelBox(i,1));
             x2 = axes2pix(length(ti),ti,Calls.RelBox(i,3)) + x1;
-%             y1 = axes2pix(length(fr),fr./1000,Calls.RelBox(i,2));
-%             y2 = axes2pix(length(fr),fr./1000,Calls.RelBox(i,4)) + y1;
+%           y1 = axes2pix(length(fr),fr./1000,Calls.RelBox(i,2));
+%           y2 = axes2pix(length(fr),fr./1000,Calls.RelBox(i,4)) + y1;
             y1 = axes2pix(length(fr),fr./1000,lowFreq);
             y2 = axes2pix(length(fr),fr./1000,highFreq);
             I=abs(s(round(y1:min(y2,size(s,1))),round(x1:x2))); % Get the pixels in the box
             
             % Use median scaling
             med = median(abs(s(:)));
-            im = mat2gray(flipud(I),[med*0.1, med*35]);
-            
+            im = mat2gray(flipud(I),[med*0.65, med*20]);
+            im = single(imresize(im,imageSize));
             % Duplicate the image with random gaussian noise.
-            im2 = imnoise(im,'gaussian',.4*rand()+.1,.1*rand());
+            %im2 = imnoise(im,'gaussian',.4*rand()+.1,.1*rand());
             
         if categorical(Calls.Type(i)) == 'Noise'
-            TrainingImages = [TrainingImages; {im}; {im2}];
-            Class = [Class; categorical({'Noise'}); categorical({'Noise'})];
+            TrainingImages = [TrainingImages; {im}];% ; {im2}];
+            Class = [Class; categorical({'Noise'})];% categorical({'Noise'})];
         elseif Calls.Accept(i)
-            TrainingImages = [TrainingImages; {im}; {im2}];
-            Class = [Class; categorical({'USV'}); categorical({'USV'})];
+            TrainingImages = [TrainingImages; {im}];% ; {im2}];
+            Class = [Class; categorical({'USV'})];% ; categorical({'USV'})];
         end
     end
 end
 delete(h)
 
-
 %% Train 
 
 % Reshape ans resize the training data
-X = [];
+X = single([]);
 for i = 1:length(TrainingImages)
-X(:,:,:,i) = imresize(TrainingImages{i,1},imageSize);
+X(:,:,:,i) = TrainingImages{i,1};
 end
+clear TrainingImages
 
 % Divide the data into training and validation data.
 % 90% goes to training, 10% to validation.
-[trainInd,valInd,testInd] = dividerand(length(TrainingImages)/2,.9,.1,0);
-% TrainX = X(:,:,:,trainInd);
-% TrainY = Class(trainInd);
+[trainInd,valInd,testInd] = dividerand(size(X,4),.9,.1,0);
+TrainX = X(:,:,:,trainInd);
+TrainY = Class(trainInd);
+ValX = X(:,:,:,valInd);
+ValY = Class(valInd);
 
-% Make sure that the validation data don't come from the images with added
-% noise. This works because every other image in the training data is unmodified.
-ValX = X(:,:,:,(valInd * 2) - 1);
-ValY = Class((valInd * 2) - 1);
-TrainX = X(:,:,:,~ismember(1:length(TrainingImages),(valInd * 2) - 1));
-TrainY = Class(~ismember(1:length(TrainingImages),(valInd * 2) - 1));
 
 aug = imageDataAugmenter('RandXScale',[.8 1.2],'RandYScale',[.8 1.2],'RandXTranslation',[-10 10],'RandYTranslation',[-10 10]);
 auimds = augmentedImageSource(imageSize,TrainX,TrainY,'DataAugmentation',aug);
@@ -108,16 +102,17 @@ layers = [
     reluLayer
     maxPooling2dLayer(2,'Stride',2)
     
-    
     convolution2dLayer(5,16,'Padding','same','stride',2)
     batchNormalizationLayer
     reluLayer
     maxPooling2dLayer(2,'Stride',2)
-    convolution2dLayer(3,31,'Padding','same','stride',1)
+    
+    convolution2dLayer(3,32,'Padding','same','stride',1)
     batchNormalizationLayer
     reluLayer
     maxPooling2dLayer(2,'Stride',2)
-    convolution2dLayer(3,31,'Padding','same','stride',1)
+    
+    convolution2dLayer(3,32,'Padding','same','stride',1)
     batchNormalizationLayer
     reluLayer
     

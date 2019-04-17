@@ -47,6 +47,7 @@ data = [
 
 
 % Calculate embeddings
+rng default;
 embed = tsne(data,'Verbose',1,'Perplexity',perplexity);
 embed = (embed - min(embed)) ./ (max(embed)-min(embed));
 
@@ -63,13 +64,14 @@ switch colorType
     case 'Cluster'
         [clustAssignID, cName] = findgroups(clustAssign); % Convert categories into numbers
         a(:,13) = num2cell(clustAssignID); % Append the category number to clustering data
+        hueRange = [0 360];
         cMap = HSLuv_to_RGB(length(cName)+1, 'H', hueRange, 'S', 100, 'L', 75); % Make a color map for each category 
         colorOrder = randperm(length(cName)+1); % Randomize the order of the colors
         cMap = cMap(colorOrder,:); 
         figure('Color','w') % Display the colors
         h = image(reshape(cMap,[],1,3));
         yticks(h.Parent,1:length(cName))
-        yticklabels(h.Parent, cName)
+        yticklabels(h.Parent, cellstr(cName))
 end
 
 

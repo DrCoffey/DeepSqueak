@@ -53,7 +53,7 @@ for j = 1:length(selections) % Do this for each file
         
         % Use median scaling
         med = median(abs(s(:)));
-        im = mat2gray(flipud(I),[med*0.1, med*35]);
+        im = mat2gray(flipud(I),[med*0.65, med*20]);
         
         X = imresize(im,imageSize);
         [Class, score] = classify(DenoiseNet,X);
