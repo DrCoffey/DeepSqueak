@@ -12,7 +12,7 @@ msgbox('This function will overwrite "DeepSqueak/Denoising Networks/CleaningNet.
 %% Prepare the data
 % Select files
 cd(handles.data.squeakfolder);
-[trainingdata, trainingpath] = uigetfile([handles.data.settings.detectionfolder '/*.mat'],'Select Detection File(s) for Training ','MultiSelect', 'on');
+[trainingdata, trainingpath] = uigetfile(fullfile(handles.data.settings.detectionfolder,'*.mat'),'Select Detection File(s) for Training ','MultiSelect', 'on');
 if isnumeric(trainingdata)  % If user cancels
     return
 end
@@ -29,7 +29,6 @@ highFreq = 110;
 imageSize = [193 100];
 
 h = waitbar(0,'Initializing');
-c=0;
 TrainingImages = {};
 Class = [];
 for j = 1:length(trainingdata)  % For Each File
@@ -37,7 +36,6 @@ for j = 1:length(trainingdata)  % For Each File
     
     for i = 1:height(Calls)     % For Each Call
         waitbar(i/height(Calls),h,['Loading File ' num2str(j) ' of '  num2str(length(trainingdata))]);
-        c=c+1;
         
         audio =  Calls.Audio{i};
         if ~isfloat(audio)

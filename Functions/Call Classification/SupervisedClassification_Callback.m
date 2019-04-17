@@ -4,7 +4,7 @@ function SupervisedClassification_Callback(hObject, eventdata, handles)
 % "TrainSupervisedClassifier_Callback.m", to classify USVs.
 
 [FileName,PathName] = uigetfile(fullfile(handles.data.squeakfolder,'Clustering Models','*.mat'),'Select Network');
-load([PathName FileName],'ClassifyNet','wind','noverlap','nfft','lowFreq','highFreq','imageSize');
+load([PathName FileName],'ClassifyNet','wind','noverlap','nfft','imageSize','padFreq');
 
 if exist('ClassifyNet', 'var') ~= 1 
     errordlg('Network not be found. Is this file a trained CNN?')
@@ -49,15 +49,18 @@ for j = 1:length(selections) % Do this for each file
             [s, fr, ti] = spectrogram(audio,round(Calls.Rate(i) * wind),round(Calls.Rate(i) * noverlap),round(Calls.Rate(i) * nfft),Calls.Rate(i),'yaxis');
             x1 = axes2pix(length(ti),ti,Calls.RelBox(i, 1));
             x2 = axes2pix(length(ti),ti,Calls.RelBox(i, 3)) + x1;
-                        y1 = axes2pix(length(fr),fr./1000,Calls.RelBox(i, 2)-10);
-                        y2 = axes2pix(length(fr),fr./1000,Calls.RelBox(i, 4)+20) + y1;
             %y1 = axes2pix(length(fr),fr./1000,lowFreq);
             %y2 = axes2pix(length(fr),fr./1000,highFreq);
+            y1 = axes2pix(length(fr),fr./1000,Calls.RelBox(i, 2)-padFreq);
+            y2 = axes2pix(length(fr),fr./1000,Calls.RelBox(i, 4)+padFreq*2) + y1;
+
+            y1 = max(y1,1); % Make sure that the box isn't too big
+            y2 = min(y2,size(s,1));
             I=abs(s(round(y1:y2),round(x1:x2))); % Get the pixels in the box
-            
-            % Scale the iages from the median
+
+            % Use median scaling
             med = median(abs(s(:)));
-            im = mat2gray(flipud(I),[med*0.6, med*20]); 
+            im = mat2gray(flipud(I),[med*0.65, med*20]);
                         
             X = imresize(im,imageSize);
             [Class, score] = classify(ClassifyNet, X);

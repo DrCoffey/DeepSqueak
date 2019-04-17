@@ -19,14 +19,12 @@ wind = .0032;
 noverlap = .0028;
 nfft = .0032;
 
-settings = inputdlg({'Low Frequency (kHz)','High Frequency (kHz)'},'Frequency Range',[1 50],{'15','90'});
-lowFreq = str2num(settings{1});
-highFreq = str2num(settings{2});
+settings = inputdlg({'Frequency to pad boxes aboxe and below each box (kHz):'},'Frequency to pad boxes by',[1 60],{'10'});
+padFreq = str2num(settings{1});
 imageSize = [200 200];
 
 h = waitbar(0,'Initializing');
 X = [];
-TrainingImages = {};
 Class = [];
 for j = 1:length(trainingdata)  % For Each File
     Calls = loadCallfile(fullfile(trainingpath, trainingdata{j}));
@@ -48,11 +46,15 @@ for j = 1:length(trainingdata)  % For Each File
         
         x1 = axes2pix(length(ti),ti,Calls.RelBox(i, 1));
         x2 = axes2pix(length(ti),ti,Calls.RelBox(i, 3)) + x1;
-        y1 = axes2pix(length(fr),fr./1000,Calls.RelBox(i, 2)-10);
-        y2 = axes2pix(length(fr),fr./1000,Calls.RelBox(i, 4)+20) + y1;
         %y1 = axes2pix(length(fr),fr./1000,lowFreq);
         %y2 = axes2pix(length(fr),fr./1000,highFreq);
-        I=abs(s(round(y1:min(y2,size(s,1))),round(x1:x2))); % Get the pixels in the box
+        y1 = axes2pix(length(fr),fr./1000,Calls.RelBox(i, 2)-padFreq);
+        y2 = axes2pix(length(fr),fr./1000,Calls.RelBox(i, 4)+padFreq*2) + y1;
+        
+        y1 = max(y1,1); % Make sure that the box isn't too big
+        y2 = min(y2,size(s,1));
+        I=abs(s(round(y1:y2),round(x1:x2))); % Get the pixels in the box
+        
         % Use median scaling
         med = median(abs(s(:)));
         im = mat2gray(flipud(I),[med*0.65, med*20]);
@@ -156,5 +158,5 @@ h.ColorbarVisible = 'off';
 colormap(inferno);
 
 [FileName,PathName] = uiputfile('ClassifierNet.mat','Save Network');
-save([PathName FileName],'ClassifyNet','wind','noverlap','nfft','lowFreq','highFreq','imageSize','layers');
+save([PathName FileName],'ClassifyNet','wind','noverlap','nfft','padFreq','imageSize','layers');
 end

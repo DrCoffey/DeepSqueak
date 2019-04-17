@@ -1,4 +1,18 @@
 # Changelog
+## 2.6.0 2019-04-17
+
+Improved the accuracy of the post-hoc denoising network.
+
+Improved Call classification
+  - Included a newly trained supervised classifier based on Wright et al.'s rat USV categories.
+  - Included a k-means model from human-selected exemplar calls, based on Wright et al.'s rat USV categories.
+  - Supervised network training now trains from the region of the spectrogram contained within the box, rather than a constant frequency range. This might make old networks incompatible.
+  - Automatically merge clusters with the same names but different case.
+
+t-SNE plots now have the option to assign colors by call classification, rather than call pitch. If coloring by classification, you must load detection files, rather than pre-extracted contours. This requires call files that have already been classified, either manually, or by supervised/unsupervised classification.
+
+Added better support for non-ultrasonic animals, such as zebras.
+
 ## 2.5.0 2019-03-04
 Fixed possible bug when updating files after clustering.
 
