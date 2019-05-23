@@ -49,7 +49,7 @@ for j = 1:length(selections) % Do this for each file
         %     y2 = axes2pix(length(fr),fr./1000,Calls.RelBox(i, 4)) + y1;
         y1 = axes2pix(length(fr),fr./1000,lowFreq);
         y2 = axes2pix(length(fr),fr./1000,highFreq);
-        I=abs(s(round(y1:min(y2,size(s,1))),round(x1:x2))); % Get the pixels in the box
+        I=abs(s(round(y1 : min(y2,size(s,1))), round(x1 : min(x2,size(s,2))))); % Get the pixels in the box
         
         % Use median scaling
         med = median(abs(s(:)));
