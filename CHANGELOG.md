@@ -1,4 +1,11 @@
 # Changelog
+## 2.6.1 2019-07-16
+
+Fixed bug when importing call classifications from Raven .txt files.
+  - DeepSqueak will now look for a column called 'Tags'.
+  - If the 'Tags' column doesn't exist, DeepSqueak will use the 'Annotation' column.
+  - If the 'Annotation' column doesn't exist, the category will be set to 'USV' by default.
+
 ## 2.6.0 2019-04-17
 
 Improved the accuracy of the post-hoc denoising network.
