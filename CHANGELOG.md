@@ -5,6 +5,8 @@ Fixed bug when importing call classifications from Raven .txt files.
   - DeepSqueak will now look for a column called 'Tags'.
   - If the 'Tags' column doesn't exist, DeepSqueak will use the 'Annotation' column.
   - If the 'Annotation' column doesn't exist, the category will be set to 'USV' by default.
+  
+Fixed issue when calls file is empty in unsupervised clustering.
 
 ## 2.6.0 2019-04-17
 
