@@ -450,7 +450,7 @@ for i = 1:height(handles.data.calls)
         DeltaTime = EndTime - BeginTime;
         DeltaFreq = HighFreq - LowFreq;
         AvgPwr = 1;
-        Annotation = handles.data.calls.Accept(i);
+        Annotation = handles.data.calls.Type(i);
         raventable = [raventable; {Selection} {View} {Channel} {BeginTime} {EndTime} {LowFreq} {HighFreq} {DeltaTime} {DeltaFreq} {AvgPwr} {Annotation}];
     end
 end
