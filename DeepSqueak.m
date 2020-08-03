@@ -722,3 +722,17 @@ web('https://github.com/DrCoffey/DeepSqueak/issues','-browser');
 % --- Executes on slider movement.
 function optimization_slider_Callback(hObject, eventdata, handles)
 hObject.Value = round(hObject.Value);
+
+
+% --------------------------------------------------------------------
+function contributor_tools_Callback(hObject, eventdata, handles)
+% hObject    handle to contributor_tools (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function temp_menu_Callback(hObject, eventdata, handles)
+% hObject    handle to temp_menu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)

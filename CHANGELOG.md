@@ -1,4 +1,16 @@
 # Changelog
+## 2.6.2 2020-08-03
+
+Modifications to increase contributor and community engagement
+ - New [Community Hub on Gitter](https://gitter.im/DeepSqueak_Community)
+ - New [DeepSqueak Twitter](https://twitter.com/DeepSqueak_USV)
+ - New Contributor Guidlines
+ - New Contributor Code of Conduct
+ - New Background Image!
+
+Minor bug fixes 
+
+# Changelog
 ## 2.6.1 2019-07-16
 
 Fixed bug when importing call classifications from Raven .txt files.
