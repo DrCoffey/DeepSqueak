@@ -8,8 +8,8 @@ if ~(isfield(handles,'detectionfilesnames') && ~isempty(handles.detectionfilesna
     msgbox('Please select a non-empty detection folder first')
     return
 end
-    
-    
+
+
 if isfield(handles,'current_file_id')
     currentfile = handles.current_file_id;
 else
@@ -83,18 +83,18 @@ rules(:,1) = num2cell(contains(rules(:,1),'Accept'));
 %% Loop
 h = waitbar(0,'Initializing');
 for currentfile = selections % Do this for each file
-    Calls = loadCallfile(fullfile(handles.detectionfiles(currentfile).folder, handles.detectionfiles(currentfile).name));
+    Calls = loadCallfile(fullfile(handles.detectionfiles(currentfile).folder, handles.detectionfiles(currentfile).name),handles);
 
-    
+
     reject = false(height(Calls),1);
     accept = false(height(Calls),1);
-    
+
     for i = 1:height(Calls)
         waitbar(i ./ height(Calls), h, ['Processing file ' num2str(find(selections == currentfile)) ' of ' num2str(length(selections))]);
 
         [I,windowsize,noverlap,nfft,rate,box] = CreateSpectrogram(Calls(i, :));
         stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.data.settings.EntropyThreshold,handles.data.settings.AmplitudeThreshold);
-        
+
         % For each rule, test the appropriate value, and accept or reject.
         for rule = rules'
             switch rule{2}
@@ -111,7 +111,7 @@ for currentfile = selections % Do this for each file
                 case 'Category'
                     testValue = Calls.Type(i);
             end
-            
+
             change = false;
             switch rule{3}
                 case 'Greater than'
@@ -121,7 +121,7 @@ for currentfile = selections % Do this for each file
                 case 'Equals'
                     change = testValue == num2str(rule{4});
             end
-            
+
             if change
                 if rule{1}
                     accept(i) = true;
@@ -129,16 +129,16 @@ for currentfile = selections % Do this for each file
                     reject(i) = true;
                 end
             end
-                
+
         end
     end
-    
-    
+
+
     Calls.Accept(reject) = false;
     Calls.Accept(accept) = true;
 
     save(fullfile(handles.detectionfiles(currentfile).folder,handles.detectionfiles(currentfile).name),'Calls','-v7.3');
-    
+
 end
 close(h);
 
@@ -147,4 +147,3 @@ close(h);
 if isfield(handles,'current_detection_file') && any(ismember(handles.detectionfilesnames(selections),handles.current_detection_file))
     loadcalls_Callback(hObject, eventdata, handles, handles.current_file_id)
 end
-

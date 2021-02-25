@@ -30,31 +30,29 @@ for j = 1:length(selections) % Do this for each file
     currentfile = selections(j);
     lastwarn(''); % Skip files if variable: 'Calls' doesn't exist
     fname = fullfile(handles.detectionfiles(currentfile).folder, handles.detectionfiles(currentfile).name);
-    Calls = loadCallfile(fname);
+    
+    audioReader = squeakData([]);
+    [Calls, audioReader.audiodata] = loadCallfile(fname,handles);
 
     
     for i = 1:height(Calls)   % For Each Call
         waitbar(((i/height(Calls)) + j - 1) / length(selections), h, ['Denoising file ' num2str(j) ' of ' num2str(length(selections))]);
-        audio =  Calls.Audio{i};
-        if ~isfloat(audio)
-            audio = double(audio) / (double(intmax(class(audio)))+1);
-        elseif ~isa(audio,'double')
-            audio = double(audio);
-        end
         
-        [s, fr, ti] = spectrogram(audio,round(Calls.Rate(i) * wind),round(Calls.Rate(i) * noverlap),round(Calls.Rate(i) * nfft),Calls.Rate(i),'yaxis');
-        x1 = axes2pix(length(ti),ti,Calls.RelBox(i, 1));
-        x2 = axes2pix(length(ti),ti,Calls.RelBox(i, 3)) + x1;
-        %     y1 = axes2pix(length(fr),fr./1000,Calls.RelBox(i, 2));
-        %     y2 = axes2pix(length(fr),fr./1000,Calls.RelBox(i, 4)) + y1;
-        y1 = axes2pix(length(fr),fr./1000,lowFreq);
-        y2 = axes2pix(length(fr),fr./1000,highFreq);
-        I=abs(s(round(y1 : min(y2,size(s,1))), round(x1 : min(x2,size(s,2))))); % Get the pixels in the box
+        options.frequency_padding = 0;
+        options.windowsize = wind;
+        options.overlap = noverlap;
+        options.nfft = nfft;
+        options.freq_range = [lowFreq, highFreq];
+        [I,~,~,~,~,~,s] = CreateFocusSpectrogram(Calls(i,:),handles, true, options, audioReader);
+        
+        if isempty(I)
+           continue; 
+        end
         
         % Use median scaling
         med = median(abs(s(:)));
         im = mat2gray(flipud(I),[med*0.65, med*20]);
-        
+
         X = imresize(im,imageSize);
         [Class, score] = classify(DenoiseNet,X);
         Calls.Score(i) = score(1);
@@ -63,7 +61,7 @@ for j = 1:length(selections) % Do this for each file
             Calls.Accept(i) = 0;
         end
     end
-    save(fname,'Calls','-v7.3');
+    save(fname, 'Calls', '-append');
 end
 close(h)
 

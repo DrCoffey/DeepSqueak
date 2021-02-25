@@ -1,66 +1,50 @@
-function [detector layers options] = TrainSqueakDetector(TrainingTables,layers)
+function [detector lgraph options] = TrainSqueakDetector(TrainingTables,layers)
 
-% Specify layers if not transfering from previous network
-if nargin == 1
-        layers = [
-            imageInputLayer([30 50 1])
-            
-            convolution2dLayer([5 5], 16, 'Padding', 1, 'Stride', [2 2])
-            batchNormalizationLayer
-            leakyReluLayer(0.1)
-            
-            convolution2dLayer([5 5], 20, 'Padding', 1, 'Stride', [2 2])
-            batchNormalizationLayer
-            leakyReluLayer(0.1)
-            
-            convolution2dLayer([3 3], 32)
-            batchNormalizationLayer
-            leakyReluLayer(0.1)
-            
-            maxPooling2dLayer(2, 'Stride',2)
-            
-            fullyConnectedLayer(64)
-            reluLayer()
-            fullyConnectedLayer(width(TrainingTables))
-            softmaxLayer()
-            classificationLayer()
-            ];
-end
+% Estimate Anchor Boxes
+blds = boxLabelDatastore(TrainingTables(:,2:end));
+imds = imageDatastore(TrainingTables.imageFilename);
+anchorBoxes = estimateAnchorBoxes(blds,8);
 
-% Matlab 2018b changed neural network training, so adjust the
-% settings accordingly.
-if verLessThan('matlab','9.5')
-    MiniBatchSize = 32;
-else
-    MiniBatchSize = 1;
-end
+% Load unweighted mobilnetV2 to modify for a YOLO net
+load('BlankNet.mat');
 
-optionsStage1 = trainingOptions('sgdm', ...
-    'MaxEpochs', 8, ...
-    'InitialLearnRate', 1e-3,'MiniBatchSize',MiniBatchSize);
+% YOLO Network Options
+featureExtractionLayer = "block_12_add";
+filterSize = [3 3];
+numFilters = 96;
+numClasses = (width(TrainingTables)-1);
+numAnchors = size(anchorBoxes,1);
+numPredictionsPerAnchor = 5;
+numFiltersInLastConvLayer = numAnchors*(numClasses+numPredictionsPerAnchor);
 
-optionsStage2 = trainingOptions('sgdm', ...
-    'MaxEpochs', 8, ...
-    'InitialLearnRate', 1e-3,'MiniBatchSize',MiniBatchSize);
-
-optionsStage3 = trainingOptions('sgdm', ...
-    'MaxEpochs', 8, ...
-    'InitialLearnRate', 1e-4,'MiniBatchSize',MiniBatchSize);
-
-optionsStage4 = trainingOptions('sgdm', ...
-    'MaxEpochs', 8, ...
-    'InitialLearnRate', 1e-4,'MiniBatchSize',MiniBatchSize);
-
-options = [
-    optionsStage1
-    optionsStage2
-    optionsStage3
-    optionsStage4
+% YOLO Network Layers
+detectionLayers = [
+    convolution2dLayer(filterSize,numFilters,"Name","yolov2Conv1","Padding", "same", "WeightsInitializer",@(sz)randn(sz)*0.01)
+    batchNormalizationLayer("Name","yolov2Batch1")
+    reluLayer("Name","yolov2Relu1")
+    convolution2dLayer(filterSize,numFilters,"Name","yolov2Conv2","Padding", "same", "WeightsInitializer",@(sz)randn(sz)*0.01)
+    batchNormalizationLayer("Name","yolov2Batch2")
+    reluLayer("Name","yolov2Relu2")
+    convolution2dLayer(1,numFiltersInLastConvLayer,"Name","yolov2ClassConv",...
+    "WeightsInitializer", @(sz)randn(sz)*0.01)
+    yolov2TransformLayer(numAnchors,"Name","yolov2Transform")
+    yolov2OutputLayer(anchorBoxes,"Name","yolov2OutputLayer")
     ];
 
-detector = trainFasterRCNNObjectDetector(TrainingTables, layers, options, ...
-    'NegativeOverlapRange', [0 0.4], ...
-    'PositiveOverlapRange', [0.6 1], ...
-    'BoxPyramidScale', 1.8,'NumStrongestRegions',Inf);
+lgraph = addLayers(blankNet,detectionLayers);
+lgraph = connectLayers(lgraph,featureExtractionLayer,"yolov2Conv1");
+
+options = trainingOptions('sgdm',...
+          'InitialLearnRate',0.001,...
+          'Verbose',true,...
+          'MiniBatchSize',16,...
+          'MaxEpochs',100,...
+          'Shuffle','never',...
+          'VerboseFrequency',30,...
+          'CheckpointPath',tempdir,...
+          'Plots','training-progress');
+
+% Train the YOLO v2 network.
+[detector,info] = trainYOLOv2ObjectDetector(TrainingTables,lgraph,options);
 end
 

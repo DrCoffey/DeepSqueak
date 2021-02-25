@@ -1,4 +1,49 @@
 # Changelog
+## 3.0 2020-12-29
+
+
+Major interface update - Full audio file navigation!
+
+Integration of DeepSqueak Screener
+
+New Collaborator: Robert Ciszek from University of Eastern Finland!
+
+# DeepSqueak-Screener
+
+[![DOI](https://zenodo.org/badge/211337688.svg)](https://zenodo.org/badge/latestdoi/211337688)
+
+
+> Fork of [DeepSqueak](https://github.com/DrCoffey/DeepSqueak) (Coffey, Marx, Neumaier, 2019), with additional functionalities for  screening of whole records for false positives, false negatives and incorrect ROIs.
+
+![DeepSqueak-Screener 10](https://user-images.githubusercontent.com/49067627/71246029-9db38380-231e-11ea-8af4-c9c9c235c8c7.gif)
+
+
+## Additions
+- Free backward and forward movement along the entire recording.
+- Additional "page" spectogram with a larger time window for call contextualization.
+- Click on the lower page spectrogram to jump to that position in the upper "focus" view.
+- Click a location on the map bar to jump to that location in the file.
+- Up and down arrow keys to slide the focus window forward or backward
+- Right click on a detection to remove it.
+- Control-click or double click on a detection to change it's label
+- Select, move, and modify ROIs of detected calls:
+
+![screenshot](https://i.postimg.cc/8C08C48V/EXAMPLE-02.png)
+
+- Possibility to manually add calls not detected by Faster-RCNN.
+- Constant time and spectrogram scales.
+- Display either spectral amplitude of power spectral density
+- Possibility to modify time and spectrogram scales, Focus (upper spectrogram), Page (lower spectrogram).
+- Sonic Visualizer export/import.
+- Fully compatible with older DeepSqueak detections files.
+- Invertible colormaps.
+- GUI tweaks.
+
+
+## Credits: 
+**Original DeepSqueak**: Coffey, K., Marx, R., & Neumaier, J.<br>
+**Screener**: Lara-Valderrábano, L. and Ciszek, R.
+
 ## 2.6.2 2020-08-03
 
 Modifications to increase contributor and community engagement
@@ -10,7 +55,6 @@ Modifications to increase contributor and community engagement
 
 Minor bug fixes 
 
-# Changelog
 ## 2.6.1 2019-07-16
 
 Fixed bug when importing call classifications from Raven .txt files.

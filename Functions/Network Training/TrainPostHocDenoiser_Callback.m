@@ -32,34 +32,25 @@ h = waitbar(0,'Initializing');
 TrainingImages = {};
 Class = [];
 for j = 1:length(trainingdata)  % For Each File
-    Calls = loadCallfile([trainingpath trainingdata{j}]);
-    
+    audioReader = squeakData([]);
+    [Calls, audioReader.audiodata] = loadCallfile([trainingpath trainingdata{j}],handles);
     for i = 1:height(Calls)     % For Each Call
         waitbar(i/height(Calls),h,['Loading File ' num2str(j) ' of '  num2str(length(trainingdata))]);
+                
+        options.frequency_padding = 0;
+        options.windowsize = wind;
+        options.overlap = noverlap;
+        options.nfft = nfft;
+        options.freq_range = [lowFreq, highFreq];
+        [I,~,~,~,~,~,s] = CreateFocusSpectrogram(Calls(i,:),handles, true, options, audioReader);
         
-        audio =  Calls.Audio{i};
-        if ~isfloat(audio)
-            audio = double(audio) / (double(intmax(class(audio)))+1);
-        elseif ~isa(audio,'double')
-            audio = double(audio);
-        end
-
-        [s, fr, ti] = spectrogram(audio,round(Calls.Rate(i) * wind),round(Calls.Rate(i) * noverlap),round(Calls.Rate(i) * nfft),Calls.Rate(i),'yaxis');
-            x1 = axes2pix(length(ti),ti,Calls.RelBox(i,1));
-            x2 = axes2pix(length(ti),ti,Calls.RelBox(i,3)) + x1;
-%           y1 = axes2pix(length(fr),fr./1000,Calls.RelBox(i,2));
-%           y2 = axes2pix(length(fr),fr./1000,Calls.RelBox(i,4)) + y1;
-            y1 = axes2pix(length(fr),fr./1000,lowFreq);
-            y2 = axes2pix(length(fr),fr./1000,highFreq);
-            I=abs(s(round(y1:min(y2,size(s,1))),round(x1:x2))); % Get the pixels in the box
-            
-            % Use median scaling
-            med = median(abs(s(:)));
-            im = mat2gray(flipud(I),[med*0.65, med*20]);
-            im = single(imresize(im,imageSize));
-            % Duplicate the image with random gaussian noise.
-            %im2 = imnoise(im,'gaussian',.4*rand()+.1,.1*rand());
-            
+        % Use median scaling
+        med = median(abs(s(:)));
+        im = mat2gray(flipud(I),[med*0.65, med*20]);
+        im = single(imresize(im,imageSize));
+        % Duplicate the image with random gaussian noise.
+        %im2 = imnoise(im,'gaussian',.4*rand()+.1,.1*rand());
+        
         if categorical(Calls.Type(i)) == 'Noise'
             TrainingImages = [TrainingImages; {im}];% ; {im2}];
             Class = [Class; categorical({'Noise'})];% categorical({'Noise'})];
@@ -71,12 +62,12 @@ for j = 1:length(trainingdata)  % For Each File
 end
 delete(h)
 
-%% Train 
+%% Train
 
 % Reshape ans resize the training data
 X = single([]);
 for i = 1:length(TrainingImages)
-X(:,:,:,i) = TrainingImages{i,1};
+    X(:,:,:,i) = TrainingImages{i,1};
 end
 clear TrainingImages
 

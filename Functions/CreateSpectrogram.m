@@ -5,6 +5,7 @@ rate = call.Rate;
 box = call.Box;
 
 audio =  call.Audio{:};
+
 if ~isfloat(audio)
     audio = double(audio) / (double(intmax(class(audio)))+1);
 elseif ~isa(audio,'double')
@@ -14,11 +15,11 @@ end
 
 %% Make Spectrogram and box
 % Spectrogram Settings
-if  call.RelBox(2)+call.RelBox(4) < 10 % For audible calls
+if  call.Box(2)+call.Box(4) < 10 % For audible calls
     windowsize = round(rate * 0.01);
     noverlap = round(rate * 0.009);
     nfft = round(rate * 0.02);
-elseif (call.RelBox(3) < .4 ) % Spect settings for short calls
+elseif (call.Box(3) < .4 ) % Spect settings for short calls
     windowsize = round(rate * 0.0032);
     noverlap = round(rate * 0.0028);
     nfft = round(rate * 0.0032);
@@ -34,6 +35,7 @@ end
 
 %% Get the part of the spectrogram within the box
 x1=find(ti>=call.RelBox(1),1);
+
 x2=find(ti>=(call.RelBox(1)+call.RelBox(3)),1);
 if isempty(x2)
    x2=length(ti); 

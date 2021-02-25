@@ -1,89 +1,65 @@
 function UnsupervisedClustering_Callback(hObject, eventdata, handles)
 % Cluster with k-means or adaptive
 
-% Get the data
-[ClusteringData] = CreateClusteringData(handles.data, 1);
-if isempty(ClusteringData); return; end
-
-[FileName,PathName] = uiputfile('Extracted Contours.mat','Save contours for faster loading');
-if FileName ~= 0
-    save(fullfile(PathName,FileName),'ClusteringData','-v7.3');
-end
-
-clustAssign = zeros(size(ClusteringData,1),1);
-
 finished = 0; % Repeated until
 while ~finished
-    choice = questdlg('Choose clustering method:','Cluster','ARTwarp','K-means (recommended)','Cancel','K-means (recommended)');
+    choice = questdlg('Choose clustering method:','Cluster','ARTwarp','K-means (recommended)', 'Variational Autoencoder','K-means (recommended)');
+    
+    % Get the data
+    %     [ClusteringData] = CreateClusteringData(handles, 'forClustering', true, 'save_data', true);
+    %     if isempty(ClusteringData); return; end
+    %     clustAssign = zeros(size(ClusteringData,1),1);
+    
     
     switch choice
-        case 'Cancel'
+        case []
             return
             
-        case 'K-means (recommended)'
-            hb = waitbar(.5,'Preparing Data');
-            % FREQ 15 Chunks
-            %             data = cellfun(@(x) imresize(x-mean(x),[20 1]),ClusteringData(:,4),'UniformOutput',0);
-            %             data = [data{:}]';
-            
-            % Parameterized data
-            nrm = @(x) ((x - mean(x,1)) ./ std(x,1));
-            ReshapedX=cell2mat(cellfun(@(x) imresize(x',[1 9]) ,ClusteringData(:,4),'UniformOutput',0));
-            slope = diff(ReshapedX,1,2);
-            slope = nrm(slope);
-            freq=cell2mat(cellfun(@(x) imresize(x',[1 8]) ,ClusteringData(:,4),'UniformOutput',0));
-            freq = nrm(freq);
-            duration = repmat(cell2mat(ClusteringData(:,3)),[1 8]);
-            duration = nrm(duration);
-            
-            close(hb)
+        case {'K-means (recommended)', 'Variational Autoencoder'}
             FromExisting = questdlg('From existing model?','Cluster','Yes','No','No');
             switch FromExisting % Load Model
                 case 'No'
                     % Get parameter weights
-                    clusterParameters= inputdlg({'Shape weight','Frequency weight','Duration weight'},'Choose cluster parameters:',1,{'1','1','1'});
-                    if isempty(clusterParameters); return; end
-                    slope_weight = str2double(clusterParameters{1});
-                    freq_weight = str2double(clusterParameters{2});
-                    duration_weight = str2double(clusterParameters{3});
-                    
-                    data = [
-                        freq     .*  freq_weight,...
-                        slope    .*  slope_weight,...
-                        duration .*  duration_weight,...
-                        ];
-                    
-                    optimize = questdlg('Optimize Cluster Number?','Cluster Optimization','Elbow Optimized','User Defined','Elbow Optimized');
-                    
-                    switch optimize
-                        case 'Elbow Optimized'
-                            opt_options = inputdlg({'Max Clusters','Replicates'},'Cluster Optimization',[1 50; 1 50],{'100','3'});
-                            if isempty(opt_options)
-                                return
-                            end
-                            [clustAssign,C]=kmeans_opt(data,str2num(opt_options{1}),0,str2num(opt_options{2}));
-                        case 'User Defined'
-                            k = inputdlg({'Choose number of k-means:'},'Cluster with k-means',1,{'15'});
-                            if isempty(k)
-                                return
-                            end
-                            k = str2num(k{1});
-                            [clustAssign, C]= kmeans(data,k,'Distance','sqeuclidean','Replicates',10);
+                    switch choice
+                        case 'K-means (recommended)'
+                            [ClusteringData, ~, ~, ~, spectrogramOptions] = CreateClusteringData(handles, 'forClustering', true, 'save_data', true);
+                            if isempty(ClusteringData); return; end
+                            clusterParameters= inputdlg({'Shape weight','Frequency weight','Duration weight'},'Choose cluster parameters:',1,{'1','1','1'});
+                            if isempty(clusterParameters); return; end
+                            slope_weight = str2double(clusterParameters{1});
+                            freq_weight = str2double(clusterParameters{2});
+                            duration_weight = str2double(clusterParameters{3});
+                            data = get_kmeans_data(ClusteringData, slope_weight, freq_weight, duration_weight);
+                        case 'Variational Autoencoder'
+                            [encoderNet, decoderNet, options, ClusteringData] = create_VAE_model(handles);
+                            data = extract_VAE_embeddings(encoderNet, options, ClusteringData);
                     end
+                    
+                    % Make a k-means model and return the centroids
+                    C = get_kmeans_centroids(data);
+                    if isempty(C); return; end
                     
                 case 'Yes'
                     [FileName,PathName] = uigetfile(fullfile(handles.data.squeakfolder,'Clustering Models','*.mat'));
-                    load(fullfile(PathName,FileName),'C','freq_weight','slope_weight','duration_weight','clusterName');
-                    data = [
-                        freq     .*  freq_weight,...
-                        slope    .*  slope_weight,...
-                        duration .*  duration_weight,...
-                        ];
-                    
-                    
-                    if exist('C', 'var') ~= 1
-                        warndlg('K-means model could not be found. Is this file a trained k-means model?')
-                        continue
+                    if isnumeric(FileName); return;end
+                    switch choice
+                        case 'K-means (recommended)'
+                            spectrogramOptions = [];
+                            load(fullfile(PathName,FileName),'C','freq_weight','slope_weight','duration_weight','clusterName','spectrogramOptions');
+                            ClusteringData = CreateClusteringData(handles, 'forClustering', true, 'spectrogramOptions', spectrogramOptions, 'save_data', true);
+                            if isempty(ClusteringData); return; end
+                            data = get_kmeans_data(ClusteringData, slope_weight, freq_weight, duration_weight)
+                        case 'Variational Autoencoder'
+                            C = [];
+                            load(fullfile(PathName,FileName),'C','encoderNet','decoderNet','options');
+                            [ClusteringData] = CreateClusteringData(handles, 'spectrogramOptions', options.spectrogram, 'scale_duration', options.maxDuration, 'freqRange', options.freqRange, 'save_data', true);
+                            if isempty(ClusteringData); return; end
+                            data = extract_VAE_embeddings(encoderNet, options, ClusteringData);
+                            
+                            % If the model was created through create_tsne_Callback, C won't exist, so make it.
+                            if isempty(C)
+                                C = get_kmeans_centroids(data);
+                            end
                     end
             end
             [clustAssign,D] = knnsearch(C,data,'Distance','seuclidean');
@@ -95,32 +71,36 @@ while ~finished
             %% Make a montage with the top calls in each class
             try
                 % Find the median call length
-                maxlength = [];
-                for i = unique(clustAssign,'sorted')'
-                    index = find(clustAssign==i,1);
-                    im = ClusteringData{index,1};
-                    maxlength = [maxlength,size(im,2)];
-                end
+                [~, i] = unique(clustAssign,'sorted');
+                maxlength = cellfun(@(spect) size(spect,2), ClusteringData.Spectrogram(i));
                 maxlength = round(prctile(maxlength,75));
+                maxBandwidth = cellfun(@(spect) size(spect,1), ClusteringData.Spectrogram(i));
+                maxBandwidth = round(prctile(maxBandwidth,75));
+                
                 % Make the image stack
                 montageI = [];
                 for i = unique(clustAssign)'
                     index = find(clustAssign==i,1);
-                    tmp = ClusteringData{index,1};
+                    tmp = ClusteringData.Spectrogram{index,1};
                     tmp = padarray(tmp,[0,max(maxlength-size(tmp,2),0)],'both');
-                    tmp = rescale(tmp,1,100);
-                    montageI(:,:,i) = floor(imresize(tmp,[120,240]));
+                    tmp = rescale(tmp,1,256);
+                    montageI(:,:,i) = floor(imresize(tmp,[maxBandwidth,maxlength]));
                 end
                 % Make the figure
-                figure('Color','w','Position',[50,50,800,800])
-                montage(montageI,inferno,'BorderSize',1,'BackgroundColor','w');
-                title('Top call in each cluster')
+                f_montage = figure('Color','w','Position',[50,50,800,800]);
+                ax_montage = axes(f_montage);
+                % montageI = cellfun(@(x) rescale(x,0,255), (ClusteringData.Spectrogram(i)), 'UniformOutput', false);
+                image(ax_montage, imtile(montageI, inferno, 'BackgroundColor', 'w', 'BorderSize', 2))
+                axis(ax_montage, 'off')
+                title(ax_montage, 'Closest call to each cluster center')
             catch
                 disp('For some reason, I couldn''t make a montage of the call exemplars')
             end
             
             
         case 'ARTwarp'
+            ClusteringData = CreateClusteringData(handles, 'forClustering', true, 'save_data', true);
+            if isempty(ClusteringData); return; end
             FromExisting = questdlg('From existing model?','Cluster','Yes','No','No');
             switch FromExisting% Load Art Model
                 case 'No'
@@ -135,7 +115,7 @@ while ~finished
                     end
                     %% Cluster
                     try
-                        [ARTnet, clustAssign] = ARTwarp2(ClusteringData(:,4),settings);
+                        [ARTnet, clustAssign] = ARTwarp2(ClusteringData.xFreq,settings);
                     catch ME
                         disp(ME)
                     end
@@ -149,7 +129,7 @@ while ~finished
                     end
                     
             end
-            [clustAssign] = GetARTwarpClusters(ClusteringData(:,4),ARTnet,settings);
+            [clustAssign] = GetARTwarpClusters(ClusteringData.xFreq,ARTnet,settings);
     end
     
     %     data = freq;
@@ -169,13 +149,12 @@ while ~finished
     
     
     %% Assign Names
-    % If the 
+    % If the
     if strcmp(choice, 'K-means (recommended)') && strcmp(FromExisting, 'Yes')
         clustAssign = categorical(clustAssign, 1:size(C,1), cellstr(clusterName));
     end
     
-    [clusterName, rejected, finished] = clusteringGUI(clustAssign, ClusteringData);
-    
+    [~, clusterName, rejected, finished, clustAssign] = clusteringGUI(clustAssign, ClusteringData);
     
 end
 %% Update Files
@@ -185,16 +164,20 @@ if FromExisting(1) == 'N'
         case 'K-means (recommended)'
             [FileName, PathName] = uiputfile(fullfile(handles.data.squeakfolder, 'Clustering Models', 'K-Means Model.mat'), 'Save clustering model');
             if ~isnumeric(FileName)
-                save(fullfile(PathName, FileName), 'C', 'freq_weight', 'slope_weight', 'duration_weight', 'clusterName');
+                save(fullfile(PathName, FileName), 'C', 'freq_weight', 'slope_weight', 'duration_weight', 'clusterName', 'spectrogramOptions');
             end
         case 'ARTwarp'
             [FileName, PathName] = uiputfile(fullfile(handles.data.squeakfolder, 'Clustering Models', 'ARTwarp Model.mat'), 'Save clustering model');
             if ~isnumeric(FileName)
                 save(fullfile(PathName, FileName), 'ARTnet', 'settings');
             end
+        case 'Variational Autoencoder'
+            [FileName, PathName] = uiputfile(fullfile(handles.data.squeakfolder, 'Clustering Models', 'Variational Autoencoder Model.mat'), 'Save clustering model');
+            if ~isnumeric(FileName)
+                save(fullfile(PathName, FileName), 'C', 'encoderNet', 'decoderNet', 'options', 'clusterName');
+            end
     end
 end
-
 
 % Save the clusters
 saveChoice =  questdlg('Update files with new clusters?','Save clusters','Yes','No','No');
@@ -212,5 +195,44 @@ function D = dtw2(ZI,ZJ)
 D = zeros(size(ZJ,1),1);
 for i = 1:size(ZJ,1)
     D(i) = dtw(ZI,ZJ(i,:),3);
+end
+end
+
+function data = get_kmeans_data(ClusteringData, slope_weight, freq_weight, duration_weight)
+% Parameterize the data for kmeans
+ReshapedX   = cell2mat(cellfun(@(x) imresize(x',[1 9]) ,ClusteringData.xFreq,'UniformOutput',0));
+slope       = diff(ReshapedX,1,2);
+slope       = zscore(slope);
+freq        = cell2mat(cellfun(@(x) imresize(x',[1 8]) ,ClusteringData.xFreq,'UniformOutput',0));
+freq        = zscore(freq);
+duration    = repmat(ClusteringData.Duration,[1 8]);
+duration    = zscore(duration);
+data = [
+    freq     .*  freq_weight,...
+    slope    .*  slope_weight,...
+    duration .*  duration_weight,...
+    ];
+end
+
+function C = get_kmeans_centroids(data)
+% Make a k-means model and return the centroids
+optimize = questdlg('Optimize Cluster Number?','Cluster Optimization','Elbow Optimized','User Defined','Elbow Optimized');
+C = [];
+switch optimize
+    case 'Elbow Optimized'
+        opt_options = inputdlg({'Max Clusters','Replicates'},'Cluster Optimization',[1 50; 1 50],{'100','3'});
+        if isempty(opt_options); return; end
+        
+        %Cap the max clusters to the number of samples.
+        if size(data,1) < str2double(opt_options{1})
+            opt_options{1} = num2str(size(data,1));
+        end
+        [~,C] = kmeans_opt(data, str2double(opt_options{1}), 0, str2double(opt_options{2}));
+        
+    case 'User Defined'
+        k = inputdlg({'Choose number of k-means:'},'Cluster with k-means',1,{'15'});
+        if isempty(k); return; end
+        k = str2double(k{1});
+        [~, C] = kmeans(data,k,'Distance','sqeuclidean','Replicates',10);
 end
 end

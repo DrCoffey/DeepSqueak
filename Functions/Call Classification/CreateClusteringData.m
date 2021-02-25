@@ -1,83 +1,153 @@
+function [ClusteringData, clustAssign, freqRange, maxDuration, spectrogramOptions] = CreateClusteringData(handles, varargin)
 %% This function prepares data for clustering
-
-function [ClusteringData, clustAssign]= CreateClusteringData(data, forClustering)
 % For each file selected, create a cell array with the image, and contour
 % of calls where Calls.Accept == 1
 
-cd(data.squeakfolder);
-if forClustering
+p = inputParser;
+addParameter(p,'forClustering', false);
+addParameter(p,'spectrogramOptions', []);
+% scale_duration can eithor be logical or scaler. If scalar, scale_duration
+% is the duration used at t_max to scale duration by sqrt(t_max ./ t)
+% If true, than t_max is the 95th percentile of call durations
+addParameter(p,'scale_duration', false);
+% If scale_duration is true, use a fixed frequency range for spectrograms
+addParameter(p,'fixed_frequency', false);
+% fixed_frequency = [lowFreq, highFreq] for fixed frequency range
+addParameter(p,'freqRange', []);
+% Ask to save the data for future use
+addParameter(p,'save_data', false); 
+parse(p,varargin{:});
+spectrogramOptions = p.Results.spectrogramOptions;
+
+ClusteringData = {};
+clustAssign = [];
+maxDuration = [];
+freqRange = [];
+xFreq = [];
+xTime = [];
+stats.Power = [];
+
+% Select the files
+if p.Results.forClustering
     prompt = 'Select detection file(s) for clustering AND/OR extracted contours';
 else
     prompt = 'Select detection file(s) for viewing';
 end
-
-[fileName, filePath] = uigetfile(fullfile(data.settings.detectionfolder,'*.mat'),prompt,'MultiSelect', 'on');
-if isnumeric(fileName);return;end
+[fileName, filePath] = uigetfile(fullfile(handles.data.settings.detectionfolder,'*.mat'),prompt,'MultiSelect', 'on');
+if isnumeric(fileName); ClusteringData = {}; return;end
 
 % If one file is selected, turn it into a cell
 fileName = cellstr(fileName);
 
+
 h = waitbar(0,'Initializing');
-
-ClusteringData = {};
-clustAssign = [];
-xFreq = [];
-xTime = [];
-stats.Power = [];
-stats.DeltaTime = [];
-
-%% For Each File
+audioReader = squeakData([]);
+%% Load the data
+audiodata = {};
+Calls = [];
 for j = 1:length(fileName)
-    file = load(fullfile(filePath,fileName{j}));
-    
+    [Calls_tmp,  audiodata{j}, loaded_ClusteringData] = loadCallfile(fullfile(filePath,fileName{j}),handles);
     % If the files is extracted contours, rather than a detection file
-    if forClustering && isfield(file,'ClusteringData')
-        ClusteringData = [ClusteringData; file.ClusteringData];
-    elseif isfield(file,'Calls')
-        
-        % Backwards compatibility with struct format for detection files
-        if isstruct(file.Calls); file.Calls = struct2table(file.Calls, 'AsArray', true); end
-    
-        % for each call in the file, calculate stats for clustering
-        for i = 1:height(file.Calls)
-            waitbar(i/height(file.Calls),h,['Loading File ' num2str(j) ' of '  num2str(length(fileName))]);
-            
-            % Skip if not accepted
-            if ~file.Calls.Accept(i) || ismember(file.Calls.Type(i),'Noise')
-                continue
-            end
-            
-            call = file.Calls(i,:);
-            
-            [I,wind,noverlap,nfft,rate,box] = CreateSpectrogram(call);
-            im = mat2gray(flipud(I),[0 max(max(I))/4]); % Set max brightness to 1/4 of max
-            
-            if forClustering
-                stats = CalculateStats(I,wind,noverlap,nfft,rate,box,data.settings.EntropyThreshold,data.settings.AmplitudeThreshold);
-                spectrange = call.Rate / 2000; % get frequency range of spectrogram in KHz
-                FreqScale = spectrange / (1 + floor(nfft / 2)); % size of frequency pixels
-                TimeScale = (wind - noverlap) / call.Rate; % size of time pixels
-                xFreq = FreqScale * (stats.ridgeFreq_smooth) + call.Box(2);
-                xTime = stats.ridgeTime * TimeScale;
-            end
-            
-            ClusteringData = [ClusteringData
-                [{uint8(im .* 256)} % Image
-                {call.RelBox(2)} % Lower freq
-                {stats.DeltaTime} % Delta time
-                {xFreq} % Time points
-                {xTime} % Freq points
-                {[filePath fileName{j}]} % File path
-                {i} % Call ID in file
-                {stats.Power}
-                {call.RelBox(4)}
-                ]'];
-            
-            clustAssign = [clustAssign; file.Calls.Type(i)];
-        end
+    if ~isempty(loaded_ClusteringData)
+        ClusteringData = [ClusteringData; table2cell(loaded_ClusteringData)];
+        continue
     else
-        fprintf(1, 'Skipping empty file: %s\n', fileName{j})
+        % Remove calls that aren't accepted
+        Calls_tmp = Calls_tmp(Calls_tmp.Accept == 1 & ~ismember(Calls_tmp.Type,'Noise'), :);
+        % Create a variable that contains the index of audiodata to use
+        Calls_tmp.audiodata_index = repmat(j, height(Calls_tmp), 1);
+        Calls = [Calls; Calls_tmp];
     end
 end
+
+% Optimize the window size so that the pixels are square on average
+if isempty(spectrogramOptions)
+    yRange = mean(Calls.Box(:,4));
+    xRange = mean(Calls.Box(:,3));
+    noverlap = .5;
+    optimalWindow = sqrt(xRange/(2000*yRange));
+    optimalWindow = optimalWindow + optimalWindow.*noverlap;
+    spectrogramOptions.windowsize = optimalWindow;
+    spectrogramOptions.overlap = optimalWindow .* noverlap;
+    spectrogramOptions.nfft = optimalWindow;
+    spectrogramOptions.frequency_padding = 0;
+end
+
+%% Stretch the duration of calls by a factor of sqrt(t_max / t)
+% This is used for VAE
+if ~isempty(Calls)
+    if p.Results.scale_duration
+        if islogical(p.Results.scale_duration)
+            maxDuration = prctile(Calls.Box(:,3),95);
+        else
+            maxDuration = p.Results.scale_duration;
+        end
+        time_padding = maxDuration  - sqrt(maxDuration ./ Calls.Box(:,3)) .* Calls.Box(:,3);
+        Calls.Box(:,3) = Calls.Box(:,3) + time_padding;
+        Calls.Box(:,1) = Calls.Box(:,1) - time_padding/2;
+    end
+    % Use the box, or a fixed frequency range?
+    if p.Results.fixed_frequency || ~isempty(p.Results.freqRange)
+        if ~isempty(p.Results.freqRange)
+            freqRange = p.Results.freqRange;
+        else
+            freqRange(1) = prctile(Calls.Box(:,2), 5);
+            freqRange(2) = prctile(Calls.Box(:,4) + Calls.Box(:,2), 95);
+        end
+        Calls.Box(:,2) = freqRange(1);
+        Calls.Box(:,4) = freqRange(2) - freqRange(1);
+    end
+end
+%% for each call in the file, calculate stats for clustering
+currentAudioFile = 0;
+for i = 1:height(Calls)
+    waitbar(i/height(Calls),h, sprintf('Loading File %u of %u', Calls.audiodata_index(i), length(fileName)));
+    
+    % Change the audio file if needed
+    if Calls.audiodata_index(i) ~= currentAudioFile;
+        audioReader.audiodata = audiodata{Calls.audiodata_index(i)};
+        currentAudioFile = Calls.audiodata_index(i);
+    end
+    
+        
+    [I,wind,noverlap,nfft,rate,box,~] = CreateFocusSpectrogram(Calls(i,:), handles, true, p.Results.spectrogramOptions, audioReader);
+    % im = mat2gray(flipud(I),[0 max(max(I))/4]); % Set max brightness to 1/4 of max
+    im = mat2gray(flipud(I), prctile(I, [1 99], 'all')); % normalize brightness
+    
+    if p.Results.forClustering
+        stats = CalculateStats(I,wind,noverlap,nfft,rate,box,handles.data.settings.EntropyThreshold,handles.data.settings.AmplitudeThreshold);
+        spectrange = audioReader.audiodata.SampleRate / 2000; % get frequency range of spectrogram in KHz
+        FreqScale = spectrange / (1 + floor(nfft / 2)); % size of frequency pixels
+        TimeScale = (wind - noverlap) / audioReader.audiodata.SampleRate; % size of time pixels
+        xFreq = FreqScale * (stats.ridgeFreq_smooth) + Calls.Box(i,2);
+        xTime = stats.ridgeTime * TimeScale;
+    else
+        stats.DeltaTime = box(3);
+    end
+    
+    ClusteringData = [ClusteringData
+        [{uint8(im .* 256)} % Image
+        {box(2)} % Lower freq
+        {stats.DeltaTime} % Delta time
+        {xFreq} % Time points
+        {xTime} % Freq points
+        {[filePath fileName{j}]} % File path
+        {i} % Call ID in file
+        {stats.Power}
+        {box(4)}
+        ]'];
+    
+    clustAssign = [clustAssign; Calls.Type(i)];
+end
+
+
+ClusteringData = cell2table(ClusteringData, 'VariableNames', {'Spectrogram', 'MinFreq', 'Duration', 'xFreq', 'xTime', 'Filename', 'callID', 'Power', 'Bandwidth'});
+
 close(h)
+
+if p.Results.save_data && ~all(cellfun(@(x) isempty(fields(x)), audiodata)) % If audiodata has no fields, then only extracted contours were used, so don't ask to save them again
+    [FileName,PathName] = uiputfile('Extracted Contours.mat','Save extracted data for faster loading (optional)');
+    if FileName ~= 0
+        save(fullfile(PathName,FileName),'ClusteringData','-v7.3');
+    end
 end

@@ -20,40 +20,28 @@ noverlap = .0028;
 nfft = .0032;
 
 settings = inputdlg({'Frequency to pad boxes aboxe and below each box (kHz):'},'Frequency to pad boxes by',[1 60],{'10'});
-padFreq = str2num(settings{1});
+padFreq = str2double(settings{1});
 imageSize = [200 200];
 
 h = waitbar(0,'Initializing');
 X = [];
 Class = [];
 for j = 1:length(trainingdata)  % For Each File
-    Calls = loadCallfile(fullfile(trainingpath, trainingdata{j}));
-
+    audioReader = squeakData([]);
+    [Calls, audioReader.audiodata] = loadCallfile(fullfile(trainingpath, trainingdata{j}),handles);
+    
     Xtemp = [];
     Classtemp = [];
     Calls=Calls(Calls.Accept==1 & Calls.Type ~= 'Noise', :);
-
+    
     for i = 1:height(Calls)     % For Each Call
         waitbar(i/height(Calls),h,['Loading File ' num2str(j) ' of '  num2str(length(trainingdata))]);
-        audio = Calls.Audio{i};
-        if ~isfloat(audio)
-            audio = double(audio) / (double(intmax(class(audio)))+1);
-        elseif ~isa(audio,'double')
-            audio = double(audio);
-        end
         
-        [s, fr, ti] = spectrogram((audio),round(Calls.Rate(i) * wind),round(Calls.Rate(i) * noverlap),round(Calls.Rate(i) * nfft),Calls.Rate(i),'yaxis');
-        
-        x1 = axes2pix(length(ti),ti,Calls.RelBox(i, 1));
-        x2 = axes2pix(length(ti),ti,Calls.RelBox(i, 3)) + x1;
-        %y1 = axes2pix(length(fr),fr./1000,lowFreq);
-        %y2 = axes2pix(length(fr),fr./1000,highFreq);
-        y1 = axes2pix(length(fr),fr./1000,Calls.RelBox(i, 2)-padFreq);
-        y2 = axes2pix(length(fr),fr./1000,Calls.RelBox(i, 4)+padFreq*2) + y1;
-        
-        y1 = max(y1,1); % Make sure that the box isn't too big
-        y2 = min(y2,size(s,1));
-        I=abs(s(round(y1:y2),round(x1:x2))); % Get the pixels in the box
+        options.frequency_padding = padFreq;
+        options.windowsize = wind;
+        options.overlap = noverlap;
+        options.nfft = nfft;
+        [I,~,~,~,~,~,s] = CreateFocusSpectrogram(Calls(i,:),handles, true, options, audioReader);
         
         % Use median scaling
         med = median(abs(s(:)));
