@@ -12,7 +12,7 @@ classdef squeakData < handle
         squeakfolder
         audiodata
         % Keyboard shortcuts for labelling calls
-        labelShortcuts = {'1','2','3','4','5','6','7','8','9','0','=','+','!','"','#','¤','%','&','/','(',')','=','?','@','£','$','{','[',']','}'}
+        labelShortcuts = {'1','2','3','4','5','6','7','8','9','0','-','=','!','@','#','$','%','^','&','*','(',')','_','+'}
         page_spect = struct() % spectrogram of the page view
         focusCenter = 0; % center of the current focus window
         pageSizes = [2, 3, 5, 10, 30] % List of page size values in the dropdown box
@@ -42,7 +42,7 @@ classdef squeakData < handle
             obj.defaultSettings.HighFreq = 115;
             obj.defaultSettings.AmplitudeThreshold = 0;
             obj.defaultSettings.EntropyThreshold = 0.3;
-            obj.defaultSettings.labels = {'FF','FM','Trill','Split',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '};
+            obj.defaultSettings.labels = {'1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24'};
             obj.defaultSettings.pageSize = 3; % Size of page view in seconds
             obj.defaultSettings.spectogram_ticks = 11;
             obj.defaultSettings.focus_window_size = 0.5;
