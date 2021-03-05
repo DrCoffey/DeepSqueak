@@ -100,5 +100,6 @@ update_fig(hObject, eventdata, handles);
 handles = guidata(hObject);
 
 %% Find the color scale limits
-handles.data.clim = prctile(handles.data.page_spect.s_display(20:10:end-20, 1:20:end),[10,90], 'all')';
+%handles.data.clim = prctile(handles.data.page_spect.s_display(20:10:end-20, 1:20:end),[10,90], 'all')';
+handles.data.clim = prctile(handles.data.page_spect.s_display,[10,90], 'all')';
 change_spectogram_contrast_Callback(hObject,[],handles);

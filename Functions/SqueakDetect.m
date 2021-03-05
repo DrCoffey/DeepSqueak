@@ -88,8 +88,8 @@ for i = 1:length(chunks)-1
         end
         
         [~,fr,ti,p] = spectrogram(audio(:,1),wind,noverlap,nfft,audio_info.SampleRate,'yaxis'); % Just use the first audio channel
-        upper_freq = find(fr>=HighCutoff*1000,1);
-        lower_freq = find(fr>=LowCutoff*1000,1);
+        upper_freq = find(fr<=HighCutoff*1000,1,'last');
+        lower_freq = find(fr>=LowCutoff*1000,1,'first');
         p = p(lower_freq:upper_freq,:);
         p(p==0)=.01;
         p = log10(p);
