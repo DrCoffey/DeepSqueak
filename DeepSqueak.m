@@ -371,7 +371,7 @@ end
 
 % --- Executes on key press with focus on figure1 or any of its controls.
 function figure1_WindowKeyPressFcn(hObject, eventdata, handles)
-disp(eventdata);
+%disp(eventdata);
 switch eventdata.Character
     case 'p'
         PlayCall_Callback(hObject, eventdata, handles)
