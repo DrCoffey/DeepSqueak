@@ -96,7 +96,13 @@ for i = 1:length(chunks)-1
         p = rescale(imcomplement(abs(p)));
         
         % Create Adjusted Image for Identification
-        im = adapthisteq(flipud(p),'NumTiles',[ceil(size(p,1)/50) ceil(size(p,2)/50)],'ClipLimit',.005,'Distribution','rayleigh','Alpha',.4);
+        xTile=ceil(size(p,1)/50);
+        yTile=ceil(size(p,2)/50);
+        if xTile>1 && yTile>1
+        im = adapthisteq(flipud(p),'NumTiles',[xTile yTile],'ClipLimit',.005,'Distribution','rayleigh','Alpha',.4);
+        else
+        im = adapthisteq(flipud(p),'NumTiles',[2 2],'ClipLimit',.005,'Distribution','rayleigh','Alpha',.4);    
+        end
 
         % Detect!
         [bboxes, scores, Class] = detect(network, im2uint8(im), 'ExecutionEnvironment','auto','SelectStrongest',1);
