@@ -8,7 +8,11 @@ images = zeros([options.imageSize, size(ClusteringData, 1)]);
 for i = 1:size(ClusteringData, 1)
     images(:,:,:,i) = imresize(ClusteringData.Spectrogram{i}, options.imageSize(1:2));
 end
-% figure; montage(images(:,:,:,end-32:end) ./ 256)
+try
+figure; montage(images(:,:,:,1:32) ./ 256);
+catch
+    Disp('Not Enough Images Silly Billy'); 
+end
 images = dlarray(single(images) ./ 256, 'SSCB');
 
 % Divide the images into training and validation

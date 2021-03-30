@@ -143,7 +143,15 @@ p = rescale(imcomplement(abs(p)));
 
 % Create adjusted image from power spectral density
 alf=.4*AmplitudeFactor;
-im = adapthisteq(flipud(p),'NumTiles',[ceil(size(p,1)/50) ceil(size(p,2)/50)],'ClipLimit',.005,'Distribution','rayleigh','Alpha',alf);
+
+% Create Adjusted Image for Identification
+xTile=ceil(size(p,1)/50);
+yTile=ceil(size(p,2)/50);
+if xTile>1 && yTile>1
+im = adapthisteq(flipud(p),'NumTiles',[xTile yTile],'ClipLimit',.005,'Distribution','rayleigh','Alpha',alf);
+else
+im = adapthisteq(flipud(p),'NumTiles',[2 2],'ClipLimit',.005,'Distribution','rayleigh','Alpha',alf);    
+end
 
 % Find the box within the spectrogram
 x1 = axes2pix(length(ti), ti, Calls.Box(:,1));

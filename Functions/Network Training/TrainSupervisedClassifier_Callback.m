@@ -5,54 +5,18 @@ function TrainSupervisedClassifier_Callback(hObject, eventdata, handles)
 % Rejected Calls are ignored. This function produces training images from
 % 15 to 75 KHz, and with width of the box.
 
-%% Prepare the data
-% Select files
-cd(handles.data.squeakfolder);
-[trainingdata, trainingpath] = uigetfile([handles.data.settings.detectionfolder '/*.mat'],'Select Detection File(s) for Training ','MultiSelect', 'on');
-if isnumeric(trainingdata)  % If user cancels
-    return
+options.imageSize = [128, 128, 1];
+[ClusteringData, Class, options.freqRange, options.maxDuration, options.spectrogram] = CreateClusteringData(handles, 'scale_duration', true, 'fixed_frequency', true);
+
+% Resize the images to match the input image size
+images = zeros([options.imageSize, size(ClusteringData, 1)]);
+for i = 1:size(ClusteringData, 1)
+    images(:,:,:,i) = imresize(ClusteringData.Spectrogram{i}, options.imageSize(1:2));
 end
-trainingdata = cellstr(trainingdata);
-
-% Spectrogram Settings
-wind = .0032;
-noverlap = .0028;
-nfft = .0032;
-
-settings = inputdlg({'Frequency to pad boxes aboxe and below each box (kHz):'},'Frequency to pad boxes by',[1 60],{'10'});
-padFreq = str2double(settings{1});
-imageSize = [200 200];
-
-h = waitbar(0,'Initializing');
-X = [];
-Class = [];
-for j = 1:length(trainingdata)  % For Each File
-    audioReader = squeakData([]);
-    [Calls, audioReader.audiodata] = loadCallfile(fullfile(trainingpath, trainingdata{j}),handles);
-    
-    Xtemp = [];
-    Classtemp = [];
-    Calls=Calls(Calls.Accept==1 & Calls.Type ~= 'Noise', :);
-    
-    for i = 1:height(Calls)     % For Each Call
-        waitbar(i/height(Calls),h,['Loading File ' num2str(j) ' of '  num2str(length(trainingdata))]);
-        
-        options.frequency_padding = padFreq;
-        options.windowsize = wind;
-        options.overlap = noverlap;
-        options.nfft = nfft;
-        [I,~,~,~,~,~,s] = CreateFocusSpectrogram(Calls(i,:),handles, true, options, audioReader);
-        
-        % Use median scaling
-        med = median(abs(s(:)));
-        im = mat2gray(flipud(I),[med*0.65, med*20]);
-        Xtemp(:,:,:,i) = single(imresize(im,imageSize));
-        Classtemp = [Classtemp; categorical(Calls.Type(i))];
-    end
-    X = cat(4,X,Xtemp);
-    Class = [Class; Classtemp];
-end
-close(h)
+wind=options.spectrogram.windowsize;
+noverlap=options.spectrogram.overlap;
+nfft=options.spectrogram.nfft;
+imageSize=options.imageSize;
 
 %% Make all categories 'Title Case'
 cats = categories(Class);
@@ -68,7 +32,7 @@ Class = removecats(Class);
 call_categories = categories(Class);
 idx = listdlg('ListString',call_categories,'Name','Select categories for training','ListSize',[300,300]);
 calls_to_train_with = ismember(Class,call_categories(idx));
-X = X(:,:,:,calls_to_train_with);
+X = images(:,:,:,calls_to_train_with) ./ 256;
 Class = Class(calls_to_train_with);
 Class = removecats(Class);
 
@@ -84,13 +48,14 @@ ValY = Class(valInd);
 
 % Augment the data by scaling and translating
 aug = imageDataAugmenter('RandXScale',[.90 1.10],'RandYScale',[.90 1.10],'RandXTranslation',[-20 20],'RandYTranslation',[-20 20],'RandXShear',[-9 9]);
-auimds = augmentedImageDatastore(imageSize,TrainX,TrainY,'DataAugmentation',aug);
+auimds = augmentedImageDatastore(options.imageSize,TrainX,TrainY,'DataAugmentation',aug);
 
-%P2=preview(auimds);
-%imshow(imtile(P2.input));
+P2=preview(auimds);
+figure;
+imshow(imtile(P2.input));
 
 layers = [
-    imageInputLayer([imageSize],'Name','input','normalization','none')
+    imageInputLayer([options.imageSize],'Name','input','normalization','none')
     
     convolution2dLayer(3,16,'Padding','same','stride',[2 2])
     batchNormalizationLayer
@@ -120,13 +85,13 @@ layers = [
     classificationLayer];
 
 options = trainingOptions('sgdm',...
-    'MiniBatchSize',20, ...
-    'MaxEpochs',25, ...
-    'InitialLearnRate',.075, ...
+    'MiniBatchSize',100, ...
+    'MaxEpochs',1000, ...
+    'InitialLearnRate',.05, ...
     'Shuffle','every-epoch', ...
     'LearnRateSchedule','piecewise',...
     'LearnRateDropFactor',0.95,...
-    'LearnRateDropPeriod',1,...
+    'LearnRateDropPeriod',10,...
     'ValidationData',{ValX, ValY},...
     'ValidationFrequency',10,...
     'ValidationPatience',inf,...
@@ -146,5 +111,5 @@ h.ColorbarVisible = 'off';
 colormap(inferno);
 
 [FileName,PathName] = uiputfile('ClassifierNet.mat','Save Network');
-save([PathName FileName],'ClassifyNet','wind','noverlap','nfft','padFreq','imageSize','layers');
+save([PathName FileName],'ClassifyNet','wind','noverlap','nfft','imageSize','layers');
 end

@@ -1,4 +1,4 @@
-function [I,windowsize,noverlap,nfft,rate,box,s,fr,ti,audio] = CreateFocusSpectrogram(call,handles, make_spectrogram, options, audioReader)
+function [I,windowsize,noverlap,nfft,rate,box,s,fr,ti,audio,p] = CreateFocusSpectrogram(call,handles, make_spectrogram, options, audioReader)
 %% Extract call features for CalculateStats and display
 
 
@@ -10,7 +10,7 @@ if nargin < 4 || isempty(options)
     options = struct;
     options.frequency_padding = 0;
     options.nfft = 0.0032;
-    options.overlap = 0.0028;
+    options.overlap = 0.0016;
     options.windowsize = 0.0032;
     options.freq_range = [];
 end
@@ -52,7 +52,6 @@ end
 
 % audio = handles.data.audiodata.samples(round(window_start):round(window_stop));
 
-
 rate = audioReader.audiodata.SampleRate;
 windowsize = round(rate * options.windowsize);
 noverlap = round(rate * options.overlap);
@@ -60,7 +59,8 @@ nfft = round(rate * options.nfft);
     
 if make_spectrogram
     audio = audioReader.AudioSamples(box(1), box(1) + box(3));
-    [s, fr, ti] = spectrogram(audio,windowsize,noverlap,nfft,rate,'yaxis');
+
+    [s, fr, ti, p] = spectrogram(audio,windowsize,noverlap,nfft,rate,'yaxis');
 else
 %     s  = handles.data.page_spect.s;
 %     fr = handles.data.page_spect.f;

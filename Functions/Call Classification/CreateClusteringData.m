@@ -15,7 +15,9 @@ addParameter(p,'fixed_frequency', false);
 % fixed_frequency = [lowFreq, highFreq] for fixed frequency range
 addParameter(p,'freqRange', []);
 % Ask to save the data for future use
-addParameter(p,'save_data', false); 
+addParameter(p,'save_data', false);
+addParameter(p,'for_denoise', false);
+
 parse(p,varargin{:});
 spectrogramOptions = p.Results.spectrogramOptions;
 
@@ -53,7 +55,9 @@ for j = 1:length(fileName)
         continue
     else
         % Remove calls that aren't accepted
+        if ~p.Results.for_denoise
         Calls_tmp = Calls_tmp(Calls_tmp.Accept == 1 & ~ismember(Calls_tmp.Type,'Noise'), :);
+        end
         % Create a variable that contains the index of audiodata to use
         Calls_tmp.audiodata_index = repmat(j, height(Calls_tmp), 1);
         Calls = [Calls; Calls_tmp];
@@ -110,10 +114,21 @@ for i = 1:height(Calls)
     end
     
         
-    [I,wind,noverlap,nfft,rate,box,~] = CreateFocusSpectrogram(Calls(i,:), handles, true, p.Results.spectrogramOptions, audioReader);
+    [I,wind,noverlap,nfft,rate,box,~,~,~,~,pow] = CreateFocusSpectrogram(Calls(i,:), handles, true, p.Results.spectrogramOptions, audioReader);
     % im = mat2gray(flipud(I),[0 max(max(I))/4]); % Set max brightness to 1/4 of max
-    im = mat2gray(flipud(I), prctile(I, [1 99], 'all')); % normalize brightness
-    
+    % im = mat2gray(flipud(I), prctile(I, [1 99], 'all')); % normalize brightness
+    pow(pow==0)=.01;
+    pow = log10(pow);
+    pow = rescale(imcomplement(abs(pow)));
+    % Create Adjusted Image for Identification
+    xTile=ceil(size(pow,1)/50);
+    yTile=ceil(size(pow,2)/50);
+    if xTile>1 && yTile>1
+    im = adapthisteq(flipud(pow),'NumTiles',[xTile yTile],'ClipLimit',.005,'Distribution','rayleigh','Alpha',.4);
+    else
+    im = adapthisteq(flipud(pow),'NumTiles',[2 2],'ClipLimit',.005,'Distribution','rayleigh','Alpha',.4);    
+    end
+
     if p.Results.forClustering
         stats = CalculateStats(I,wind,noverlap,nfft,rate,box,handles.data.settings.EntropyThreshold,handles.data.settings.AmplitudeThreshold);
         spectrange = audioReader.audiodata.SampleRate / 2000; % get frequency range of spectrogram in KHz
