@@ -878,18 +878,15 @@ handles.data.focusCenter = handles.data.settings.focus_window_size ./ 2;
 initialize_display(hObject, eventdata, handles);
 close(h);
 
-
 % --- Executes during object creation, after setting all properties.
 function detectionAxes_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to detectionAxes (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
-
 % --------------------------------------------------------------------
 function contributorToolsMenu_Callback(hObject, eventdata, handles)
 web('https://gitter.im/DeepSqueak_Community/General')
-
 
 % --------------------------------------------------------------------
 function Untitled_2_Callback(hObject, eventdata, handles)
@@ -897,9 +894,34 @@ function Untitled_2_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-
-
 % --- Executes on button press in invert_cmap.
 function invert_cmap_Callback(hObject, eventdata, handles)
 colormap(handles.spectogramWindow, flipud(colormap(handles.spectogramWindow)))
 colormap(handles.focusWindow, flipud(colormap(handles.focusWindow)))
+
+% --- Executes on button press in recordAudio.
+function recordAudio_Callback(hObject, eventdata, handles)
+% hObject    handle to recordAudio (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+get(hObject,'Value');
+handles = guidata(hObject);
+recordingOver=0;
+if eventdata.Source.Value==1
+   hObject.String='Recording';
+   hObject.BackgroundColor=[0.84,0.08,0.18];
+   prompt = {'Recording Length (Seconds; 0 = Continuous)','Sample Rate (Max=200,000)','Display Time (Seconds)','Filename'};
+   dlg_title = 'Rercording Settings';
+   num_lines=[1 100]; options.Resize='off'; options.WindowStyle='modal'; options.Interpreter='tex';
+   def = {'0','200000','3','New Recording'};
+   recSettings=inputdlg(prompt,dlg_title,num_lines,def,options);
+   recordingOver=recordAudioFun(recSettings,eventdata.Source.Value,handles);
+end
+hObject.String='Record';
+hObject.BackgroundColor=[0.20,0.83,0.10];
+eventdata.Source.Value=0;
+update_folders(hObject, eventdata, handles);
+
+
+
+
+
