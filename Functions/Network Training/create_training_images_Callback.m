@@ -122,6 +122,10 @@ else
     AmplitudeFactor = 1;
     StretchFactor = 1;
 end
+if width(audio)>height(audio)
+    audio=audio';
+end
+
 
 % Make the spectrogram
 [~, fr, ti, p] = spectrogram(audio(:,1),...
