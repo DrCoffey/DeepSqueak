@@ -182,7 +182,7 @@ classdef clusteringGUI < handle
             % Choose a number of rows and columns to fill the space with
             % the average call aspect ratio
             nFrames = 20;
-            figureAspectRatio = 1.4;
+            figureAspectRatio = 1;
             x_grids = sqrt(aspectRatio * figureAspectRatio * nFrames);
             x_grids = ceil(x_grids);
             y_grids = ceil(nFrames / x_grids);
