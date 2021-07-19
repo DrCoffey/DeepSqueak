@@ -181,19 +181,19 @@ classdef clusteringGUI < handle
             
             % Choose a number of rows and columns to fill the space with
             % the average call aspect ratio
-            nFrames = 20;
-            figureAspectRatio = 1;
-            x_grids = sqrt(aspectRatio * figureAspectRatio * nFrames);
-            x_grids = ceil(x_grids);
-            y_grids = ceil(nFrames / x_grids);
+            % nFrames = 10;
+            % figureAspectRatio = 1;
+            % x_grids = sqrt(aspectRatio * figureAspectRatio * nFrames);
+            % x_grids = ceil(x_grids);
+            % y_grids = ceil(nFrames / x_grids);
         
             obj.thumbnail_size = round(sqrt(20000 .* [aspectRatio, 1/aspectRatio]));
 
-            axes_spacing = .85; % Relative width of each image
+            axes_spacing = .70; % Relative width of each image
             y_range = [.05, .75]; % [Start, End] of the grid
-            x_range = [.02, .85];
-            % x_grids = 5; % Number of x grids
-            % y_grids = 4; % Number of y grids
+            x_range = [.05, .85];
+            x_grids = 9; % Number of x grids
+            y_grids = 3; % Number of y grids
 
             ypos = linspace(y_range(1), y_range(2) - axes_spacing * range(y_range) / y_grids, y_grids );
             xpos = linspace(x_range(1), x_range(2) - axes_spacing * range(x_range) / x_grids, x_grids );
@@ -264,6 +264,8 @@ classdef clusteringGUI < handle
             xticks(axis_handles,xtick_positions(2:end));
             xticklabels(axis_handles,x_ticks);
             yticklabels(axis_handles,y_ticks);
+            xlabel(axis_handles,'Time (s)');
+            ylabel(axis_handles,'Frequency (kHz)');
         end
         
         function obj = plotimages(obj)

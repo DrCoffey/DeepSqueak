@@ -9,10 +9,11 @@ end
 %% Ridge Detection
 % Calculate entropy at each time point
 stats.Entropy = geomean(I,1) ./ mean(I,1);
-stats.Entropy = smooth(stats.Entropy,3)';
+stats.Entropy = smooth(stats.Entropy,0.1,'rlowess')';
+% EntropyThreshold=prctile(1-stats.Entropy,20);
 % Find maximum amplitude and corresponding at each time point
 [amplitude,ridgeFreq] = max((I));
-amplitude = smooth(amplitude,3)';
+amplitude = smooth(amplitude,0.1,'rlowess')';
 
 % Get index of the time points where entropy and aplitude are greater than their thesholds
 % iteratively lower threshholds until at least 6 points are selected
@@ -37,7 +38,8 @@ stats.ridgeTime = find(greaterthannoise);
 stats.ridgeFreq = ridgeFreq(greaterthannoise);
 % Smoothed frequency of the call contour
 try
-    stats.ridgeFreq_smooth = smooth(stats.ridgeTime,stats.ridgeFreq,7,'sgolay');
+    stats.ridgeFreq_smooth = smooth(stats.ridgeTime,stats.ridgeFreq,0.1,'rlowess');
+    %stats.ridgeFreq_smooth = stats.ridgeFreq;
 catch
     disp('Cannot apply smoothing. The line is probably too short');
     stats.ridgeFreq_smooth=stats.ridgeFreq';

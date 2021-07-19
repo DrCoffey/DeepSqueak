@@ -121,8 +121,8 @@ for i = 1:height(Calls)
     pow = log10(pow);
     pow = rescale(imcomplement(abs(pow)));
     % Create Adjusted Image for Identification
-    xTile=ceil(size(pow,1)/50);
-    yTile=ceil(size(pow,2)/50);
+    xTile=ceil(size(pow,1)/10);
+    yTile=ceil(size(pow,2)/10);
     if xTile>1 && yTile>1
     im = adapthisteq(flipud(pow),'NumTiles',[xTile yTile],'ClipLimit',.005,'Distribution','rayleigh','Alpha',.4);
     else

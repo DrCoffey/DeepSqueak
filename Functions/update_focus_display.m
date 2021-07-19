@@ -31,8 +31,6 @@ if isempty(handles.data.calls) || ~any(handles.data.calls.Box(handles.data.curre
     return
 end
 
-
-
 [I,windowsize,noverlap,nfft,rate,box,~,~,~] = CreateFocusSpectrogram(handles.data.calls(handles.data.currentcall,:),handles,false, [], handles.data);
 stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.data.settings.EntropyThreshold,handles.data.settings.AmplitudeThreshold);
 
