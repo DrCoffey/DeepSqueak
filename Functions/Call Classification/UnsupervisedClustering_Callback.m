@@ -90,7 +90,7 @@ while ~finished
                 f_montage = figure('Color','w','Position',[50,50,800,800]);
                 ax_montage = axes(f_montage);
                 % montageI = cellfun(@(x) rescale(x,0,255), (ClusteringData.Spectrogram(i)), 'UniformOutput', false);
-                image(ax_montage, imtile(montageI, inferno, 'BackgroundColor', 'w', 'BorderSize', 2))
+                image(ax_montage, imtile(montageI, inferno, 'BackgroundColor', 'w', 'BorderSize', 2, 'GridSize',[5 NaN]))
                 axis(ax_montage, 'off')
                 title(ax_montage, 'Closest call to each cluster center')
             catch
@@ -200,12 +200,12 @@ end
 
 function data = get_kmeans_data(ClusteringData, slope_weight, freq_weight, duration_weight)
 % Parameterize the data for kmeans
-ReshapedX   = cell2mat(cellfun(@(x) imresize(x',[1 9]) ,ClusteringData.xFreq,'UniformOutput',0));
+ReshapedX   = cell2mat(cellfun(@(x) imresize(x',[1 13]) ,ClusteringData.xFreq,'UniformOutput',0));
 slope       = diff(ReshapedX,1,2);
 slope       = zscore(slope);
-freq        = cell2mat(cellfun(@(x) imresize(x',[1 8]) ,ClusteringData.xFreq,'UniformOutput',0));
+freq        = cell2mat(cellfun(@(x) imresize(x',[1 12]) ,ClusteringData.xFreq,'UniformOutput',0));
 freq        = zscore(freq);
-duration    = repmat(ClusteringData.Duration,[1 8]);
+duration    = repmat(ClusteringData.Duration,[1 12]);
 duration    = zscore(duration);
 data = [
     freq     .*  freq_weight+.001,...

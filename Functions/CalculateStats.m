@@ -3,35 +3,51 @@ if nargin <= 8
     verbose = 1;
 end
 
-
-
-
 %% Ridge Detection
 % Calculate entropy at each time point
 stats.Entropy = geomean(I,1) ./ mean(I,1);
 stats.Entropy = smooth(stats.Entropy,0.1,'rlowess')';
-% EntropyThreshold=prctile(1-stats.Entropy,20);
-% Find maximum amplitude and corresponding at each time point
+% % EntropyThreshold=prctile(1-stats.Entropy,20);
+% % Find maximum amplitude and corresponding at each time point
+% [amplitude,ridgeFreq] = max((I));
+% amplitude = smooth(amplitude,0.1,'rlowess')';
+% 
+% % Get index of the time points where entropy and aplitude are greater than their thesholds
+% % iteratively lower threshholds until at least 6 points are selected
+% iter = 0;
+% greaterthannoise = false(1, size(I, 2));
+% while sum(greaterthannoise)<5
+%     greaterthannoise = greaterthannoise | 1-stats.Entropy > EntropyThreshold   / 1.1 ^ iter;
+%     greaterthannoise = greaterthannoise & amplitude       > AmplitudeThreshold / 1.1 ^ iter;
+%     if iter > 10
+% %         disp('Could not detect contour')
+%         greaterthannoise = true(1, size(I, 2));
+%         break;
+%     end
+%     iter = iter + 1;
+%     if iter > 1
+%         disp('lowering threshold')
+%     end
+% end
+brightThreshold=prctile(I(:),95);
+% % Get index of the time points where aplitude is greater than theshold
+% % iteratively lower threshholds until at least 6 points are selected
 [amplitude,ridgeFreq] = max((I));
-amplitude = smooth(amplitude,0.1,'rlowess')';
-
-% Get index of the time points where entropy and aplitude are greater than their thesholds
-% iteratively lower threshholds until at least 6 points are selected
-iter = 0;
+%amplitude = smooth(amplitude,0.1,'rlowess')';
+iter = 1;
 greaterthannoise = false(1, size(I, 2));
 while sum(greaterthannoise)<5
-    greaterthannoise = greaterthannoise | 1-stats.Entropy > EntropyThreshold   / 1.1 ^ iter;
-    greaterthannoise = greaterthannoise & amplitude       > AmplitudeThreshold / 1.1 ^ iter;
-    if iter > 10
-%         disp('Could not detect contour')
-        greaterthannoise = true(1, size(I, 2));
-        break;
+    if iter==1;
+    greaterthannoise = greaterthannoise | amplitude  > brightThreshold;
+    else
+    greaterthannoise = greaterthannoise | amplitude  > brightThreshold / 1.1 ^ iter;
     end
     iter = iter + 1;
-    if iter > 1
+    if iter > 2
         disp('lowering threshold')
     end
 end
+
 
 % index of time points
 stats.ridgeTime = find(greaterthannoise);

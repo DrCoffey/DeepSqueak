@@ -104,6 +104,7 @@ if ~isempty(Calls)
 end
 %% for each call in the file, calculate stats for clustering
 currentAudioFile = 0;
+perFileCallID = 0;
 for i = 1:height(Calls)
     waitbar(i/height(Calls),h, sprintf('Loading File %u of %u', Calls.audiodata_index(i), length(fileName)));
     
@@ -111,8 +112,9 @@ for i = 1:height(Calls)
     if Calls.audiodata_index(i) ~= currentAudioFile;
         audioReader.audiodata = audiodata{Calls.audiodata_index(i)};
         currentAudioFile = Calls.audiodata_index(i);
+        perFileCallID = 0;
     end
-    
+    perFileCallID = perFileCallID + 1;
         
     [I,wind,noverlap,nfft,rate,box,~,~,~,~,pow] = CreateFocusSpectrogram(Calls(i,:), handles, true, p.Results.spectrogramOptions, audioReader);
     % im = mat2gray(flipud(I),[0 max(max(I))/4]); % Set max brightness to 1/4 of max
@@ -146,8 +148,8 @@ for i = 1:height(Calls)
         {stats.DeltaTime} % Delta time
         {xFreq} % Time points
         {xTime} % Freq points
-        {[filePath fileName{j}]} % File path
-        {i} % Call ID in file
+        {[filePath fileName{Calls.audiodata_index(i)}]} % File path
+        {perFileCallID} % Call ID in file
         {stats.Power}
         {box(4)}
         ]'];
