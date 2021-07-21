@@ -179,7 +179,7 @@ update_folders(hObject, eventdata, handles);
 handles = guidata(hObject);  % Get newest version of handles
 
 % Set the sliders to the saved values
-set(handles.TonalitySlider, 'Value', handles.data.settings.EntropyThreshold);
+% set(handles.TonalitySlider, 'Value', handles.data.settings.EntropyThreshold);
 
 % Set the page and focus window dropdown boxes to the values defined in
 % squeakData, and set the current value to the one closest to the save value.
@@ -925,3 +925,12 @@ update_folders(hObject, eventdata, handles);
 
 
 
+
+
+% --- Executes during object creation, after setting all properties.
+function waveformWindow_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to waveformWindow (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: place code in OpeningFcn to populate waveformWindow

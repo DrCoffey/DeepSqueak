@@ -77,14 +77,14 @@ PlotAudio = handles.data.AudioSamples(handles.data.calls.Box(handles.data.curren
 PlotAudio = PlotAudio - movmean(PlotAudio, 100);
 set(handles.Waveform,...
 'XData', length(stats.Entropy) * ((1:length(PlotAudio)) / length(PlotAudio)),...
-'YData', (PlotAudio - min(PlotAudio)) / (max(PlotAudio) - min(PlotAudio)) - 1)
+'YData', (PlotAudio - min(PlotAudio)) / (max(PlotAudio) - min(PlotAudio)) - 1);
 
-% SNR
+% % SNR
 y = 0-stats.Entropy;
 x = 1:length(stats.Entropy);
 z = zeros(size(x));
-col = double(stats.Entropy < 1-handles.data.settings.EntropyThreshold);  % This is the color, vary with x in this case.
-set(handles.SNR, 'XData', [x;x], 'YData', [y;y], 'ZData', [z;z], 'CData', [col;col]);
+% col = double(stats.Entropy < 1-handles.data.settings.EntropyThreshold);  % This is the color, vary with x in this case.
+% set(handles.SNR, 'XData', [x;x], 'YData', [y;y], 'ZData', [z;z], 'CData', [col;col]);
 set(handles.waveformWindow, 'XLim', [x(1), x(end)]);
 
 % guidata(hObject, handles);

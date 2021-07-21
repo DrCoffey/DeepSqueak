@@ -1,7 +1,7 @@
 function set_tick_timestamps(axes, use_milliseconds)
 
 %% Find nice round numbers to use
-number_of_ticks = 5;
+number_of_ticks = 6;
 x_lim = xlim(axes);
 xrange = x_lim(2) - x_lim(1);
 xrange = xrange / number_of_ticks;
@@ -22,6 +22,9 @@ if use_milliseconds
 else
         labels = compose('%.0f:%04.1f', x_tick_minutes', x_tick_seconds');
 end
+
+x_tick=x_tick(1,2:end-1);
+labels=labels(2:end-1,1);
 
 xticks(axes, x_tick)
 xticklabels(axes,labels);
