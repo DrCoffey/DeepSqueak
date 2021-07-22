@@ -82,8 +82,8 @@ if ~isdeployed
     savepath
     
     %% Display error message if running on matlab before 2017b or toolboxes not found
-    if verLessThan('matlab','9.3')
-        errordlg(['Warning, DeepSqueak requires MATLAB 2017b or later. It looks like you are use MATLAB ' version('-release')],'upgrade your matlab')
+    if verLessThan('matlab','9.9')
+        errordlg(['Warning, DeepSqueak V3 requires MATLAB 20201 or later. It looks like you are use MATLAB ' version('-release')],'upgrade your matlab')
     end
     
     try
@@ -215,6 +215,8 @@ set(handles.detectionAxes,'XTickLabel',[]);
 set(handles.detectionAxes,'XTick',[]);
 set(handles.detectionAxes,'YTick',[]);
 set(handles.spectogramWindow,'Parent',handles.hFig);
+handles.data.settings.EntropyThreshold=0.95;
+handles.data.settings.AmplitudeThreshold=0;
 
 % Set the list of colormaps
 handles.popupmenuColorMap.String = {
@@ -573,7 +575,7 @@ function CallClassification_Callback(hObject, eventdata, handles)
 % --------------------------------------------------------------------
 function ChangeContourThreshold_Callback(hObject, eventdata, handles)
 % Change the contour threshold
-prompt = {'Tonality Threshold: (default = 0.25)', 'Amplitude Threshold: (default = 0.075)'};
+prompt = {'Percentile Threshold: (default = 0.95)', 'Amplitude Threshold: (default = 0.0)'};
 dlg_title = 'New Contour Threshold:';
 num_lines=[1 50]; options.Resize='off'; options.WindowStyle='modal'; options.Interpreter='tex';
 defaultans = {num2str(handles.data.settings.EntropyThreshold),num2str(handles.data.settings.AmplitudeThreshold)};

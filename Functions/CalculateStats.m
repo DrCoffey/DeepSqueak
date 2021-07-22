@@ -29,7 +29,16 @@ stats.Entropy = smooth(stats.Entropy,0.1,'rlowess')';
 %         disp('lowering threshold')
 %     end
 % end
-brightThreshold=prctile(I(:),95);
+% I=imadjust(I);
+% I = medfilt2(I,[2 3]);
+% I=imgaussfilt(I,1);
+if EntropyThreshold > .001 & EntropyThreshold < .999
+    brightThreshold=prctile(I(:),EntropyThreshold*100);
+else
+    disp('Warning! Percentile Threshold Must be (0 > 1), Reverting to Default (.95)');
+    brightThreshold=prctile(I(:),95);
+end
+
 % % Get index of the time points where aplitude is greater than theshold
 % % iteratively lower threshholds until at least 6 points are selected
 [amplitude,ridgeFreq] = max((I));
@@ -39,8 +48,10 @@ greaterthannoise = false(1, size(I, 2));
 while sum(greaterthannoise)<5
     if iter==1;
     greaterthannoise = greaterthannoise | amplitude  > brightThreshold;
+    greaterthannoise = greaterthannoise & amplitude  > AmplitudeThreshold;
     else
     greaterthannoise = greaterthannoise | amplitude  > brightThreshold / 1.1 ^ iter;
+    greaterthannoise = greaterthannoise & amplitude  > AmplitudeThreshold / 1.1 ^ iter;
     end
     iter = iter + 1;
     if iter > 2
