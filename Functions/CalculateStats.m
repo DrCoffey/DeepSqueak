@@ -32,11 +32,16 @@ stats.Entropy = smooth(stats.Entropy,0.1,'rlowess')';
 % I=imadjust(I);
 % I = medfilt2(I,[2 3]);
 % I=imgaussfilt(I,1);
-if EntropyThreshold > .001 & EntropyThreshold < .999
-    brightThreshold=prctile(I(:),EntropyThreshold*100);
+if AmplitudeThreshold > .001 & AmplitudeThreshold < .999
+    brightThreshold=prctile(I(:),AmplitudeThreshold*100);
 else
-    disp('Warning! Percentile Threshold Must be (0 > 1), Reverting to Default (.95)');
-    brightThreshold=prctile(I(:),95);
+    disp('Warning! Amplitude Percentile Threshold Must be (0 > 1), Reverting to Default (.825)');
+    brightThreshold=prctile(I(:),825);
+end
+
+if EntropyThreshold < .001 | EntropyThreshold > .999 
+    disp('Warning! Entropy Threshold Must be (0 > 1), Reverting to Default (.215)');
+    EntropyThreshold=.215;
 end
 
 % % Get index of the time points where aplitude is greater than theshold
@@ -48,10 +53,10 @@ greaterthannoise = false(1, size(I, 2));
 while sum(greaterthannoise)<5
     if iter==1;
     greaterthannoise = greaterthannoise | amplitude  > brightThreshold;
-    greaterthannoise = greaterthannoise & amplitude  > AmplitudeThreshold;
+    greaterthannoise = greaterthannoise & 1-stats.Entropy  > EntropyThreshold;
     else
     greaterthannoise = greaterthannoise | amplitude  > brightThreshold / 1.1 ^ iter;
-    greaterthannoise = greaterthannoise & amplitude  > AmplitudeThreshold / 1.1 ^ iter;
+    greaterthannoise = greaterthannoise & 1-stats.Entropy  > EntropyThreshold / 1.1 ^ iter;
     end
     iter = iter + 1;
     if iter > 2
