@@ -9,6 +9,7 @@
 - Start From Scratch: Hand Box Calls and Train a New Species Detector
 - Improved automatic contour extraction
 - Contour Invarient Clustering With Variational Auto Encoders
+- Upgraded clustering GUI
 - Additional "page" spectogram with a larger time window for call contextualization.
 - Record Audio Directly in DeepSqueak
 

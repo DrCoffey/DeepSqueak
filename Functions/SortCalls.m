@@ -41,6 +41,4 @@ if show_waitbar
 end
 
 set(handles.hFig, 'pointer', 'arrow');
-
-
 end

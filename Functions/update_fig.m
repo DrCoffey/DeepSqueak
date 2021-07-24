@@ -56,11 +56,10 @@ handles = render_call_position(handles, handles.update_position_axes);
 handles = render_call_boxes(handles.spectogramWindow, handles,false,false);
 handles = render_call_boxes(handles.focusWindow, handles, true,false);
 
+% Deals with a random figure popping up rarely.... literally no idea why
+if length(findobj('type','figure'))==1; close(1); end
 
-
-
-
-% set(groot,'defaultFigureVisible','on');
+%set(groot,'defaultFigureVisible','on');
 set(handles.hFig, 'pointer', 'arrow')
 guidata(hObject, handles);
 
