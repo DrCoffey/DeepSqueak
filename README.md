@@ -18,5 +18,6 @@ Follow](https://camo.githubusercontent.com/51e14ceb3b49e0fb9965a09148568d11ec4ba
 -   Retrain Existing Networks With Your Own Recordings
 -   Start From Scratch: Hand Box Calls and Train a New Species Detector
 -   Contour Invarient Clustering With Variational Auto Encoders
+-   Brand New Clustering GUI
 
 Copyright © 2021 by Russell Marx, Kevin Coffey, Robert Ciszek, & Lara Valderrabano All Rights Reserved.
