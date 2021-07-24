@@ -1,4 +1,39 @@
 # Changelog
+## 3.0 2021-07-23
+
+## Main Upgrades
+- Brand New YOLO V2 based Detection Architechture
+- Navigate Entire Audio Files to Quickly & Easily Refine Detections or Add New Boxes
+- Retrain Existing Networks With Your Own Recordings
+- Manually add calls not detected by Faster-RCNN.
+- Start From Scratch: Hand Box Calls and Train a New Species Detector
+- Improved automatic contour extraction
+- Contour Invarient Clustering With Variational Auto Encoders
+- Upgraded clustering GUI
+- Additional "page" spectogram with a larger time window for call contextualization.
+- Record Audio Directly in DeepSqueak
+
+## New Navigation Controls
+- Click on the lower page spectrogram to jump to that position in the upper "focus" view.
+- Click a location on the map bar to jump to that location in the file.
+- Up and down arrow keys to slide the focus window forward or backward
+- Right click on a detection to remove it.
+- Control-click or double click on a detection to change it's label
+- Select, move, and modify ROIs of detected calls:
+
+## Minor Upgrades
+- Constant time and spectrogram scales.
+- Display either spectral amplitude of power spectral density
+- Possibility to modify time and spectrogram scales, Focus (upper spectrogram), Page (lower spectrogram).
+- Sonic Visualizer export/import.
+- Fully compatible with older DeepSqueak detections files.
+- Invertible colormaps.
+- GUI tweaks.
+
+## Credits: 
+**Original DeepSqueak**: Coffey, K., Marx, R., & Neumaier, J.<br>
+**Screener**: Lara-Valderrábano, L. and Ciszek, R.
+
 ## 2.6.2 2020-08-03
 
 Modifications to increase contributor and community engagement
@@ -10,7 +45,6 @@ Modifications to increase contributor and community engagement
 
 Minor bug fixes 
 
-# Changelog
 ## 2.6.1 2019-07-16
 
 Fixed bug when importing call classifications from Raven .txt files.

@@ -15,7 +15,7 @@ trainingdata = cellstr(trainingdata);
 %% Load the data into a single table
 AllSettings = [];
 for i = 1:length(trainingdata)
-    load([trainingpath trainingdata{i}],'TTable','wind','noverlap','nfft');
+    load([trainingpath trainingdata{i}],'TTable','wind','noverlap','nfft','imLength');
     TrainingTables = [TrainingTables; TTable];
     AllSettings = [AllSettings; wind noverlap nfft];
 end
@@ -30,11 +30,10 @@ end
 if ~strcmp(warningmsg,'Train anyway'); return; end
 
 %% Train the network
-choice = questdlg(['Train from existing network?'], ...
-    'Yes', 'No');
+choice = questdlg('Train from existing network?', 'Yes', 'No');
 switch choice
     case 'Yes'
-        [NetName NetPath] = uigetfile(handles.data.settings.networkfolder,'Select Existing Network');
+        [NetName, NetPath] = uigetfile(handles.data.settings.networkfolder,'Select Existing Network');
         load([NetPath NetName],'detector');
         [detector, layers, options] = TrainSqueakDetector(TrainingTables,detector);
     case 'No'
@@ -47,8 +46,8 @@ wind = max(AllSettings(:,1));
 noverlap = max(AllSettings(:,2));
 nfft = max(AllSettings(:,3));
 
-
-save(fullfile(PathName,FileName),'detector','layers','options','wind','noverlap','nfft');
+version = handles.DSVersion;
+save(fullfile(PathName,FileName),'detector','layers','options','wind','noverlap','nfft','version','imLength');
 
 %% Update the menu
 update_folders(hObject, eventdata, handles);

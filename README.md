@@ -1,39 +1,23 @@
-# DeepSqueak
->Coffey, K. R., Marx, R. G., & Neumaier, J. F. (2019). DeepSqueak: A deep learning-based system for detection and analysis of ultrasonic  vocalizations. _Neuropsychopharmacology_.
->[doi:10.1038/s41386-018-0303-6](https://doi.org/10.1038/s41386-018-0303-6)
+﻿# DeepSqueak: Using Machine Vision to Accelerate Bioacoustics Research
 
-[![DeepSqueak Video](http://img.youtube.com/vi/25LYVxTUZhM/0.jpg)](http://www.youtube.com/watch?v=25LYVxTUZhM "This algorithm decodes rat squeaks and could revolutionize animal research")
+[![Version](https://camo.githubusercontent.com/2c8911863c44b5f1bde8f97aae78bb31142c56d5b238adafb7ff906792166e42/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f56657273696f6e2d332e302d73756363657373)](https://camo.githubusercontent.com/2c8911863c44b5f1bde8f97aae78bb31142c56d5b238adafb7ff906792166e42/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f56657273696f6e2d332e302d73756363657373)
+[![Manuscript](https://camo.githubusercontent.com/6306d37523298ae46d57fa6b2a51830975025ecb7237c361f0afcf14b0e41da9/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f4d616e757363726970742d4e6575726f7068737963686f706861726d61636f6c6f67792d626c7565)](https://www.nature.com/articles/s41386-018-0303-6)
+[![Help](https://camo.githubusercontent.com/4c09aea8c46ebc86eb9b983e486c4eacc8b6f26bfc17817649866637d5a1cb23/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f48656c702d57696b692d626c756576696f6c6574)](https://github.com/DrCoffey/DeepSqueak/wiki)
+[![Gitter](https://camo.githubusercontent.com/7ea0d04373e952b29d9841a23fa301d007f66b57f9de6ba1233ac6bf885834eb/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f436f6d6d756e6974792d4769747465722d666636396234)](https://gitter.im/DeepSqueak_Community/General)
+[![Video](https://camo.githubusercontent.com/4ac50159fa0bc12c7c6d7e0018981021cb8e203924964122c3327faf58c7a908/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f596f75547562652d5665726765253230536369656e63652d726564)](https://youtu.be/25LYVxTUZhM)
+[![Twitter
+Follow](https://camo.githubusercontent.com/51e14ceb3b49e0fb9965a09148568d11ec4ba54f540d3b603081b120cc198d20/68747470733a2f2f696d672e736869656c64732e696f2f747769747465722f666f6c6c6f772f4465657053717565616b5f5553563f7374796c653d736f6369616c)](https://twitter.com/DeepSqueak_USV)
 
+[![gify](https://camo.githubusercontent.com/7322294a80eb3f24f51ea131719e4ecaf99bce3915d1ab70bfe605380cc121ee/68747470733a2f2f6d656469612e67697068792e636f6d2f6d656469612f5a5a4858504f3667563946586c42396a566c2f67697068792e676966)](https://camo.githubusercontent.com/7322294a80eb3f24f51ea131719e4ecaf99bce3915d1ab70bfe605380cc121ee/68747470733a2f2f6d656469612e67697068792e636f6d2f6d656469612f5a5a4858504f3667563946586c42396a566c2f67697068792e676966)
 
-**DeepSqueak is a fully graphical MATLAB package for detecting and classifying rodent ultrasonic vocalizations (USVs). DeepSqueak is engineered to allow non-experts easy entry into USV detection and analysis.**
+**V3 Major Upgrades**
 
-DeepSqueak provides a fully automated pipeline for USV detection, classification, and analysis:
+-   Brand New YOLO V2 based Detection Architechture
+-   Navigate Entire Audio Files to Quickly & Easily Refine Detections or
+    Add New Boxes
+-   Retrain Existing Networks With Your Own Recordings
+-   Start From Scratch: Hand Box Calls and Train a New Species Detector
+-   Contour Invarient Clustering With Variational Auto Encoders
+-   Brand New Clustering GUI
 
-* State-of-the-art regional object detection neural networks (Faster-RCNN) dramatically reduces the false positive rate to facilitate reliable USV analysis in standard experimental conditions.
-
-* Create unsupervised k-means clustering models from vocalization contours and trainable neural networks for supervised call classification.
-
-* Output call statistics in spreadsheets for further analysis.
-
-![Image by Alice Gray](https://newsroom.uw.edu/sites/default/files/deepsqueakz03.jpg)
->Image by Alice Gray
-
-DeepSqueak 2.0 was designed and tested with MATLAB 2017b, 2018a, and 2018b.
-
-To run DeepSqueak, navigate to the main DeepSqueak folder in MATLAB, and type "DeepSqueak" into the command line.
-DeepSqueak will add itself to the MATLAB path after running.
-
-# For help see the [Wiki](https://github.com/DrCoffey/DeepSqueak/wiki)
-
-Copyright © 2018 by Russell Marx & Kevin Coffey. All Rights Reserved.
-
-![screenshot](https://user-images.githubusercontent.com/39605011/40864034-f4f10e60-65a6-11e8-86ef-841aae1713aa.PNG)
-
-![Figure 1](https://i.imgur.com/1SqgB5w.jpg)
-
-
-
-
-
-
- :rat:
+Copyright © 2021 by Russell Marx, Kevin Coffey, Robert Ciszek, & Lara Valderrabano All Rights Reserved.

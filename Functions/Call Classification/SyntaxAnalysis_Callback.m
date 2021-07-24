@@ -17,8 +17,8 @@ AllCalls = table([],[],[],[],[],'VariableNames',{'BeginTime_s_','Label','File','
 
 if strcmp(ext,'.mat')
     for i = 1:length(filename)
-        Calls = loadCallfile([filepath filename{i}]);
-        
+        Calls = loadCallfile([filepath filename{i}],handles);
+
         Calls = Calls(Calls.Accept == 1, :);
         begintime = Calls.Box(:,1); % Get Box Position
         CallClass = Calls.Type;
@@ -26,7 +26,7 @@ if strcmp(ext,'.mat')
         dist(dist > boutlength) = 0;
         G = graph(dist);
         bout = conncomp(G)';
-        
+
         try
             g = table(begintime, CallClass, repmat(i,height(Calls),1), bout, Calls.Accept,'VariableNames',{'BeginTime_s_','Label','File','Bout','Accepted'});
             AllCalls = [AllCalls; g];
@@ -34,7 +34,7 @@ if strcmp(ext,'.mat')
         catch
             warning('No Accepted Calls in File');
         end
-        
+
     end
 elseif strcmp(ext,'.xlsx')
     for i = 1:length(filename)
@@ -51,7 +51,7 @@ elseif strcmp(ext,'.xlsx')
         catch
             warning('No Accepted Calls in File');
         end
-        
+
     end
 end
 AllCalls.Label = categorical(AllCalls.Label);
@@ -132,7 +132,7 @@ if ~isnumeric(file)
     end
     output = [output; [{'Conditional Probability'} cell(1,length(cats))]];
     output = [output; [[{'Category'} cats'] ; [cats, counts]]];
-    
+
     counts = cell(length(cats));
     for i = 1:length(cats)
         for j = 1:length(cats)
@@ -147,42 +147,20 @@ if ~isnumeric(file)
     output = [output; cell(3,length(cats)+1)];
     output = [output; [{'Transition Count'} cell(1,length(cats))]];
     output = [output;[[{'Category'} cats'] ; [cats, counts]]];
-    
-    
+
+
     counts = cell(length(cats),1);
     for i = 1:length(cats)
         counts(i) = {sum(AllCalls{1:end,'Label'} == cats{i})};
     end
-    
+
     output = [output; cell(3,length(cats)+1)];
     output = [output; [{'Total Count'} cell(1,length(cats))]];
     output = [output; cats, counts, cell(length(cats),length(cats)-1)];
-    
-    
+
+
     writetable(cell2table(output),[path file],'WriteVariableNames',0);
 end
 
 
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

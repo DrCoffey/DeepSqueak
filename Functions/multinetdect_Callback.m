@@ -1,5 +1,7 @@
 % --- Executes on button press in multinetdect.
 function multinetdect_Callback(hObject, eventdata, handles, SingleDetect)
+
+
 if isempty(handles.audiofiles)
     errordlg('No Audio Selected')
     return
@@ -35,7 +37,7 @@ end
 
 Settings = [];
 for k=1:length(networkselections)
-    prompt = {'Total Analysis Length (Seconds; 0 = Full Duration)','Analysis Chunk Length (Seconds; GPU Dependent)','Overlap (Seconds)','Frequency Cut Off High (kHZ)','Frequency Cut Off Low (kHZ)','Score Threshold (0-1)','Append Date to FileName (1 = yes)'};
+    prompt = {'Total Analysis Length (Seconds; 0 = Full Duration)','Frequency Cut Off High (kHZ)','Frequency Cut Off Low (kHZ)','Score Threshold (0-1)','Append Date to FileName (1 = yes)'};
     dlg_title = ['Settings for ' handles.networkfiles(networkselections(k)).name];
     num_lines=[1 100]; options.Resize='off'; options.WindowStyle='modal'; options.Interpreter='tex';
     def = handles.data.settings.detectionSettings;
@@ -69,17 +71,18 @@ for j = 1:length(audioselections)
         h = waitbar(0,'Loading neural network...');
         
         AudioFile = fullfile(handles.audiofiles(CurrentAudioFile).folder,handles.audiofiles(CurrentAudioFile).name);
+        
         networkname = handles.networkfiles(networkselections(k)).name;
         networkpath = fullfile(handles.networkfiles(networkselections(k)).folder,networkname);
         NeuralNetwork=load(networkpath);%get currently selected option from menu
         close(h);
         
-        Calls = [Calls; SqueakDetect(AudioFile,NeuralNetwork,handles.audiofiles(CurrentAudioFile).name,Settings(:,k),j,length(audioselections),networkname,handles.optimization_slider.Value)];
+        Calls = [Calls; SqueakDetect(AudioFile,NeuralNetwork,handles.audiofiles(CurrentAudioFile).name,Settings(:,k),j,length(audioselections),networkname)];
 
     end
     
     [~,audioname] = fileparts(AudioFile);
-    detectiontime=datestr(datetime('now'),'mmm-DD-YYYY HH_MM PM');
+    detectiontime=datestr(datetime('now'),'yyyy-mm-dd HH_MM PM');
     
     if isempty(Calls)
         fprintf(1,'No Calls found in: %s \n',audioname)
@@ -90,11 +93,10 @@ for j = 1:length(audioselections)
     Calls = Automerge_Callback(Calls, [], AudioFile);
     
     %% Save the file
-    
-
+    % Save the Call table, detection metadata, and results of audioinfo
     
     % Append date to filename
-    if Settings(7)
+    if Settings(5)
         fname = fullfile(handles.data.settings.detectionfolder,[audioname ' ' detectiontime '.mat']);
     else
         fname = fullfile(handles.data.settings.detectionfolder,[audioname '.mat']);
@@ -104,7 +106,12 @@ for j = 1:length(audioselections)
     fprintf(1,'%d Calls found in: %s \n',height(Calls),audioname)
     
     if ~isempty(Calls)
-        save(fname,'Calls','Settings','AudioFile','detectiontime','networkselections','-v7.3','-mat');
+        detection_metadata = struct(...
+            'Settings', Settings,...
+            'detectiontime', detectiontime,...
+            'networkselections', {handles.networkfiles(networkselections).name});
+        audiodata = audioinfo(AudioFile);
+        save(fname,'Calls', 'detection_metadata', 'audiodata' ,'-v7.3', '-mat');
     end
     
     delete(h)

@@ -37,11 +37,17 @@ if isempty(handles.data.settings.audiofolder)
 elseif exist(handles.data.settings.audiofolder,'dir')==0
     set(handles.AudioFilespopup,'String','Invalid Folder','value',1);
 else
-    handles.audiofiles=[
-        dir([handles.data.settings.audiofolder '/*.wav*'])
-        dir([handles.data.settings.audiofolder '/*.UVD*'])
-        dir([handles.data.settings.audiofolder '/*.wmf*'])
-        dir([handles.data.settings.audiofolder '/*.flac*'])
+    handles.audiofiles = [
+        dir(fullfile(handles.data.settings.audiofolder, '*.wav'))
+        dir(fullfile(handles.data.settings.audiofolder, '*.ogg'))
+        dir(fullfile(handles.data.settings.audiofolder, '*.flac'))
+        dir(fullfile(handles.data.settings.audiofolder, '*.UVD'))
+        dir(fullfile(handles.data.settings.audiofolder, '*.au'))
+        dir(fullfile(handles.data.settings.audiofolder, '*.aiff'))
+        dir(fullfile(handles.data.settings.audiofolder, '*.aif'))
+        dir(fullfile(handles.data.settings.audiofolder, '*.mp3'))
+        dir(fullfile(handles.data.settings.audiofolder, '*.m4a'))
+        dir(fullfile(handles.data.settings.audiofolder, '*.mp4'))
         ];
     handles.audiofilesnames = {handles.audiofiles.name};
     if isempty(handles.audiofilesnames)

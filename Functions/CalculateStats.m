@@ -3,41 +3,75 @@ if nargin <= 8
     verbose = 1;
 end
 
-
-
-
 %% Ridge Detection
 % Calculate entropy at each time point
 stats.Entropy = geomean(I,1) ./ mean(I,1);
-stats.Entropy = smooth(stats.Entropy,3)';
-% Find maximum amplitude and corresponding at each time point
-[amplitude,ridgeFreq] = max((I));
-amplitude = smooth(amplitude,3)';
+stats.Entropy = smooth(stats.Entropy,0.1,'rlowess')';
+% % EntropyThreshold=prctile(1-stats.Entropy,20);
+% % Find maximum amplitude and corresponding at each time point
+% [amplitude,ridgeFreq] = max((I));
+% amplitude = smooth(amplitude,0.1,'rlowess')';
+% 
+% % Get index of the time points where entropy and aplitude are greater than their thesholds
+% % iteratively lower threshholds until at least 6 points are selected
+% iter = 0;
+% greaterthannoise = false(1, size(I, 2));
+% while sum(greaterthannoise)<5
+%     greaterthannoise = greaterthannoise | 1-stats.Entropy > EntropyThreshold   / 1.1 ^ iter;
+%     greaterthannoise = greaterthannoise & amplitude       > AmplitudeThreshold / 1.1 ^ iter;
+%     if iter > 10
+% %         disp('Could not detect contour')
+%         greaterthannoise = true(1, size(I, 2));
+%         break;
+%     end
+%     iter = iter + 1;
+%     if iter > 1
+%         disp('lowering threshold')
+%     end
+% end
+% I=imadjust(I);
+% I = medfilt2(I,[2 3]);
+% I=imgaussfilt(I,1);
+if AmplitudeThreshold > .001 & AmplitudeThreshold < .999
+    brightThreshold=prctile(I(:),AmplitudeThreshold*100);
+else
+    disp('Warning! Amplitude Percentile Threshold Must be (0 > 1), Reverting to Default (.825)');
+    brightThreshold=prctile(I(:),825);
+end
 
-% Get index of the time points where entropy and aplitude are greater than their thesholds
-% iteratively lower threshholds until at least 6 points are selected
-iter = 0;
+if EntropyThreshold < .001 | EntropyThreshold > .999 
+    disp('Warning! Entropy Threshold Must be (0 > 1), Reverting to Default (.215)');
+    EntropyThreshold=.215;
+end
+
+% % Get index of the time points where aplitude is greater than theshold
+% % iteratively lower threshholds until at least 6 points are selected
+[amplitude,ridgeFreq] = max((I));
+%amplitude = smooth(amplitude,0.1,'rlowess')';
+iter = 1;
 greaterthannoise = false(1, size(I, 2));
 while sum(greaterthannoise)<5
-    greaterthannoise = greaterthannoise | 1-stats.Entropy > EntropyThreshold   / 1.1 ^ iter;
-    greaterthannoise = greaterthannoise & amplitude       > AmplitudeThreshold / 1.1 ^ iter;
-    if iter > 10
-%         disp('Could not detect contour')
-        greaterthannoise = true(1, size(I, 2));
-        break;
+    if iter==1;
+    greaterthannoise = greaterthannoise | amplitude  > brightThreshold;
+    greaterthannoise = greaterthannoise & 1-stats.Entropy  > EntropyThreshold;
+    else
+    greaterthannoise = greaterthannoise | amplitude  > brightThreshold / 1.1 ^ iter;
+    greaterthannoise = greaterthannoise & 1-stats.Entropy  > EntropyThreshold / 1.1 ^ iter;
     end
     iter = iter + 1;
-    if iter > 1
+    if iter > 2
         disp('lowering threshold')
     end
 end
+
 
 % index of time points
 stats.ridgeTime = find(greaterthannoise);
 stats.ridgeFreq = ridgeFreq(greaterthannoise);
 % Smoothed frequency of the call contour
 try
-    stats.ridgeFreq_smooth = smooth(stats.ridgeTime,stats.ridgeFreq,7,'sgolay');
+    stats.ridgeFreq_smooth = smooth(stats.ridgeTime,stats.ridgeFreq,0.1,'rlowess');
+    %stats.ridgeFreq_smooth = stats.ridgeFreq;
 catch
     disp('Cannot apply smoothing. The line is probably too short');
     stats.ridgeFreq_smooth=stats.ridgeFreq';
