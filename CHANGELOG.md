@@ -1,26 +1,18 @@
 # Changelog
-## 3.0 2020-12-29
+## 3.0 2021-07-23
 
-
-Major interface update - Full audio file navigation!
-
-Integration of DeepSqueak Screener
-
-New Collaborator: Robert Ciszek from University of Eastern Finland!
-
-# DeepSqueak-Screener
-
-[![DOI](https://zenodo.org/badge/211337688.svg)](https://zenodo.org/badge/latestdoi/211337688)
-
-
-> Fork of [DeepSqueak](https://github.com/DrCoffey/DeepSqueak) (Coffey, Marx, Neumaier, 2019), with additional functionalities for  screening of whole records for false positives, false negatives and incorrect ROIs.
-
-![DeepSqueak-Screener 10](https://user-images.githubusercontent.com/49067627/71246029-9db38380-231e-11ea-8af4-c9c9c235c8c7.gif)
-
-
-## Additions
-- Free backward and forward movement along the entire recording.
+## Main Upgrades
+- Brand New YOLO V2 based Detection Architechture
+- Navigate Entire Audio Files to Quickly & Easily Refine Detections or Add New Boxes
+- Retrain Existing Networks With Your Own Recordings
+- Manually add calls not detected by Faster-RCNN.
+- Start From Scratch: Hand Box Calls and Train a New Species Detector
+- Improved automatic contour extraction
+- Contour Invarient Clustering With Variational Auto Encoders
 - Additional "page" spectogram with a larger time window for call contextualization.
+- Record Audio Directly in DeepSqueak
+
+## New Navigation Controls
 - Click on the lower page spectrogram to jump to that position in the upper "focus" view.
 - Click a location on the map bar to jump to that location in the file.
 - Up and down arrow keys to slide the focus window forward or backward
@@ -28,9 +20,7 @@ New Collaborator: Robert Ciszek from University of Eastern Finland!
 - Control-click or double click on a detection to change it's label
 - Select, move, and modify ROIs of detected calls:
 
-![screenshot](https://i.postimg.cc/8C08C48V/EXAMPLE-02.png)
-
-- Possibility to manually add calls not detected by Faster-RCNN.
+## Minor Upgrades
 - Constant time and spectrogram scales.
 - Display either spectral amplitude of power spectral density
 - Possibility to modify time and spectrogram scales, Focus (upper spectrogram), Page (lower spectrogram).
@@ -38,7 +28,6 @@ New Collaborator: Robert Ciszek from University of Eastern Finland!
 - Fully compatible with older DeepSqueak detections files.
 - Invertible colormaps.
 - GUI tweaks.
-
 
 ## Credits: 
 **Original DeepSqueak**: Coffey, K., Marx, R., & Neumaier, J.<br>
