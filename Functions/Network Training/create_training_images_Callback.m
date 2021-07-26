@@ -9,7 +9,7 @@ if isnumeric(trainingdata); return; end
 trainingdata = cellstr(trainingdata);
 
 % Get training settings
-prompt = {'Window Length (s)','Overlap (%)','NFFT (s)','Image Length (s) [Requires Single Files & Audio]',...
+prompt = {'Window Length (s)','Overlap (%)','NFFT (s)','Image Length (s)',...
     'Number of augmented duplicates'};
 dlg_title = 'Spectrogram Settings';
 num_lines=[1 40]; options.Resize='off'; options.windStyle='modal'; options.Interpreter='tex';

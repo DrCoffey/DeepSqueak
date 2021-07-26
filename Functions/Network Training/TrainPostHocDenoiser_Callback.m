@@ -5,8 +5,6 @@ function TrainPostHocDenoiser_Callback(hObject, eventdata, handles)
 % files by labelling negative samples as "Noise", and by accepting positive
 % samples. This function produces training images from 15 to 75 KHz, and
 % with width of the box.
-waitfor(msgbox('This function will overwrite "DeepSqueak/Denoising Networks/CleaningNet.mat". You might want to back it up first.','Back up your network','help','modal'));
-
 options.imageSize = [128, 128, 1];
 [ClusteringData, Class, options.freqRange, options.maxDuration, options.spectrogram] = CreateClusteringData(handles, 'scale_duration', true, 'fixed_frequency', true, 'for_denoise', true);
 
@@ -112,8 +110,8 @@ h.YLabel = 'True Class';
 h.ColorbarVisible = 'off';
 colormap(inferno);
 
-% [FileName,PathName] = uiputfile('CleaningNet.mat','Save Network');
-save(fullfile(handles.data.squeakfolder,'Denoising Networks','CleaningNet.mat'),'DenoiseNet','wind','noverlap','nfft','imageSize','layers');
+[FileName, PathName] = uiputfile(fullfile(handles.data.squeakfolder,'Denoising Network', 'CleaningNet.mat'),'Save Denoising Network');
+save(fullfile(PathName,FileName),'DenoiseNet','wind','noverlap','nfft','imageSize','layers');
 msgbox('The new network is now saved.','Saved','help')
 
 end

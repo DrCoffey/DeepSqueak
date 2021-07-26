@@ -4,10 +4,11 @@ function PostHocDenoising_Callback(hObject, eventdata, handles)
 % "TrainPostHocDenoiser_Callback.m", to seperate noise from USVs.
 
 % Load the network
+[FileName,PathName] = uigetfile(fullfile(handles.data.squeakfolder,'Denoising Network','*.mat'),'Select Denoising Network');
 try
-    net=load(fullfile(handles.data.squeakfolder,'Denoising Networks','CleaningNet.mat'),'DenoiseNet','wind','noverlap','nfft','imageSize');
+    net=load(fullfile(PathName,FileName),'DenoiseNet','wind','noverlap','nfft','imageSize');
 catch
-    errordlg(sprintf('Denoising network not found. \nNetwork must be named "CleaningNet.mat" \n In folder: "Denoising Networks"'))
+    errordlg(sprintf('Denoising network not found'))
     return
 end
 
@@ -44,12 +45,13 @@ saveChoice =  questdlg('Update files with new denoising?','Save Rejections','Yes
 switch saveChoice
     case 'Yes'
         UpdateCluster(ClusteringData, clustAssign, clusterName, zeros(1,height(ClusteringData)));
+        update_folders(hObject, eventdata, handles);
     case 'No'
         return
 end
 
-%% Update display
-if isfield(handles,'current_detection_file')
-    loadcalls_Callback(hObject, eventdata, handles,handles.current_file_id)
-end
+% %% Update display
+% if isfield(handles,'current_detection_file')
+%     loadcalls_Callback(hObject, eventdata, handles,handles.current_file_id)
+% end
 end

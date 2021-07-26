@@ -24,7 +24,7 @@ while ~finished
                         case 'K-means (recommended)'
                             [ClusteringData, ~, ~, ~, spectrogramOptions] = CreateClusteringData(handles, 'forClustering', true, 'save_data', true);
                             if isempty(ClusteringData); return; end
-                            clusterParameters= inputdlg({'Shape weight','Frequency weight','Duration weight'},'Choose cluster parameters:',1,{'1','1','1'});
+                            clusterParameters= inputdlg({'Shape weight','Frequency weight','Duration weight'},'Choose cluster parameters:',1,{'3','2','1'});
                             if isempty(clusterParameters); return; end
                             slope_weight = str2double(clusterParameters{1});
                             freq_weight = str2double(clusterParameters{2});

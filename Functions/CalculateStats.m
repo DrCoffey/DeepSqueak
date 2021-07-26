@@ -135,6 +135,10 @@ stats.MaxPower = mean(ridgePower);
 % Power of the call contour
 stats.Power = ridgePower;
 
+% Peak frequency of the call contour
+stats.RidgeFreq = FreqScale*stats.ridgeFreq_smooth + Box(2);
+stats.PeakFreq = stats.RidgeFreq(stats.Power==max(ridgePower));
+
 %% Sinuosity - path length / duration
 try
     D = pdist([stats.ridgeTime' stats.ridgeFreq_smooth],'Euclidean');

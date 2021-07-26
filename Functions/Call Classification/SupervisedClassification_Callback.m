@@ -44,14 +44,13 @@ saveChoice =  questdlg('Update files with new classifications?','Save Classifica
 switch saveChoice
     case 'Yes'
         UpdateCluster(ClusteringData, clustAssign, clusterName, zeros(1,height(ClusteringData)));
+        update_folders(hObject, eventdata, handles);
     case 'No'
         return
 end
 
-
 %% Update display
-if isfield(handles,'current_detection_file')
-    loadcalls_Callback(hObject, eventdata, handles,handles.current_file_id)
-end
-
+% if isfield(handles,'current_detection_file')
+%     loadcalls_Callback(hObject, eventdata, handles,handles.current_file_id)
+% end
 end
