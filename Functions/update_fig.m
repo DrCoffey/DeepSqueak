@@ -57,7 +57,11 @@ handles = render_call_boxes(handles.spectogramWindow, handles,false,false);
 handles = render_call_boxes(handles.focusWindow, handles, true,false);
 
 % Deals with a random figure popping up rarely.... literally no idea why
-if length(findobj('type','figure'))==1; close(1); end
+chkfig = findobj('type','figure');
+% Make sure not main window (which has Number == [] and Name = 'DeepSqueak'
+if length(chkfig)==1 && ~isempty(chkfig.Number) && ~strcmp(chkfig.Name,'DeepSqueak')
+    close(chkfig.Number); 
+end
 
 %set(groot,'defaultFigureVisible','on');
 set(handles.hFig, 'pointer', 'arrow')
