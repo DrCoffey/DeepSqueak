@@ -132,7 +132,16 @@ for i = 1:height(Calls)
     end
 
     if p.Results.forClustering
-        stats = CalculateStats(I,wind,noverlap,nfft,rate,box,handles.data.settings.EntropyThreshold,handles.data.settings.AmplitudeThreshold);
+        % If each call was saved with its own Entropy and Amplitude
+        % Threshold, run CalculateStats with those values,
+        % otherwise run with global settings
+        if any(strcmp('EntThresh',Calls.Properties.VariableNames)) && ...
+            ~isempty(Calls.EntThresh(i))
+            % Calculate statistics
+            stats = CalculateStats(I,wind,noverlap,nfft,rate,box,Calls.EntThresh(i),Calls.AmpThresh(i));
+        else
+            stats = CalculateStats(I,wind,noverlap,nfft,rate,box,handles.data.settings.EntropyThreshold,handles.data.settings.AmplitudeThreshold);
+        end
         spectrange = audioReader.audiodata.SampleRate / 2000; % get frequency range of spectrogram in KHz
         FreqScale = spectrange / (1 + floor(nfft / 2)); % size of frequency pixels
         TimeScale = (wind - noverlap) / audioReader.audiodata.SampleRate; % size of time pixels

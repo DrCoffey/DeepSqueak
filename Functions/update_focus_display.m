@@ -35,6 +35,8 @@ end
 stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.data.settings.EntropyThreshold,handles.data.settings.AmplitudeThreshold);
 
 handles.data.calls.Power(handles.data.currentcall) = stats.MaxPower;
+handles.data.calls.EntThresh(handles.data.currentcall) = handles.data.settings.EntropyThreshold;
+handles.data.calls.AmpThresh(handles.data.currentcall) = handles.data.settings.AmplitudeThreshold;
 
 
 % plot Ridge Detection
