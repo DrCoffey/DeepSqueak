@@ -179,7 +179,7 @@ update_folders(hObject, eventdata, handles);
 handles = guidata(hObject);  % Get newest version of handles
 
 % Set the sliders to the saved values
-% set(handles.TonalitySlider, 'Value', handles.data.settings.EntropyThreshold);
+set(handles.TonalitySlider, 'Value', handles.data.settings.EntropyThreshold);
 
 % Set the page and focus window dropdown boxes to the values defined in
 % squeakData, and set the current value to the one closest to the save value.
@@ -430,6 +430,8 @@ new_box.Box = current_box.Position;
 new_box.Score = 1;
 new_box.Type = categorical({'USV'});
 new_box.Power = 0;
+new_box.EntThresh = handles.data.settings.EntropyThreshold;
+new_box.AmpThresh = handles.data.settings.AmplitudeThreshold;
 new_box.Accept = true;
 handles.data.calls = [handles.data.calls; new_box];
 
@@ -649,7 +651,9 @@ end
 % --- Executes on slider movement.
 function TonalitySlider_Callback(hObject, eventdata, handles)
 handles.data.settings.EntropyThreshold=(get(hObject,'Value'));
-handles.data.saveSettings();
+%GA 210807: Slider now only used for individual adjustments, so I don't think I want to save to
+%settings.mat
+%handles.data.saveSettings();
 update_fig(hObject, eventdata, handles);
 
 % --- Executes during object creation, after setting all properties.
@@ -879,11 +883,6 @@ eventdata.Source.Value=0;
 update_folders(hObject, eventdata, handles);
 
 
-
-
-
-
-
 % --- Executes during object creation, after setting all properties.
 function waveformWindow_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to waveformWindow (see GCBO)
@@ -891,3 +890,4 @@ function waveformWindow_CreateFcn(hObject, eventdata, handles)
 % handles    empty - handles not created until after all CreateFcns called
 
 % Hint: place code in OpeningFcn to populate waveformWindow
+
