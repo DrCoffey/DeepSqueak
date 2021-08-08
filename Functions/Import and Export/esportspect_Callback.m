@@ -25,5 +25,6 @@ I = mat2gray(I,Clim);
 fullFileName = fullfile(PathName, FileName); % Add Figure Path
 cmap = handles.data.cmap;
 I2 = gray2ind(I,256);
-imwrite(I2,cmap,fullFileName,'png','BitDepth',8); % Re-change it to colored one 
+RGB3 = ind2rgb(I2, inferno(255));
+imwrite(RGB3,fullFileName,'png','BitDepth',8); % Re-change it to colored one 
 
