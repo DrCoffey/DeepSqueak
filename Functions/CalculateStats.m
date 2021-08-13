@@ -131,7 +131,9 @@ ridgePower = 2*ridgePower / SampleRate;
 ridgePower = 10 * log10(ridgePower);
 
 % Mean power of the call contour
-stats.MaxPower = mean(ridgePower);
+stats.MeanPower = mean(ridgePower);
+% Max power of the call contour
+stats.MaxPower = max(ridgePower);
 % Power of the call contour
 stats.Power = ridgePower;
 

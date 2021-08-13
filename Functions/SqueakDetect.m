@@ -91,6 +91,8 @@ for i = 1:length(chunks)-1
         upper_freq = find(fr<=HighCutoff*1000,1,'last');
         lower_freq = find(fr>=LowCutoff*1000,1,'first');
         p = p(lower_freq:upper_freq,:);
+        % Save unadjusted pwr for power calc below
+        pwr = p;
         p(p==0)=.01;
         p = log10(p);
         p = rescale(imcomplement(abs(p)));
@@ -111,8 +113,12 @@ for i = 1:length(chunks)-1
         Power = [];
         for j = 1:size(bboxes,1)
             % Get the maximum power of the region within the box
-            callPower = max(max(...
-                p(bboxes(j,2):bboxes(j,2)+bboxes(j,4)-1,bboxes(j,1):bboxes(j,3)+bboxes(j,1)-1)));
+%             callPower = max(max(...
+%                 pwr(bboxes(j,2):bboxes(j,2)+bboxes(j,4)-1,bboxes(j,1):bboxes(j,3)+bboxes(j,1)-1)));
+            % Get the mean power of the region within the box
+            % Changed to be consistent with calculation in CalculateStats.m
+            callPower = mean(max(...
+                pwr(bboxes(j,2):bboxes(j,2)+bboxes(j,4)-1,bboxes(j,1):bboxes(j,3)+bboxes(j,1)-1)));
             callPower = 10 * log10(callPower);
             Power = [Power
                 callPower];

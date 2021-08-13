@@ -124,7 +124,7 @@ for currentfile = selections % Do this for each file
                     testValue = stats.PrincipalFreq;
                     if ischar(rule{4}); rule{4}=str2num(rule{4}); end
                 case 'Power (dB/Hz)'
-                    testValue = stats.MaxPower;
+                    testValue = stats.MeanPower;
                     if ischar(rule{4}); rule{4}=str2num(rule{4}); end
                 case 'Duration (s)'
                     testValue = stats.DeltaTime;
