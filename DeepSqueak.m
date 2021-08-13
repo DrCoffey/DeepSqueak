@@ -148,6 +148,9 @@ catch
     fprintf(1,'Can''t check for a updates online right now\n');
 end
 
+% Power warning
+disp('All reported Powers (dB) are relative to themselves. Do not use as inherent measures of sound pressure or intensity.')
+
 % set(handles.spectogramWindow,'Visible', 'off');
 % set(handles.epochSpect,'Visible', 'off');
 % set(handles.topRightButton, 'Visible', 'off');
