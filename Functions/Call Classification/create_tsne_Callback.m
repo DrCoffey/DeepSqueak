@@ -74,7 +74,7 @@ switch inputParameters
                 [FileName, PathName] = uigetfile(fullfile(handles.data.squeakfolder, 'Clustering Models', '*.mat'), 'Select VAE model');
                 if isnumeric(FileName);return;end
                 load(fullfile(PathName,FileName),'encoderNet','options');
-                [ClusteringData] = CreateClusteringData(handles, 'spectrogramOptions', options.spectrogram, 'scale_duration', options.maxDuration, 'freqRange', options.freqRange);
+                [ClusteringData, clustAssign] = CreateClusteringData(handles, 'spectrogramOptions', options.spectrogram, 'scale_duration', options.maxDuration, 'freqRange', options.freqRange, 'forClustering', true);
                 if isempty(ClusteringData); return; end
         end
         data = extract_VAE_embeddings(encoderNet, options, ClusteringData);
@@ -124,7 +124,13 @@ switch colorType
         % make it so that adjacent clusters are generally different colors.
         % it turns out that this isn't trivial, so try 200 different color
         % orders and use the best one.
-        clusterCentroids = splitapply(@mean, [ClusteringData.embedY, ClusteringData.embedX], clustAssignID);
+        embedings=[ClusteringData.embedY,  ClusteringData.embedX];
+        z=unique(clustAssignID);
+        for c=1:height(z)
+            idx=clustAssignID==z(c);
+            clusterCentroids(c,:)=mean(embedings(idx,:));
+        end
+        % = splitapply(@mean,[ClusteringData.embedY,  ClusteringData.embedX], clustAssignID);
         clusterCentroids = pdist2(clusterCentroids, clusterCentroids);
         hueAngle = [
             sin(linspace(0,2*pi, length(cName)))
@@ -144,8 +150,8 @@ switch colorType
         cMap = cMap(colorOrder,:);
         figure('Color','w') % Display the colors
         h = image(reshape(cMap,[],1,3));
-        yticks(h.Parent,1:length(cName))
-        %         yticklabels(h.Parent, cellstr(cName))
+        yticklabels(h.Parent, cellstr(cName));
+        yticks(h.Parent,1:length(cName));
 end
 
 

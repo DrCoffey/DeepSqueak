@@ -27,14 +27,14 @@ uitText = uicontrol('Parent',d,...
     'Units','normalized',...
     'Style','text',...
     'Position', [.02 .95 .96 .033],...
-    'String',{'Set rules for accepting/rejecting calls'});
+    'String',{'Set rules for accepting/rejecting calls (ACCEPT SUPERSEDES REJECT!)'});
 
 uit = uitable('Parent',d,...
     'Units','normalized',...
     'ColumnFormat',{
-    {' ','Reject calls with','Accept calls with'}, {'Tonality','Frequency (kHz)','Power (dB/Hz)','Duration (s)', 'Score', 'Category'}, {'Greater than','Less then','Equals'}, 'char'},...
+    {' ','Reject calls with','Accept calls with'}, {'Tonality','Frequency (kHz)','Power (dB/Hz)','Duration (s)', 'Score', 'Category'}, {'Greater than','Less than','Equals'}, 'char'},...
     'ColumnWidth',{130,130,130,90},...
-    'Data',[{'Reject calls with', 'Score', 'Less than', 0.5}; cell(7,4)],...
+    'Data',[{'Reject calls with', 'Score', 'Less than', []}; cell(7,4)],...
     'ColumnEditable', true,...
     'RowName',[],...
     'ColumnName',[],...
@@ -83,25 +83,35 @@ rules(:,1) = num2cell(contains(rules(:,1),'Accept'));
 %% Loop
 h = waitbar(0,'Initializing');
 for currentfile = selections % Do this for each file
-    Calls = loadCallfile(fullfile(handles.detectionfiles(currentfile).folder, handles.detectionfiles(currentfile).name),handles);
-
+    [Calls,  audiodata, loaded_ClusteringData] = loadCallfile(fullfile(handles.detectionfiles(currentfile).folder, handles.detectionfiles(currentfile).name),handles);
 
     reject = false(height(Calls),1);
     accept = false(height(Calls),1);
-
+    audioReader = squeakData([]);
+    audioReader.audiodata = audiodata;
+    yRange = mean(Calls.Box(:,4));
+    xRange = mean(Calls.Box(:,3));
+    noverlap = .5;
+    optimalWindow = sqrt(xRange/(2000*yRange));
+    optimalWindow = optimalWindow + optimalWindow.*noverlap;
+    spectrogramOptions.windowsize = optimalWindow;
+    spectrogramOptions.overlap = optimalWindow .* noverlap;
+    spectrogramOptions.nfft = optimalWindow;
+    spectrogramOptions.frequency_padding = 0;
+    
     for i = 1:height(Calls)
         waitbar(i ./ height(Calls), h, ['Processing file ' num2str(find(selections == currentfile)) ' of ' num2str(length(selections))]);
 
-        [I,windowsize,noverlap,nfft,rate,box] = CreateSpectrogram(Calls(i, :));
+        [I,wind,noverlap,nfft,rate,box,~,~,~,~,pow] = CreateFocusSpectrogram(Calls(i,:), handles, true, spectrogramOptions, audioReader);
         % If each call was saved with its own Entropy and Amplitude
         % Threshold, run CalculateStats with those values,
         % otherwise run with global settings
         if any(strcmp('EntThresh',Calls.Properties.VariableNames)) && ...
             ~isempty(Calls.EntThresh(i))
             % Calculate statistics
-            stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,Calls.EntThresh(i),Calls.AmpThresh(i));
+            stats = CalculateStats(I,wind,noverlap,nfft,rate,box,Calls.EntThresh(i),Calls.AmpThresh(i));
         else
-            stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.data.settings.EntropyThreshold,handles.data.settings.AmplitudeThreshold);
+            stats = CalculateStats(I,wind,noverlap,nfft,rate,box,handles.data.settings.EntropyThreshold,handles.data.settings.AmplitudeThreshold);
         end
         
         % For each rule, test the appropriate value, and accept or reject.
@@ -109,16 +119,22 @@ for currentfile = selections % Do this for each file
             switch rule{2}
                 case 'Tonality'
                     testValue = stats.SignalToNoise;
+                    if ischar(rule{4}); rule{4}=str2num(rule{4}); end
                 case 'Frequency (kHz)'
                     testValue = stats.PrincipalFreq;
+                    if ischar(rule{4}); rule{4}=str2num(rule{4}); end
                 case 'Power (dB/Hz)'
                     testValue = stats.MaxPower;
+                    if ischar(rule{4}); rule{4}=str2num(rule{4}); end
                 case 'Duration (s)'
                     testValue = stats.DeltaTime;
+                    if ischar(rule{4}); rule{4}=str2num(rule{4}); end
                 case 'Score'
                     testValue = Calls.Score(i);
+                    if ischar(rule{4}); rule{4}=str2num(rule{4}); end
                 case 'Category'
                     testValue = Calls.Type(i);
+                    if ischar(rule{4}); rule{4}=categorical(rule(4)); end
             end
 
             change = false;
@@ -128,7 +144,7 @@ for currentfile = selections % Do this for each file
                 case 'Less than'
                     change = testValue <= rule{4};
                 case 'Equals'
-                    change = testValue == num2str(rule{4});
+                    change = testValue == rule{4};
             end
 
             if change
@@ -145,12 +161,10 @@ for currentfile = selections % Do this for each file
 
     Calls.Accept(reject) = false;
     Calls.Accept(accept) = true;
-
-    save(fullfile(handles.detectionfiles(currentfile).folder,handles.detectionfiles(currentfile).name),'Calls','-v7.3');
+    save(fullfile(handles.detectionfiles(currentfile).folder,handles.detectionfiles(currentfile).name),'Calls','audiodata', '-v7.3');
 
 end
 close(h);
-
 
 %update the display
 if isfield(handles,'current_detection_file') && any(ismember(handles.detectionfilesnames(selections),handles.current_detection_file))

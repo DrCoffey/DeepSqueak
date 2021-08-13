@@ -1,4 +1,10 @@
 # Changelog
+## 3.0.1 2021-08-08
+## v3 Bug Fixes
+- Batch Reject By Threshold Fix
+- Export Audio Fix
+- Export Spectrogram Fix
+
 ## 3.0 2021-07-23
 
 ## Main Upgrades
