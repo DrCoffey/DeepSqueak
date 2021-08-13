@@ -589,6 +589,24 @@ disp(errmsg);
 disp(errmsg);
 
 if ~isempty(Tonality) && ~isempty(Amplitude)
+
+    % Add option to apply to all or just current det
+    answer = questdlg('Would you like to apply these settings to all detections?', ...
+        'Apply to all detections?', ...
+        'All Detections','Only This Detection','Only This Detection');
+    % Handle response
+    switch answer
+        case 'All Detections'
+            handles.data.calls.EntThresh(:) = Tonality;
+            handles.data.calls.AmpThresh(:) = Amplitude;
+        case 'Only This Detection'
+            handles.data.calls.EntThresh(handles.data.currentcall) = Tonality;
+            handles.data.calls.AmpThresh(handles.data.currentcall) = Amplitude;
+        % If close (X) or Esc, cancel whole operation
+        case ''
+            return;
+    end
+
     handles.data.settings.EntropyThreshold = Tonality;
     handles.data.settings.AmplitudeThreshold = Amplitude;
     handles.data.saveSettings();
@@ -654,6 +672,9 @@ handles.data.settings.EntropyThreshold=(get(hObject,'Value'));
 %GA 210807: Slider now only used for individual adjustments, so I don't think I want to save to
 %settings.mat
 %handles.data.saveSettings();
+%update_focus_display has preference for existing EntThresh, so need to
+%overwrite for this call
+handles.data.calls.EntThresh(handles.data.currentcall) = handles.data.settings.EntropyThreshold;
 update_fig(hObject, eventdata, handles);
 
 % --- Executes during object creation, after setting all properties.

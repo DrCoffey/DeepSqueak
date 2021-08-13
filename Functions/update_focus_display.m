@@ -31,6 +31,18 @@ if isempty(handles.data.calls) || ~any(handles.data.calls.Box(handles.data.curre
     return
 end
 
+% If Tonality and Amplitude were previously changed, apply the saved values
+% to the global settings
+if handles.data.calls.EntThresh(handles.data.currentcall) ~= 0
+    handles.data.settings.EntropyThreshold = handles.data.calls.EntThresh(handles.data.currentcall);
+end
+if handles.data.calls.AmpThresh(handles.data.currentcall) ~= 0
+    handles.data.settings.AmplitudeThreshold = handles.data.calls.AmpThresh(handles.data.currentcall);
+end
+
+% Set the sliders to the saved values
+set(handles.TonalitySlider, 'Value', handles.data.settings.EntropyThreshold);
+
 [I,windowsize,noverlap,nfft,rate,box,~,~,~] = CreateFocusSpectrogram(handles.data.calls(handles.data.currentcall,:),handles,false, [], handles.data);
 stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.data.settings.EntropyThreshold,handles.data.settings.AmplitudeThreshold);
 
