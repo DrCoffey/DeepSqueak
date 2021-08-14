@@ -149,7 +149,7 @@ catch
 end
 
 % Power warning
-disp('All reported Powers (dB) are relative to themselves. Do not use as inherent measures of sound pressure or intensity.')
+disp('All reported Powers (dB) are relative to themselves. Do not use as intrinsic measures of sound pressure or intensity.')
 
 % set(handles.spectogramWindow,'Visible', 'off');
 % set(handles.epochSpect,'Visible', 'off');
@@ -602,6 +602,22 @@ if ~isempty(Tonality) && ~isempty(Amplitude)
         case 'All Detections'
             handles.data.calls.EntThresh(:) = Tonality;
             handles.data.calls.AmpThresh(:) = Amplitude;
+            if height(handles.data.calls) > 0
+                % Store actual current call for reset
+                thiscc = handles.data.currentcall;
+                % Start at and update Call 1
+                handles.data.currentcall=1;
+                handles.data.focusCenter = handles.data.calls.Box(handles.data.currentcall,1) + handles.data.calls.Box(handles.data.currentcall,3)/2;
+                update_fig(hObject, eventdata, handles);
+                % Cycle through all calls applying global thresholds
+                for cc = 1:height(handles.data.calls)-1
+                    NextCall_Callback(hObject, eventdata, handles)
+                end
+                % Reset
+                handles.data.currentcall = thiscc;
+                handles.data.focusCenter = handles.data.calls.Box(handles.data.currentcall,1) + handles.data.calls.Box(handles.data.currentcall,3)/2;
+                update_fig(hObject, eventdata, handles);
+            end
         case 'Only This Detection'
             handles.data.calls.EntThresh(handles.data.currentcall) = Tonality;
             handles.data.calls.AmpThresh(handles.data.currentcall) = Amplitude;
