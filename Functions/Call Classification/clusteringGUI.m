@@ -177,7 +177,7 @@ classdef clusteringGUI < handle
             ylabel(caxis, 'Frequency (kHz)')
             
             %% Make the axes
-            aspectRatio = median(cellfun(@(im) size(im,1) ./ size(im,2), obj.ClusteringData.Spectrogram))
+            aspectRatio = median(cellfun(@(im) size(im,1) ./ size(im,2), obj.ClusteringData.Spectrogram));
             
             % Choose a number of rows and columns to fill the space with
             % the average call aspect ratio

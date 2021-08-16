@@ -7,4 +7,4 @@ Calls=[Calls1; Calls2];
 audio_info = audioinfo(AudioFile);
 
 %% Merge overlapping boxes
-Calls = merge_boxes(Calls.Box, Calls.Score, Calls.Type, Calls.Power, audio_info, 1, 0, 0);
+Calls = merge_boxes(Calls.Box, Calls.Score, Calls.Type, audio_info, 1, 0, 0);

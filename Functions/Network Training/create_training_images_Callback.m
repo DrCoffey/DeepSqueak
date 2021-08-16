@@ -23,7 +23,6 @@ imLength = spectSettings(4);
 repeats = spectSettings(5)+1;
 AmplitudeRange = [.5, 1.5];
 StretchRange = [0.75, 1.25];
-
 h = waitbar(0,'Initializing');
 
 for k = 1:length(trainingdata)
@@ -125,7 +124,6 @@ end
 if width(audio)>height(audio)
     audio=audio';
 end
-
 
 % Make the spectrogram
 [~, fr, ti, p] = spectrogram(audio(:,1),...

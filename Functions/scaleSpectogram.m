@@ -1,9 +1,5 @@
 function values = scaleSpectogram(values, spectrogramType, windowsize, samplerate)
 
-%     contents = cellstr(get(handles.spectogramScalePopup,'String'));
-%     scale = contents{get(handles.spectogramScalePopup,'Value')};
-% spectrogramType = "absolute";
-% spectrogramType = 'absolute';
 switch spectrogramType
     case 'Power Spectral Density'
         win = hamming(windowsize);

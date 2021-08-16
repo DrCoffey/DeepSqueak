@@ -24,7 +24,7 @@ function excel_Callback(hObject, eventdata, handles)
                 Label = Calls.Type(i);
                 Score = Calls.Score(i);
                 accepted = Calls.Accept(i);
-                exceltable = [exceltable; {ID} {Label} {accepted} {Score} {stats.BeginTime} {stats.EndTime} {stats.DeltaTime} {stats.PrincipalFreq} {stats.LowFreq} {stats.HighFreq} {stats.DeltaFreq} {stats.stdev} {stats.Slope} {stats.Sinuosity} {stats.MaxPower} {stats.SignalToNoise} {stats.PeakFreq}];            end
+                exceltable = [exceltable; {ID} {Label} {accepted} {Score} {stats.BeginTime} {stats.EndTime} {stats.DeltaTime} {stats.PrincipalFreq} {stats.LowFreq} {stats.HighFreq} {stats.DeltaFreq} {stats.stdev} {stats.Slope} {stats.Sinuosity} {stats.MeanPower} {stats.SignalToNoise} {stats.PeakFreq}];            end
 
         end
         t = cell2table(exceltable);

@@ -90,33 +90,22 @@ for i = 1:length(chunks)-1
         [~,fr,ti,p] = spectrogram(audio(:,1),wind,noverlap,nfft,audio_info.SampleRate,'yaxis'); % Just use the first audio channel
         upper_freq = find(fr<=HighCutoff*1000,1,'last');
         lower_freq = find(fr>=LowCutoff*1000,1,'first');
-        p = p(lower_freq:upper_freq,:);
-        p(p==0)=.01;
-        p = log10(p);
-        p = rescale(imcomplement(abs(p)));
+        pow = p(lower_freq:upper_freq,:);
+        pow(pow==0)=.01;
+        pow = log10(pow);
+        pow = rescale(imcomplement(abs(pow)));
         
         % Create Adjusted Image for Identification
-        xTile=ceil(size(p,1)/50);
-        yTile=ceil(size(p,2)/50);
+        xTile=ceil(size(pow,1)/50);
+        yTile=ceil(size(pow,2)/50);
         if xTile>1 && yTile>1
-        im = adapthisteq(flipud(p),'NumTiles',[xTile yTile],'ClipLimit',.005,'Distribution','rayleigh','Alpha',.4);
+        im = adapthisteq(flipud(pow),'NumTiles',[xTile yTile],'ClipLimit',.005,'Distribution','rayleigh','Alpha',.4);
         else
-        im = adapthisteq(flipud(p),'NumTiles',[2 2],'ClipLimit',.005,'Distribution','rayleigh','Alpha',.4);    
+        im = adapthisteq(flipud(pow),'NumTiles',[2 2],'ClipLimit',.005,'Distribution','rayleigh','Alpha',.4);    
         end
 
         % Detect!
         [bboxes, scores, Class] = detect(network, im2uint8(im), 'ExecutionEnvironment','auto','SelectStrongest',1);
-        
-        % Calculate each call's power
-        Power = [];
-        for j = 1:size(bboxes,1)
-            % Get the maximum power of the region within the box
-            callPower = max(max(...
-                p(bboxes(j,2):bboxes(j,2)+bboxes(j,4)-1,bboxes(j,1):bboxes(j,3)+bboxes(j,1)-1)));
-            callPower = 10 * log10(callPower);
-            Power = [Power
-                callPower];
-        end
         
         % Convert boxes from pixels to time and kHz
         bboxes(:,1) = ti(bboxes(:,1)) + (windL ./ audio_info.SampleRate);
@@ -131,8 +120,6 @@ for i = 1:length(chunks)-1
             scores(Class == 'USV',:)];
         AllClass=[AllClass
             Class(Class == 'USV',:)];
-        AllPowers=[AllPowers
-            Power(Class == 'USV',:)];
         
         t = toc(DetectStart);
         waitbar(...
@@ -153,7 +140,7 @@ end
 if isempty(AllScores); close(h); return; end
 
 h = waitbar(1,h,'Merging Boxes...');
-Calls = merge_boxes(AllBoxes, AllScores, AllClass, AllPowers, audio_info, 1, score_cuttoff, 0);
+Calls = merge_boxes(AllBoxes, AllScores, AllClass, audio_info, 1, score_cuttoff, 0);
 
 % Merge long 22s if detected with a long 22 network
 if contains(networkname,'long','IgnoreCase',true)

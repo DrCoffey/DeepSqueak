@@ -17,7 +17,6 @@ addParameter(p,'freqRange', []);
 % Ask to save the data for future use
 addParameter(p,'save_data', false);
 addParameter(p,'for_denoise', false);
-
 parse(p,varargin{:});
 spectrogramOptions = p.Results.spectrogramOptions;
 

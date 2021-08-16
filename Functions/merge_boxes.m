@@ -1,10 +1,9 @@
-function Calls = merge_boxes(AllBoxes, AllScores, AllClass, AllPowers, audio_info, merge_in_frequency, score_cuttoff, pad_calls)
+function Calls = merge_boxes(AllBoxes, AllScores, AllClass, audio_info, merge_in_frequency, score_cuttoff, pad_calls)
 %% Merge overlapping boxes
 % Sort the boxes by start time
 [AllBoxes,index] = sortrows(AllBoxes);
 AllScores=AllScores(index);
 AllClass=AllClass(index);
-AllPowers=AllPowers(index);
 
 % Find all the boxes that overlap in time
 OverBoxes=single(AllBoxes);
@@ -34,7 +33,6 @@ end_time__ = accumarray(componentIndices', AllBoxes(:,1)+AllBoxes(:,3), [], @max
 high_freq_ = accumarray(componentIndices', AllBoxes(:,2)+AllBoxes(:,4), [], @max);
 
 call_score = accumarray(componentIndices', AllScores, [], @mean);
-call_power = accumarray(componentIndices', AllPowers, [], @max);
 
 [~, z2]=unique(componentIndices);
 call_Class = AllClass(z2);
@@ -52,9 +50,8 @@ high_freq_ = high_freq_(Accepted);
 duration__ = duration__(Accepted);
 bandwidth_ = bandwidth_(Accepted);
 call_score = call_score(Accepted);
-call_power = call_power(Accepted);
+% call_power = call_power(Accepted);
 call_Class = call_Class(Accepted);
-
 
 %% Make the boxes all a little bigger
 if pad_calls
@@ -75,29 +72,24 @@ high_freq_ = min(high_freq_,audio_info.SampleRate./2000 - 1);
 
 duration__ = end_time__ - begin_time;
 bandwidth_ = high_freq_ - lower_freq;
-
-Calls = table('Size',[length(begin_time), 8], 'VariableTypes',...
+Calls = table('Size',[length(begin_time), 7], 'VariableTypes',...
     {'double', 'double', 'double', 'double',...
     'double',...
     'categorical',...
-    'double',...
     'logical'},...
     'VariableNames',...
     {'Box1', 'Box2', 'Box3', 'Box4',...
     'Score',...
     'Type',...
-    'Power',...
     'Accept'});
 Calls = mergevars(Calls,{'Box1', 'Box2', 'Box3', 'Box4'},'NewVariableName','Box');
 
 %% Create Output Table
-
 for i = 1:length(begin_time)
     Calls(i,:) = {
         [begin_time(i), lower_freq(i), duration__(i), bandwidth_(i)],...
         call_score(i,:),...
         call_Class(i),...
-        call_power(i),...
         1,...
         };
 end

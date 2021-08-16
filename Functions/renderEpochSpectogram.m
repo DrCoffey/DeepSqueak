@@ -11,12 +11,10 @@ window_start = max(handles.data.windowposition - handles.data.settings.focus_win
 window_stop = handles.data.windowposition + handles.data.settings.pageSize + handles.data.settings.focus_window_size/2;
 audio = handles.data.AudioSamples(window_start, window_stop);
 
-
 %% Make the spectrogram
 [s, f, t] = spectrogram(audio,windowsize,noverlap,nfft,handles.data.audiodata.SampleRate,'yaxis');
 t = t + window_start; % Add the start of the window the time units
 s_display = scaleSpectogram(s, handles.data.settings.spect.type, windowsize, handles.data.audiodata.SampleRate);
-
 
 %% Find the color scale limits
 % handles.data.clim = prctile(s_display(20:10:end-20, 1:20:end),[10,90], 'all')';
