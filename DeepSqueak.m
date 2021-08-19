@@ -148,6 +148,9 @@ catch
     fprintf(1,'Can''t check for a updates online right now\n');
 end
 
+% Power warning
+disp('All reported Powers (dB) are relative to themselves. Do not use as intrinsic measures of sound pressure or intensity.')
+
 % set(handles.spectogramWindow,'Visible', 'off');
 % set(handles.epochSpect,'Visible', 'off');
 % set(handles.topRightButton, 'Visible', 'off');
@@ -179,7 +182,7 @@ update_folders(hObject, eventdata, handles);
 handles = guidata(hObject);  % Get newest version of handles
 
 % Set the sliders to the saved values
-% set(handles.TonalitySlider, 'Value', handles.data.settings.EntropyThreshold);
+set(handles.TonalitySlider, 'Value', handles.data.settings.EntropyThreshold);
 
 % Set the page and focus window dropdown boxes to the values defined in
 % squeakData, and set the current value to the one closest to the save value.
@@ -430,6 +433,8 @@ new_box.Box = current_box.Position;
 new_box.Score = 1;
 new_box.Type = categorical({'USV'});
 new_box.Power = 0;
+new_box.EntThresh = handles.data.settings.EntropyThreshold;
+new_box.AmpThresh = handles.data.settings.AmplitudeThreshold;
 new_box.Accept = true;
 handles.data.calls = [handles.data.calls; new_box];
 
@@ -587,6 +592,40 @@ disp(errmsg);
 disp(errmsg);
 
 if ~isempty(Tonality) && ~isempty(Amplitude)
+
+    % Add option to apply to all or just current det
+    answer = questdlg('Would you like to apply these settings to all detections?', ...
+        'Apply to all detections?', ...
+        'All Detections','Only This Detection','Only This Detection');
+    % Handle response
+    switch answer
+        case 'All Detections'
+            handles.data.calls.EntThresh(:) = Tonality;
+            handles.data.calls.AmpThresh(:) = Amplitude;
+            if height(handles.data.calls) > 0
+                % Store actual current call for reset
+                thiscc = handles.data.currentcall;
+                % Start at and update Call 1
+                handles.data.currentcall=1;
+                handles.data.focusCenter = handles.data.calls.Box(handles.data.currentcall,1) + handles.data.calls.Box(handles.data.currentcall,3)/2;
+                update_fig(hObject, eventdata, handles);
+                % Cycle through all calls applying global thresholds
+                for cc = 1:height(handles.data.calls)-1
+                    NextCall_Callback(hObject, eventdata, handles)
+                end
+                % Reset
+                handles.data.currentcall = thiscc;
+                handles.data.focusCenter = handles.data.calls.Box(handles.data.currentcall,1) + handles.data.calls.Box(handles.data.currentcall,3)/2;
+                update_fig(hObject, eventdata, handles);
+            end
+        case 'Only This Detection'
+            handles.data.calls.EntThresh(handles.data.currentcall) = Tonality;
+            handles.data.calls.AmpThresh(handles.data.currentcall) = Amplitude;
+        % If close (X) or Esc, cancel whole operation
+        case ''
+            return;
+    end
+
     handles.data.settings.EntropyThreshold = Tonality;
     handles.data.settings.AmplitudeThreshold = Amplitude;
     handles.data.saveSettings();
@@ -649,7 +688,12 @@ end
 % --- Executes on slider movement.
 function TonalitySlider_Callback(hObject, eventdata, handles)
 handles.data.settings.EntropyThreshold=(get(hObject,'Value'));
-handles.data.saveSettings();
+%GA 210807: Slider now only used for individual adjustments, so I don't think I want to save to
+%settings.mat
+%handles.data.saveSettings();
+%update_focus_display has preference for existing EntThresh, so need to
+%overwrite for this call
+handles.data.calls.EntThresh(handles.data.currentcall) = handles.data.settings.EntropyThreshold;
 update_fig(hObject, eventdata, handles);
 
 % --- Executes during object creation, after setting all properties.
@@ -823,7 +867,7 @@ end
 
 handles.data.audiodata = audioinfo(fullfile(handles.data.settings.audiofolder,handles.current_audio_file));
 
-Calls = table(zeros(0,4),[],[],[],[], 'VariableNames', {'Box', 'Score', 'Type', 'Power', 'Accept'});
+Calls = table(zeros(0,4),[],[],[],[],[],[], 'VariableNames', {'Box', 'Score', 'Type', 'Power', 'EntThresh', 'AmpThresh', 'Accept'});
 % Calls.Box = [0 0 1 1];
 % Calls.Score = 0;
 % Calls.Type = categorical({'NA'});
@@ -879,11 +923,6 @@ eventdata.Source.Value=0;
 update_folders(hObject, eventdata, handles);
 
 
-
-
-
-
-
 % --- Executes during object creation, after setting all properties.
 function waveformWindow_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to waveformWindow (see GCBO)
@@ -891,3 +930,4 @@ function waveformWindow_CreateFcn(hObject, eventdata, handles)
 % handles    empty - handles not created until after all CreateFcns called
 
 % Hint: place code in OpeningFcn to populate waveformWindow
+

@@ -36,7 +36,7 @@ if AmplitudeThreshold > .001 & AmplitudeThreshold < .999
     brightThreshold=prctile(I(:),AmplitudeThreshold*100);
 else
     disp('Warning! Amplitude Percentile Threshold Must be (0 > 1), Reverting to Default (.825)');
-    brightThreshold=prctile(I(:),825);
+    brightThreshold=prctile(I(:),82.5);
 end
 
 if EntropyThreshold < .001 | EntropyThreshold > .999 
@@ -127,11 +127,15 @@ ridgePower = amplitude(stats.ridgeTime);
 % Magnitude sqaured divided by sum of squares of hamming window
 ridgePower = ridgePower.^2 / sum(hamming(windowsize).^2);
 ridgePower = 2*ridgePower / SampleRate;
+% Mean power of the call contour (mean needs to be before log)
+stats.MeanPower = 10 * log10(mean(ridgePower));
 % Convert power to db
 ridgePower = 10 * log10(ridgePower);
 
 % Mean power of the call contour
 stats.MeanPower = mean(ridgePower);
+% Max power of the call contour
+stats.MaxPower = max(ridgePower);
 % Power of the call contour
 stats.Power = ridgePower;
 

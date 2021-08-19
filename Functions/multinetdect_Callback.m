@@ -92,6 +92,23 @@ for j = 1:length(audioselections)
     h = waitbar(1,'Saving...');
     Calls = Automerge_Callback(Calls, [], AudioFile);
     
+    % Correct power measure for merged calls
+    % This should also now be consistent with the calculation in
+    % CalculateStats
+    audioReader = squeakData([]);
+    audioReader.audiodata = audioinfo(AudioFile);
+    for i = 1:height(Calls) % Do this for each call
+        % Get spectrogram data
+        [I,windowsize,~,~,rate,~] = CreateFocusSpectrogram(Calls(i, :),handles,true, [], audioReader);
+        
+        ridgePower = max(I);
+        % Magnitude sqaured divided by sum of squares of hamming window
+        ridgePower = ridgePower.^2 / sum(hamming(windowsize).^2);
+        ridgePower = 2*ridgePower / rate;
+        % Mean power of the call contour (mean needs to be before log)
+        Calls.Power(i) = 10 * log10(mean(ridgePower));
+    end
+    
     %% Save the file
     % Save the Call table, detection metadata, and results of audioinfo
     

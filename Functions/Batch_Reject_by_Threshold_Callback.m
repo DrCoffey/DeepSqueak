@@ -101,10 +101,19 @@ for currentfile = selections % Do this for each file
     
     for i = 1:height(Calls)
         waitbar(i ./ height(Calls), h, ['Processing file ' num2str(find(selections == currentfile)) ' of ' num2str(length(selections))]);
-        
-        [I,wind,noverlap,nfft,rate,box,~,~,~,~,pow] = CreateFocusSpectrogram(Calls(i,:), handles, true, spectrogramOptions, audioReader);
-        stats = CalculateStats(I,wind,noverlap,nfft,rate,box,handles.data.settings.EntropyThreshold,handles.data.settings.AmplitudeThreshold);
 
+        [I,wind,noverlap,nfft,rate,box,~,~,~,~,pow] = CreateFocusSpectrogram(Calls(i,:), handles, true, spectrogramOptions, audioReader);
+        % If each call was saved with its own Entropy and Amplitude
+        % Threshold, run CalculateStats with those values,
+        % otherwise run with global settings
+        if any(strcmp('EntThresh',Calls.Properties.VariableNames)) && ...
+            ~isempty(Calls.EntThresh(i))
+            % Calculate statistics
+            stats = CalculateStats(I,wind,noverlap,nfft,rate,box,Calls.EntThresh(i),Calls.AmpThresh(i));
+        else
+            stats = CalculateStats(I,wind,noverlap,nfft,rate,box,handles.data.settings.EntropyThreshold,handles.data.settings.AmplitudeThreshold);
+        end
+        
         % For each rule, test the appropriate value, and accept or reject.
         for rule = rules'
             switch rule{2}
