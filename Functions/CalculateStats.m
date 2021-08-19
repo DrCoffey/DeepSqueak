@@ -51,16 +51,16 @@ end
 iter = 1;
 greaterthannoise = false(1, size(I, 2));
 while sum(greaterthannoise)<5
-    if iter==1;
-    greaterthannoise = greaterthannoise | amplitude  > brightThreshold;
-    greaterthannoise = greaterthannoise & 1-stats.Entropy  > EntropyThreshold;
+    if iter==1
+        greaterthannoise = greaterthannoise | amplitude  > brightThreshold;
+        greaterthannoise = greaterthannoise & 1-stats.Entropy  > EntropyThreshold;
     else
-    greaterthannoise = greaterthannoise | amplitude  > brightThreshold / 1.1 ^ iter;
-    greaterthannoise = greaterthannoise & 1-stats.Entropy  > EntropyThreshold / 1.1 ^ iter;
+        greaterthannoise = greaterthannoise | amplitude  > brightThreshold / 1.1 ^ iter;
+        greaterthannoise = greaterthannoise & 1-stats.Entropy  > EntropyThreshold / 1.1 ^ iter;
     end
     iter = iter + 1;
     if iter > 2
-        disp('lowering threshold')
+        disp('Not enough pts for contour - lowering threshold')
     end
 end
 
