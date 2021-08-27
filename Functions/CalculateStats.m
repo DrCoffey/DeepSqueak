@@ -132,8 +132,6 @@ stats.MeanPower = 10 * log10(mean(ridgePower));
 % Convert power to db
 ridgePower = 10 * log10(ridgePower);
 
-% Mean power of the call contour
-stats.MeanPower = mean(ridgePower);
 % Max power of the call contour
 stats.MaxPower = max(ridgePower);
 % Power of the call contour

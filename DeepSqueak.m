@@ -148,9 +148,6 @@ catch
     fprintf(1,'Can''t check for a updates online right now\n');
 end
 
-% Power warning
-disp('All reported Powers (dB) are relative to themselves. Do not use as intrinsic measures of sound pressure or intensity.')
-
 % set(handles.spectogramWindow,'Visible', 'off');
 % set(handles.epochSpect,'Visible', 'off');
 % set(handles.topRightButton, 'Visible', 'off');
@@ -618,17 +615,21 @@ if ~isempty(Tonality) && ~isempty(Amplitude)
                 handles.data.focusCenter = handles.data.calls.Box(handles.data.currentcall,1) + handles.data.calls.Box(handles.data.currentcall,3)/2;
                 update_fig(hObject, eventdata, handles);
             end
+            
+            %Save global settings in settings.mat
+            handles.data.settings.EntropyThreshold = Tonality;
+            handles.data.settings.AmplitudeThreshold = Amplitude;
+            handles.data.saveSettings();
         case 'Only This Detection'
             handles.data.calls.EntThresh(handles.data.currentcall) = Tonality;
             handles.data.calls.AmpThresh(handles.data.currentcall) = Amplitude;
+            
+            %Do NOT save global settings in settings.mat
         % If close (X) or Esc, cancel whole operation
         case ''
             return;
     end
 
-    handles.data.settings.EntropyThreshold = Tonality;
-    handles.data.settings.AmplitudeThreshold = Amplitude;
-    handles.data.saveSettings();
     update_folders(hObject, eventdata, handles);
     try
         update_fig(hObject, eventdata, handles);
@@ -687,13 +688,13 @@ end
 
 % --- Executes on slider movement.
 function TonalitySlider_Callback(hObject, eventdata, handles)
-handles.data.settings.EntropyThreshold=(get(hObject,'Value'));
 %GA 210807: Slider now only used for individual adjustments, so I don't think I want to save to
+%handles.data.settings.EntropyThreshold=(get(hObject,'Value'));
 %settings.mat
 %handles.data.saveSettings();
 %update_focus_display has preference for existing EntThresh, so need to
 %overwrite for this call
-handles.data.calls.EntThresh(handles.data.currentcall) = handles.data.settings.EntropyThreshold;
+handles.data.calls.EntThresh(handles.data.currentcall) = (get(hObject,'Value'));
 update_fig(hObject, eventdata, handles);
 
 % --- Executes during object creation, after setting all properties.

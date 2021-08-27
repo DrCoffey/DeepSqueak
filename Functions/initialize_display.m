@@ -96,17 +96,21 @@ handles.currentWindowRectangle = rectangle(handles.spectogramWindow,...
     'LineStyle','--',...
     'PickableParts', 'none');
 
-answer = '';
+
+% Apply global defaults for Entropy and Amplitude thresholds if they have never been
+% applied before.  This check needs to be before update_fig()
+bApplyGlobal = false;
 if height(handles.data.calls) > 0
-    if handles.data.calls.EntThresh(1) == 0 && handles.data.calls.AmpThresh(1) == 0  
-        answer = questdlg({'It looks like Tonality and Amplitude Thresholds have never been applied.',...
-            'Would you like to go ahead apply these default settings (may be from settings.mat) to all detections in this file?', ...
-            'If you skip this now, you can still choose to apply these or different settings later at Tools -> Change Contour Threshold,',...
-            'or by adjusting the Tonality threshold bar to the left for individual calls.',...
-            sprintf('Tonality: %0.3f',handles.data.settings.EntropyThreshold), ...
-            sprintf('Amplitude: %0.3f',handles.data.settings.AmplitudeThreshold)}, ...
-            'Apply Tonality and Amplitude Thresholds?', ...
-            'Yes','No','No');
+    if ~any(strcmp('EntThresh',handles.data.calls.Properties.VariableNames))
+        handles.data.calls.EntThresh(:) = 0;
+    end
+
+    if ~any(strcmp('AmpThresh',handles.data.calls.Properties.VariableNames))
+        handles.data.calls.AmpThresh(:) = 0;
+    end
+    
+    if all(handles.data.calls.EntThresh(:) == 0) && all(handles.data.calls.AmpThresh(:) == 0)
+        bApplyGlobal = true;
     end
 end
 
@@ -118,27 +122,27 @@ handles = guidata(hObject);
 handles.data.clim = prctile(handles.data.page_spect.s_display,[10,90], 'all')';
 change_spectogram_contrast_Callback(hObject,[],handles);
 
-% Ask to apply Entropy and Amplitude thresholds if they have never been
-% applied before
-switch answer
-    case 'Yes'
-        % Apply global settings to all calls
-        handles.data.calls.EntThresh(:) = handles.data.settings.EntropyThreshold;
-        handles.data.calls.AmpThresh(:) = handles.data.settings.AmplitudeThreshold;
-        % Start at and update last call
-        handles.data.currentcall=height(handles.data.calls);
-        handles.data.focusCenter = handles.data.calls.Box(handles.data.currentcall,1) + handles.data.calls.Box(handles.data.currentcall,3)/2;
-        update_fig(hObject, eventdata, handles);
-        % Cycle through all calls applying global thresholds
-        for cc = height(handles.data.calls):-1:2
-            if handles.data.currentcall > 1 % If not the first call
-                handles.data.currentcall=handles.data.currentcall-1;
-                handles.data.focusCenter = handles.data.calls.Box(handles.data.currentcall,1) + handles.data.calls.Box(handles.data.currentcall,3)/2;
-            end
-            handles.data.current_call_valid = true;
-            update_fig(hObject, eventdata, handles);
+%Continue applying global thresholds if applicable
+if bApplyGlobal
+    % Apply global settings to all calls
+    handles.data.calls.EntThresh(:) = handles.data.settings.EntropyThreshold;
+    handles.data.calls.AmpThresh(:) = handles.data.settings.AmplitudeThreshold;
+    % Start at and update last call
+    handles.data.currentcall=height(handles.data.calls);
+    handles.data.focusCenter = handles.data.calls.Box(handles.data.currentcall,1) + handles.data.calls.Box(handles.data.currentcall,3)/2;
+    update_fig(hObject, eventdata, handles);
+    % Cycle through all calls applying global thresholds
+    for cc = height(handles.data.calls):-1:2
+        if handles.data.currentcall > 1 % If not the first call
+            handles.data.currentcall=handles.data.currentcall-1;
+            handles.data.focusCenter = handles.data.calls.Box(handles.data.currentcall,1) + handles.data.calls.Box(handles.data.currentcall,3)/2;
         end
-        % Reset
-        handles.data.currentcall = 1;
-        handles.data.focusCenter = handles.data.calls.Box(handles.data.currentcall,1) + handles.data.calls.Box(handles.data.currentcall,3)/2;
+        handles.data.current_call_valid = true;
+        update_fig(hObject, eventdata, handles);
+    end
+    % Reset
+    handles.data.currentcall = 1;
+    handles.data.focusCenter = handles.data.calls.Box(handles.data.currentcall,1) + handles.data.calls.Box(handles.data.currentcall,3)/2;
+    disp('Saving file with globally-applied Entropy and Amplitude Thresholds for each call...')
+    savesession_Callback(hObject, eventdata, handles);
 end

@@ -99,15 +99,14 @@ for j = 1:length(audioselections)
     audioReader.audiodata = audioinfo(AudioFile);
     for i = 1:height(Calls) % Do this for each call
         % Get spectrogram data
-        [I,windowsize,~,~,rate,~] = CreateFocusSpectrogram(Calls(i, :),handles,true, [], audioReader);
-        
-        ridgePower = max(I);
-        % Magnitude sqaured divided by sum of squares of hamming window
-        ridgePower = ridgePower.^2 / sum(hamming(windowsize).^2);
-        ridgePower = 2*ridgePower / rate;
+        [I,windowsize,noverlap,nfft,rate,box] = CreateFocusSpectrogram(Calls(i, :),handles,true, [], audioReader);
+        stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.data.settings.EntropyThreshold,handles.data.settings.AmplitudeThreshold);
+
         % Mean power of the call contour (mean needs to be before log)
-        Calls.Power(i) = 10 * log10(mean(ridgePower));
+        Calls.Power(i) = stats.MeanPower;
     end
+    Calls.EntThresh(:) = handles.data.settings.EntropyThreshold;
+    Calls.AmpThresh(:) = handles.data.settings.AmplitudeThreshold;
     
     %% Save the file
     % Save the Call table, detection metadata, and results of audioinfo
