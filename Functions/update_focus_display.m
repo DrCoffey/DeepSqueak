@@ -46,9 +46,8 @@ end
 set(handles.TonalitySlider, 'Value', handles.data.calls.EntThresh(handles.data.currentcall));
 
 [I,windowsize,noverlap,nfft,rate,box,~,~,~] = CreateFocusSpectrogram(handles.data.calls(handles.data.currentcall,:),handles,false, [], handles.data);
-stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.data.calls.EntThresh(handles.data.currentcall),handles.data.calls.AmpThresh(handles.data.currentcall));
 
-handles.data.calls.Power(handles.data.currentcall) = stats.MeanPower;
+stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.data.calls.EntThresh(handles.data.currentcall),handles.data.calls.AmpThresh(handles.data.currentcall));
 
 % plot Ridge Detection
 set(handles.ContourScatter,'XData',stats.ridgeTime','YData',stats.ridgeFreq_smooth);
@@ -75,7 +74,7 @@ set(handles.freq,'String',['Frequency: ' num2str(stats.PrincipalFreq,'%.1f') ' k
 set(handles.slope,'String',['Slope: ' num2str(stats.Slope,'%.3f') ' kHz/s']);
 set(handles.duration,'String',['Duration: ' num2str(stats.DeltaTime*1000,'%.0f') ' ms']);
 set(handles.sinuosity,'String',['Sinuosity: ' num2str(stats.Sinuosity,'%.4f')]);
-set(handles.powertext,'String',['Rel Pwr: ' num2str(handles.data.calls.Power(handles.data.currentcall)) ' dB/Hz'])
+set(handles.powertext,'String',['Rel Pwr: ' num2str(stats.MeanPower) ' dB/Hz']);
 set(handles.tonalitytext,'String',['Tonality: ' num2str(stats.SignalToNoise,'%.4f')]);
 
 % Waveform

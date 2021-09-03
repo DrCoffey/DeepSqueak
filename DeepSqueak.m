@@ -429,7 +429,6 @@ new_box = table();
 new_box.Box = current_box.Position;
 new_box.Score = 1;
 new_box.Type = categorical({'USV'});
-new_box.Power = 0;
 new_box.EntThresh = handles.data.settings.EntropyThreshold;
 new_box.AmpThresh = handles.data.settings.AmplitudeThreshold;
 new_box.Accept = true;
@@ -868,7 +867,7 @@ end
 
 handles.data.audiodata = audioinfo(fullfile(handles.data.settings.audiofolder,handles.current_audio_file));
 
-Calls = table(zeros(0,4),[],[],[],[],[],[], 'VariableNames', {'Box', 'Score', 'Type', 'Power', 'EntThresh', 'AmpThresh', 'Accept'});
+Calls = table(zeros(0,4),[],[],[],[],[],[], 'VariableNames', {'Box', 'Score', 'Type', 'EntThresh', 'AmpThresh', 'Accept'});
 % Calls.Box = [0 0 1 1];
 % Calls.Score = 0;
 % Calls.Type = categorical({'NA'});
