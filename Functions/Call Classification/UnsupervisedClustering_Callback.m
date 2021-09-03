@@ -170,7 +170,7 @@ if FromExisting(1) == 'N'
         case 'K-means (recommended)'
             [FileName, PathName] = uiputfile(fullfile(handles.data.squeakfolder, 'Clustering Models', 'K-Means Model.mat'), 'Save clustering model');
             if ~isnumeric(FileName)
-                save(fullfile(PathName, FileName), 'C', 'freq_weight', 'slope_weight', 'duration_weight', 'clusterName', 'spectrogramOptions');
+                save(fullfile(PathName, FileName), 'C', 'num_pts','freq_weight', 'slope_weight', 'duration_weight', 'clusterName', 'spectrogramOptions');
             end
         case 'ARTwarp'
             [FileName, PathName] = uiputfile(fullfile(handles.data.squeakfolder, 'Clustering Models', 'ARTwarp Model.mat'), 'Save clustering model');
