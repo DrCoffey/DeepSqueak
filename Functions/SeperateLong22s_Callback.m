@@ -55,12 +55,9 @@ end_time__ = accumarray(componentIndices', oldBoxes(:,1)+oldBoxes(:,3), [], @max
 high_freq_ = accumarray(componentIndices', oldBoxes(:,2)+oldBoxes(:,4), [], @max);
 
 merged_scores = accumarray(componentIndices', Calls.Score, [], @mean);
-merged_power  = accumarray(componentIndices', Calls.Power, [], @mean);
 
 call_duration = end_time__ - begin_time;
 call_bandwidth = high_freq_ - lower_freq;
-
-
 
 %% Now, extract the spectrogram from each box, and find the calls within the box by using tonality
 for i=1:length(begin_time)
@@ -123,8 +120,6 @@ for i=1:length(begin_time)
         repmat(high_freq_(i)-lower_freq(i),length(startime),1)];
 
     newScores = [newScores; repmat(merged_scores(i),length(startime),1)];
-    newPower = [newScores; repmat(merged_power(i),length(startime),1)];
-
 end
 
 %%
@@ -147,7 +142,6 @@ for i=1:size(newBoxes,1)
     NewCalls(i).Box=newBoxes(i,:);
     NewCalls(i).Score=newScores(i);
     NewCalls(i).Type=categorical({'USV'});
-    NewCalls(i).Power=newPower(i);
     NewCalls(i).Accept=1;
 
 end

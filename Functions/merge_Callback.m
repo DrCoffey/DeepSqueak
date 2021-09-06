@@ -23,11 +23,9 @@ hc = waitbar(0,'Merging Output Structures');
 cd(handles.data.squeakfolder);
 detectionFilename = cellstr(detectionFilename);
 
-
 AllBoxes = [];
 AllScores = [];
 AllClass = [];
-AllPower = [];
 AllAccept = [];
 
 for j = 1:length(detectionFilename)
@@ -36,7 +34,6 @@ for j = 1:length(detectionFilename)
     AllBoxes = [AllBoxes; Calls.Box];
     AllScores = [AllScores; Calls.Score];
     AllClass = [AllClass; Calls.Type];
-    AllPower = [AllPower; Calls.Power];
     AllAccept = [AllAccept; Calls.Accept];
 end
 
@@ -49,7 +46,7 @@ end
 clear('Calls')
 %% Merge overlapping boxes
 waitbar(.5,hc,'Writing Output Structure');
-Calls = merge_boxes(AllBoxes, AllScores .* AllAccept, AllClass, AllPower, audio_info, 1, 0, 0);
+Calls = merge_boxes(AllBoxes, AllScores .* AllAccept, AllClass, audio_info, 1, 0, 0);
 
 [FileName, PathName] = uiputfile(fullfile(handles.data.settings.detectionfolder, '*.mat'), 'Save Merged Detections');
 waitbar(1/2, hc, 'Saving...');
