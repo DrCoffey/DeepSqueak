@@ -178,6 +178,9 @@ set(handles.focusWindow,'YTick',[]);
 update_folders(hObject, eventdata, handles);
 handles = guidata(hObject);  % Get newest version of handles
 
+% Set the sliders to the saved values
+% set(handles.TonalitySlider, 'Value', handles.data.settings.EntropyThreshold);
+
 % Set the page and focus window dropdown boxes to the values defined in
 % squeakData, and set the current value to the one closest to the save value.
 handles.epochWindowSizePopup.String = compose('%gs', handles.data.pageSizes);
@@ -586,7 +589,6 @@ if ~isempty(Tonality) && ~isempty(Amplitude)
     handles.data.settings.EntropyThreshold = Tonality;
     handles.data.settings.AmplitudeThreshold = Amplitude;
     handles.data.saveSettings();
-
     update_folders(hObject, eventdata, handles);
     try
         update_fig(hObject, eventdata, handles);
@@ -820,7 +822,7 @@ end
 
 handles.data.audiodata = audioinfo(fullfile(handles.data.settings.audiofolder,handles.current_audio_file));
 
-Calls = table(zeros(0,4),[],[],[],[], 'VariableNames', {'Box', 'Score', 'Type', 'Accept'});
+Calls = table(zeros(0,4),[],[],[], 'VariableNames', {'Box', 'Score', 'Type', 'Accept'});
 % Calls.Box = [0 0 1 1];
 % Calls.Score = 0;
 % Calls.Type = categorical({'NA'});
@@ -883,4 +885,3 @@ function waveformWindow_CreateFcn(hObject, eventdata, handles)
 % handles    empty - handles not created until after all CreateFcns called
 
 % Hint: place code in OpeningFcn to populate waveformWindow
-
