@@ -28,7 +28,6 @@ if isempty(handles.data.calls) || ~any(handles.data.calls.Box(handles.data.curre
 end
 
 [I,windowsize,noverlap,nfft,rate,box,~,~,~] = CreateFocusSpectrogram(handles.data.calls(handles.data.currentcall,:),handles,false, [], handles.data);
-
 stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.data.settings.EntropyThreshold,handles.data.settings.AmplitudeThreshold);
 % plot Ridge Detection
 set(handles.ContourScatter,'XData',stats.ridgeTime','YData',stats.ridgeFreq_smooth);
@@ -70,8 +69,8 @@ set(handles.Waveform,...
 y = 0-stats.Entropy;
 x = 1:length(stats.Entropy);
 z = zeros(size(x));
-%col = double(stats.Entropy < 1-handles.data.settings.EntropyThreshold);  % This is the color, vary with x in this case.
-%set(handles.SNR, 'XData', [x;x], 'YData', [y;y], 'ZData', [z;z], 'CData', [col;col]);
+% col = double(stats.Entropy < 1-handles.data.settings.EntropyThreshold);  % This is the color, vary with x in this case.
+% set(handles.SNR, 'XData', [x;x], 'YData', [y;y], 'ZData', [z;z], 'CData', [col;col]);
 set(handles.waveformWindow, 'XLim', [x(1), x(end)]);
 % guidata(hObject, handles);
 end
