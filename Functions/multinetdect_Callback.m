@@ -92,22 +92,6 @@ for j = 1:length(audioselections)
     h = waitbar(1,'Saving...');
     Calls = Automerge_Callback(Calls, [], AudioFile);
     
-    % Correct power measure for merged calls
-    % This should also now be consistent with the calculation in
-    % CalculateStats
-    audioReader = squeakData([]);
-    audioReader.audiodata = audioinfo(AudioFile);
-    for i = 1:height(Calls) % Do this for each call
-        % Get spectrogram data
-        [I,windowsize,noverlap,nfft,rate,box] = CreateFocusSpectrogram(Calls(i, :),handles,true, [], audioReader);
-        stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.data.settings.EntropyThreshold,handles.data.settings.AmplitudeThreshold);
-
-        % Mean power of the call contour (mean needs to be before log)
-        Calls.Power(i) = stats.MeanPower;
-    end
-    Calls.EntThresh(:) = handles.data.settings.EntropyThreshold;
-    Calls.AmpThresh(:) = handles.data.settings.AmplitudeThreshold;
-    
     %% Save the file
     % Save the Call table, detection metadata, and results of audioinfo
     

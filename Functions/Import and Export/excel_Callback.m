@@ -19,17 +19,8 @@ function excel_Callback(hObject, eventdata, handles)
                 % Get spectrogram data
                 [I,windowsize,noverlap,nfft,rate,box] = CreateFocusSpectrogram(Calls(i, :),handles,true, [], audioReader);
                 
-                % If each call was saved with its own Entropy and Amplitude
-                % Threshold, run CalculateStats with those values,
-                % otherwise run with global settings
-                if any(strcmp('EntThresh',Calls.Properties.VariableNames)) && ...
-                    ~isempty(Calls.EntThresh(i))
-                    % Calculate statistics
-                    stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,Calls.EntThresh(i),Calls.AmpThresh(i));
-                else
-                    % Calculate statistics
-                    stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.data.settings.EntropyThreshold,handles.data.settings.AmplitudeThreshold);
-                end
+                % Calculate statistics
+                stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.data.settings.EntropyThreshold,handles.data.settings.AmplitudeThreshold);
                 
                 ID = i;
                 Label = Calls.Type(i);

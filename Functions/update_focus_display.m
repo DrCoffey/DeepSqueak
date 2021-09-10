@@ -27,28 +27,9 @@ if isempty(handles.data.calls) || ~any(handles.data.calls.Box(handles.data.curre
     return
 end
 
-% If a call was not saved with an Entropy or Amplitude threshold, apply
-% global settings to that call
-if ~any(strcmp('EntThresh',handles.data.calls.Properties.VariableNames)) || ...
-    isempty(handles.data.calls.EntThresh(handles.data.currentcall)) || ...
-    handles.data.calls.EntThresh(handles.data.currentcall) == 0
-    
-    handles.data.calls.EntThresh(handles.data.currentcall) = handles.data.settings.EntropyThreshold;
-end
-if ~any(strcmp('AmpThresh',handles.data.calls.Properties.VariableNames)) || ...
-    isempty(handles.data.calls.AmpThresh(handles.data.currentcall)) || ...
-    handles.data.calls.AmpThresh(handles.data.currentcall) == 0
-
-    handles.data.calls.AmpThresh(handles.data.currentcall) = handles.data.settings.AmplitudeThreshold;
-end
-
-% Set the sliders to the saved values
-set(handles.TonalitySlider, 'Value', handles.data.calls.EntThresh(handles.data.currentcall));
-
 [I,windowsize,noverlap,nfft,rate,box,~,~,~] = CreateFocusSpectrogram(handles.data.calls(handles.data.currentcall,:),handles,false, [], handles.data);
 
-stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.data.calls.EntThresh(handles.data.currentcall),handles.data.calls.AmpThresh(handles.data.currentcall));
-
+stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.data.settings.EntropyThreshold,handles.data.settings.AmplitudeThreshold);
 % plot Ridge Detection
 set(handles.ContourScatter,'XData',stats.ridgeTime','YData',stats.ridgeFreq_smooth);
 set(handles.contourWindow,'Xlim',[1 size(I,2)],'Ylim',[1 size(I,1)]);
@@ -89,8 +70,8 @@ set(handles.Waveform,...
 y = 0-stats.Entropy;
 x = 1:length(stats.Entropy);
 z = zeros(size(x));
-col = double(stats.Entropy < 1-handles.data.calls.EntThresh(handles.data.currentcall));  % This is the color, vary with x in this case.
-set(handles.SNR, 'XData', [x;x], 'YData', [y;y], 'ZData', [z;z], 'CData', [col;col]);
+%col = double(stats.Entropy < 1-handles.data.settings.EntropyThreshold);  % This is the color, vary with x in this case.
+%set(handles.SNR, 'XData', [x;x], 'YData', [y;y], 'ZData', [z;z], 'CData', [col;col]);
 set(handles.waveformWindow, 'XLim', [x(1), x(end)]);
 % guidata(hObject, handles);
 end
