@@ -471,8 +471,7 @@ function folders_Callback(hObject, eventdata, handles)
 function export_raven_Callback(hObject, eventdata, handles)
 % Export current file as a txt file for viewing in Raven
 % http://www.birds.cornell.edu/brp/raven/RavenOverview.html
-handles.current_file_id = get(handles.popupmenuDetectionFiles,'Value');
-current_detection_file = handles.detectionfiles(handles.current_file_id).name;
+
 raventable = [{'Selection'} {'View'} {'Channel'} {'Begin Time (s)'} {'End Time (s)'} {'Low Freq (Hz)'} {'High Freq (Hz)'} {'Delta Time (s)'} {'Delta Freq (Hz)'} {'Avg Power Density (dB FS)'} {'Annotation'} {'Begin Path'} {'File Offset'}];
 View = 'Spectrogram 1';
 Channel = 1;
@@ -493,6 +492,8 @@ for i = 1:height(handles.data.calls)
     end
 end
 a  = cell2table(raventable);
+handles.current_file_id = get(handles.popupmenuDetectionFiles,'Value');
+current_detection_file = handles.detectionfiles(handles.current_file_id).name;
 ravenname=[strtok(current_detection_file,'.') '_Raven.txt'];
 [FileName,PathName] = uiputfile(ravenname,'Save Raven Truth Table (.txt)');
 writetable(a,[PathName FileName],'delimiter','\t','WriteVariableNames',false);
