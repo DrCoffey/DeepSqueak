@@ -485,7 +485,7 @@ for i = 1:height(handles.data.calls)
         DeltaFreq = HighFreq - LowFreq;
         AvgPwr = 1;
         Annotation = handles.data.calls.Accept(i);
-        BeginPath = handles.data.audiodata.Filename
+        BeginPath = handles.data.audiodata.Filename;
         FileOffset = handles.data.calls.Box(i, 1);
         raventable = [raventable; {Selection} {View} {Channel} {BeginTime} {EndTime} {LowFreq} {HighFreq} {DeltaTime} {DeltaFreq} {AvgPwr} {Annotation} {BeginPath} {FileOffset}];
     end
