@@ -471,7 +471,6 @@ function folders_Callback(hObject, eventdata, handles)
 function export_raven_Callback(hObject, eventdata, handles)
 % Export current file as a txt file for viewing in Raven
 % http://www.birds.cornell.edu/brp/raven/RavenOverview.html
-
 raventable = [{'Selection'} {'View'} {'Channel'} {'Begin Time (s)'} {'End Time (s)'} {'Low Freq (Hz)'} {'High Freq (Hz)'} {'Delta Time (s)'} {'Delta Freq (Hz)'} {'Avg Power Density (dB FS)'} {'Annotation'} {'Begin Path'} {'File Offset'}];
 View = 'Spectrogram 1';
 Channel = 1;
