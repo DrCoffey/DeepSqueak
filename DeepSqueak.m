@@ -386,6 +386,9 @@ switch eventdata.Character
         RejectCall_Callback(hObject, eventdata, handles)
     case 'd'
         rectangle_Callback(hObject, eventdata, handles)
+    case 127 % Delete key
+        handles.data.calls(handles.data.currentcall,:) = [];
+        SortCalls(hObject, [], handles, 'time', 0, handles.data.currentcall - 1);
     case 30 % char(30) is up arrow key
         slide_focus(+ handles.data.settings.focus_window_size, hObject, eventdata, handles)
     case 31 % char(31) is down arrow key
