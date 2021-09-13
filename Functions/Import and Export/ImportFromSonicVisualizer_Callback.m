@@ -18,7 +18,7 @@ sv_table = readtable([svpath svname],'Delimiter', ',');
     }, ['Select Audio File for ' svname],handles.data.settings.audiofolder);
 
 
-Calls  = cell2table(cell(0,6), 'VariableNames', {'Box', 'Score', 'Accept', 'Type', 'Power', 'Tag'});
+Calls  = cell2table(cell(0,5), 'VariableNames', {'Box', 'Score', 'Accept', 'Type', 'Tag'});
 hc = waitbar(0,'Importing Calls from Sonic Visualizer');
 n_rows = size(sv_table,1);
 for i=1:n_rows

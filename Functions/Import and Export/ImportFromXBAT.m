@@ -58,7 +58,6 @@ for file = fname
             Calls(i).Accept=0;
         end
         Calls(i).Type=data.event(i).annotation.name;
-        Calls(i).Power = 0;
         
     end
     Calls = struct2table(Calls);

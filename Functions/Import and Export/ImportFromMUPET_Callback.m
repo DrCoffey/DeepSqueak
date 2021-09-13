@@ -19,7 +19,7 @@ if FileName == 0
 end
 audiodata = audioinfo([audiopath audioname]);
 
-Calls = struct('Box',struct,'Score',struct,'Accept',struct,'Type',struct,'Power',struct);
+Calls = struct('Box',struct,'Score',struct,'Accept',struct,'Type',struct);
 hc = waitbar(0,'Importing Calls from MUPET Log');
 for i=1:length(MUPET.SyllableNumber)
     waitbar(i/length(MUPET.SyllableNumber),hc);
@@ -27,7 +27,6 @@ for i=1:length(MUPET.SyllableNumber)
     Calls(i).Score = 1;
     Calls(i).Accept=1;
     Calls(i).Type=categorical({'USV'});
-    Calls(i).Power = 1;
 end
 Calls = struct2table(Calls);
 [~, name] = fileparts(mupetname);

@@ -33,7 +33,6 @@ end
 Box    = [ravenTable.BeginTime_s_, ravenTable.LowFreq_Hz_/1000, ravenTable.DeltaTime_s_, (ravenTable.HighFreq_Hz_ - ravenTable.LowFreq_Hz_)/1000];
 Score  = ones(height(ravenTable),1);
 Accept = ones(height(ravenTable),1);
-Power  = zeros(height(ravenTable),1);
 
 %% Get the classification from raven, from the variable 'Tags' or 'Annotation'
 if ismember('Tags', ravenTable.Properties.VariableNames)
@@ -46,7 +45,7 @@ end
 
 
 %% Put all the variables into a table
-Calls = table(Box,Score,Accept,Type,Power,'VariableNames',{'Box','Score','Accept','Type','Power'});
+Calls = table(Box,Score,Accept,Type,'VariableNames',{'Box','Score','Accept','Type'});
 
 
 [~ ,name] = fileparts(audioname);
