@@ -40,7 +40,7 @@ overlap=networkfile.imLength*.2;
 
 % (2) High frequency cutoff (kHz)
 if audio_info.SampleRate < (Settings(2)*1000)*2
-    disp('Warning: Upper Range Above Nyquist Frequency');
+    disp('Warning: Upper frequency is above sampling rate / 2. Lowering it to the Nyquist frequency.');
     HighCutoff=floor(audio_info.SampleRate/2000);
 else
     HighCutoff = Settings(2);

@@ -194,3 +194,14 @@ end
 
 [fname,fpath] = uiputfile({'*.jpg'; '*.png'},'Save image', 'embeddings');
 imwrite(im2uint8(im(y1:y2,x1:x2,:)),fullfile(fpath,fname))
+
+% Open the image in a file manager
+if ispc % Open the file in windows explorer
+    system(['explorer.exe /select,"' fullfile(fpath,fname) '"']);
+    % winopen(fullfile(fpath,fname));
+elseif ismac % Open the file in finder - UNTESTED (I don't have a mac)
+    system(['open -a Finder "' fullfile(fpath,fname) '"']);
+elseif isunix % Open the file in linux file manager - UNTESTED
+    system(['xdg-open "' fullfile(fpath) '"']); % open folder in file manager
+    % system(['xdg-open "' fullfile(fpath, fname) '"']); % open image in default viewer
+end

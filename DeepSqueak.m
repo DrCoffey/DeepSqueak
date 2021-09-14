@@ -386,11 +386,14 @@ switch eventdata.Character
         RejectCall_Callback(hObject, eventdata, handles)
     case 'd'
         rectangle_Callback(hObject, eventdata, handles)
+    case 127 % Delete key
+        handles.data.calls(handles.data.currentcall,:) = [];
+        SortCalls(hObject, [], handles, 'time', 0, handles.data.currentcall - 1);
     case 30 % char(30) is up arrow key
         slide_focus(+ handles.data.settings.focus_window_size, hObject, eventdata, handles)
     case 31 % char(31) is down arrow key
         slide_focus(- handles.data.settings.focus_window_size, hObject, eventdata, handles)
-    case 'space'
+    case 32 % 'space'
         forwardButton_Callback(hObject, eventdata, handles);
     case handles.data.labelShortcuts
         %% Update the call labels
@@ -471,7 +474,7 @@ function folders_Callback(hObject, eventdata, handles)
 function export_raven_Callback(hObject, eventdata, handles)
 % Export current file as a txt file for viewing in Raven
 % http://www.birds.cornell.edu/brp/raven/RavenOverview.html
-raventable = [{'Selection'} {'View'} {'Channel'} {'Begin Time (s)'} {'End Time (s)'} {'Low Freq (Hz)'} {'High Freq (Hz)'} {'Delta Time (s)'} {'Delta Freq (Hz)'} {'Avg Power Density (dB FS)'} {'Annotation'}];
+raventable = [{'Selection'} {'View'} {'Channel'} {'Begin Time (s)'} {'End Time (s)'} {'Low Freq (Hz)'} {'High Freq (Hz)'} {'Delta Time (s)'} {'Delta Freq (Hz)'} {'Avg Power Density (dB FS)'} {'Annotation'} {'Begin Path'} {'File Offset'}];
 View = 'Spectrogram 1';
 Channel = 1;
 for i = 1:height(handles.data.calls)
@@ -485,7 +488,9 @@ for i = 1:height(handles.data.calls)
         DeltaFreq = HighFreq - LowFreq;
         AvgPwr = 1;
         Annotation = handles.data.calls.Accept(i);
-        raventable = [raventable; {Selection} {View} {Channel} {BeginTime} {EndTime} {LowFreq} {HighFreq} {DeltaTime} {DeltaFreq} {AvgPwr} {Annotation}];
+        BeginPath = handles.data.audiodata.Filename;
+        FileOffset = handles.data.calls.Box(i, 1);
+        raventable = [raventable; {Selection} {View} {Channel} {BeginTime} {EndTime} {LowFreq} {HighFreq} {DeltaTime} {DeltaFreq} {AvgPwr} {Annotation} {BeginPath} {FileOffset}];
     end
 end
 a  = cell2table(raventable);
@@ -532,7 +537,7 @@ prompt = {
     };
 
 dlg_title = 'Set Custom Label Names';
-num_lines=[1,60]; options.Resize='off'; options.WindowStyle='modal'; options.Interpreter='tex';
+num_lines=[1,60]; options.Resize='off'; options.WindowStyle='modal'; options.Interpreter='none';
 old_labels = handles.data.settings.labels;
 new_labels = inputdlgcol(prompt,dlg_title,num_lines,old_labels,options,3);
 if ~isempty(new_labels)
@@ -573,21 +578,31 @@ function CallClassification_Callback(hObject, eventdata, handles)
 % --------------------------------------------------------------------
 function ChangeContourThreshold_Callback(hObject, eventdata, handles)
 % Change the contour threshold
-prompt = {'Entropy Threshold: (default = 0.215)', 'Amplitude Percentile Threshold: (default = 0.825)'};
+prompt = {'Entropy Threshold: (range = 0-1, default = 0.215)', 'Amplitude Percentile Threshold: (range = 0-1, default = 0.825)'};
 dlg_title = 'New Contour Threshold:';
 num_lines=[1 50]; options.Resize='off'; options.WindowStyle='modal'; options.Interpreter='tex';
 defaultans = {num2str(handles.data.settings.EntropyThreshold),num2str(handles.data.settings.AmplitudeThreshold)};
 threshold = inputdlg(prompt,dlg_title,num_lines,defaultans);
 if isempty(threshold); return; end
 
-[Tonality,~,errmsg] = sscanf(threshold{1},'%f',1);
+[EntropyThreshold,~,errmsg] = sscanf(threshold{1},'%f',1);
 disp(errmsg);
-[Amplitude,~,errmsg] = sscanf(threshold{2},'%f',1);
+[AmplitudeThreshold,~,errmsg] = sscanf(threshold{2},'%f',1);
 disp(errmsg);
 
-if ~isempty(Tonality) && ~isempty(Amplitude)
-    handles.data.settings.EntropyThreshold = Tonality;
-    handles.data.settings.AmplitudeThreshold = Amplitude;
+if ~isempty(EntropyThreshold) && ~isempty(AmplitudeThreshold)
+
+    if AmplitudeThreshold < .001 || AmplitudeThreshold > .999
+        disp('Warning! Amplitude Percentile Threshold Must be (0 > 1), Reverting to Default (.825)');
+        AmplitudeThreshold = handles.data.defaultSettings.AmplitudeThreshold;
+    end
+    if EntropyThreshold < .001 || EntropyThreshold > .999
+        disp('Warning! Entropy Threshold Must be (0 > 1), Reverting to Default (.215)');
+        EntropyThreshold = handles.data.defaultSettings.EntropyThreshold;
+    end
+
+    handles.data.settings.EntropyThreshold = EntropyThreshold;
+    handles.data.settings.AmplitudeThreshold = AmplitudeThreshold;
     handles.data.saveSettings();
     update_folders(hObject, eventdata, handles);
     try
@@ -890,3 +905,25 @@ function waveformWindow_CreateFcn(hObject, eventdata, handles)
 % handles    empty - handles not created until after all CreateFcns called
 
 % Hint: place code in OpeningFcn to populate waveformWindow
+
+
+% --------------------------------------------------------------------
+function Keyboard_Shortcuts_Callback(hObject, eventdata, handles)
+% Display a list of keyboard shortcuts
+Keyboard_Shortcuts = [
+    "Save file", "ctrl + s"
+    "Next call", "e, right arrow"
+    "Previous call", "q, left arrow"
+    "Accept call", "a"
+    "Reject call", "r"
+    "Delete call", "delete"
+    "Redraw box", "d"
+    "Play call audio", "p"
+    "Set call label", "See ""Add Custom Labels"""
+    "Slide foucs forward", "up arrow"
+    "Slide foucs back", "down arrow"
+    "Next page", "space"
+    ];
+CreateStruct.Interpreter = 'tex';
+CreateStruct.WindowStyle = 'modal';
+msgbox(['\fontname{Courier}\fontsize{12}' sprintf('%-20s |   %s\n', Keyboard_Shortcuts')], 'Keyboard Shortcuts', CreateStruct)

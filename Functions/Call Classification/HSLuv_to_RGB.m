@@ -148,6 +148,7 @@ RGB = XYZ * T';
 RGB = max(RGB,0);
 RGB = gammaFcn(RGB);
 RGB = min(RGB,1);
+RGB = max(RGB,0);
 
 %% Plot the output
 switch p.Results.plot

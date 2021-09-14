@@ -13,7 +13,7 @@ prompt = {'Window Length (s)','Overlap (%)','NFFT (s)','Image Length (s)',...
     'Number of augmented duplicates'};
 dlg_title = 'Spectrogram Settings';
 num_lines=[1 40]; options.Resize='off'; options.windStyle='modal'; options.Interpreter='tex';
-spectSettings = str2double(inputdlg(prompt,dlg_title,num_lines,{'0.0032','50','0.0032','.5','0'},options));
+spectSettings = str2double(inputdlg(prompt,dlg_title,num_lines,{num2str(handles.data.settings.spect.windowsize,3),'50',num2str(handles.data.settings.spect.nfft,3),'.5','0'},options));
 if isempty(spectSettings); return; end
 
 wind = spectSettings(1);
@@ -137,6 +137,17 @@ end
 lowCut=(min(Calls.Box(:,2))-(min(Calls.Box(:,2))*.75))*1000;
 min_freq  = find(fr>lowCut);
 p = p(min_freq,:);
+
+% % Add brown noise to adjust the amplitude
+% if replicatenumber > 1
+%     AmplitudeFactor = spatialPattern(size(p), -3);
+%     AmplitudeFactor = AmplitudeFactor ./ std(AmplitudeFactor, [], 'all');
+%     AmplitudeFactor = AmplitudeFactor .* range(AmplitudeRange) ./ 2 + mean(AmplitudeRange);
+% end
+% im = log10(p);
+% im = (im - mean(im, 'all')) * std(im, [],'all');
+% im = rescale(im + AmplitudeFactor .* im.^3 ./ (im.^2+2), 'InputMin',-1 ,'InputMax', 5);
+
 
 % -- convert power spectral density to [0 1]
 p(p==0)=.01;
