@@ -49,27 +49,32 @@ y_position = fig_pos(2) + fig_pos(4) * (axes_position(2) + axes_position(4)*rect
 x_position = min(x_position,fig_pos(3)-dialog_width);
 y_position = min(y_position,fig_pos(4)-dialog_heigth);
 
-d = dialog('Position',[x_position y_position dialog_width dialog_heigth],'Name',['Call ' tag],'Units','normal');
+d = dialog('Position',[x_position y_position dialog_width dialog_heigth],'Name',['Change label for call ' tag],'Units','normal');
 
-n_columns = 5;
-n_rows = 6;
-button_width = 70;
-button_height = 25;
-button_spacing = 1;
-type_index = 1;
-padding = 1;
-for c=1:n_columns
-    for r=1:n_rows
-        x_position = padding + (c-1)*button_width + button_spacing*(c-1);
-        y_position = padding + (r-1)*button_height + button_spacing*(r-1);
-        
+% Get the number of rows to columns
+n_columns = floor(sqrt(length(handles.data.settings.labels)));
+n_rows = ceil(length(handles.data.settings.labels) / n_columns);
+
+button_width = 1 ./ n_columns;
+button_height = 1 ./ n_rows;
+label_index = 0;
+padding = .1;
+
+for c = 1:n_columns
+    for r = n_rows:-1:1
+        label_index = label_index + 1;
+        if label_index > length(handles.data.settings.labels)
+            continue
+        end
+        x_position = (c-1) / n_columns + button_width*padding/2;
+        y_position = (r-1) / n_rows + button_height*padding/2;
         uicontrol('Parent',d,...
-            'Position',[x_position y_position button_width button_height],...
-            'String',handles.data.settings.labels{type_index},...
-            'Callback',{@label_callback,handles.data.settings.labels{type_index}},...
+            'Units', 'normalized',...
+            'Position',[x_position, y_position, button_width*(1-padding), button_height*(1-padding)],...
+            'String',handles.data.settings.labels{label_index},...
+            'Callback',{@label_callback,handles.data.settings.labels{label_index}},...
             'BackgroundColor',[0.302,0.502,0.302],...
             'ForegroundColor',[1.0 1.0 1.0]);
-        type_index = type_index +1;
     end
 end
 

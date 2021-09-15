@@ -12,7 +12,14 @@ calls_in_page = find( (handles.data.calls.Box(:,1) >= axis_xlim(1) & handles.dat
     );
 
 boxes = handles.data.calls.Box(calls_in_page,:);
-    
+
+% Draw labels if there are any labels other than 'USV'
+if any(handles.data.calls.Type ~= 'USV')
+    LabelVisible = 'on'; % use 'hover' to only display labels on mouse over2
+else
+    LabelVisible = 'off';
+end
+
 % Loop through all calls
 for box_number = 1:length(calls_in_page)
     current_tag = num2str(calls_in_page(box_number));
@@ -35,9 +42,17 @@ for box_number = 1:length(calls_in_page)
     end
     
     if roi
+        
+        % Only display a label if it isn't just "USV"
+        % if handles.data.calls.Type(calls_in_page(box_number)) == 'USV'
+            % label = '';
+        % else
+            label = char(handles.data.calls.Type(calls_in_page(box_number)));
+        % end
+        
         % Add a new rectangle if there isn't a handle for one yet, or
         % update an existing one
-        if box_number > length(handles.FocusWindowRectangles)
+        if box_number > length(handles.FocusWindowRectangles) % draw a new rectangle if we need more
             c = uicontextmenu;
             handles.FocusWindowRectangles{box_number} = drawrectangle(...
                 'Position', boxes(box_number, :),...
@@ -46,7 +61,10 @@ for box_number = 1:length(calls_in_page)
                 'FaceAlpha', 0,...
                 'LineWidth', line_width,...
                 'Tag', current_tag,...
-                'uicontextmenu', c);
+                'uicontextmenu', c,...
+                'label', label,...
+                'LabelAlpha', .5,...
+                'LabelVisible', LabelVisible);
             addlistener(handles.FocusWindowRectangles{box_number},'ROIClicked',@callBoxDeleteCallback);
             addlistener(handles.FocusWindowRectangles{box_number},'ROIMoved', @roiMovedCallback);
         else
@@ -55,7 +73,9 @@ for box_number = 1:length(calls_in_page)
                 'Color', box_color,...
                 'LineWidth', line_width,...
                 'Tag', current_tag,...
-                'Visible', true)
+                'Visible', true,...
+                'label', label,...
+                'LabelVisible', LabelVisible);
         end
         
     else
