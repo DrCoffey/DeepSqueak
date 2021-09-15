@@ -1,9 +1,9 @@
 % --- Executes on button press in LOAD CALLS.
-function loadcalls_Callback(hObject, eventdata, handles,call_file_number)
+function loadcalls_Callback(hObject, eventdata, handles, reload_current_file)
 h = waitbar(0,'Loading Calls Please wait...');
 update_folders(hObject, eventdata, handles);
 handles = guidata(hObject);
-if nargin == 3 % if "Load Calls" button pressed
+if nargin == 3 % if "Load Calls" button pressed, load the selected file, else reload the current file
     if isempty(handles.detectionfiles)
         close(h);
         errordlg(['No valid detection files in current folder. Select a folder containing detection files with '...
