@@ -334,7 +334,7 @@ new_position = min(new_position, handles.data.audiodata.Duration - handles.data.
 new_position = max(new_position, handles.data.settings.focus_window_size ./ 2);
 handles.data.focusCenter = new_position;
 
-if new_position >= handles.data.windowposition + handles.data.settings.pageSize
+if new_position > handles.data.windowposition + handles.data.settings.pageSize
     forwardButton_Callback(hObject, eventdata, handles);
 elseif new_position < handles.data.windowposition
     backwardButton_Callback(hObject, eventdata, handles);
