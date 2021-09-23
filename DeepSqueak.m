@@ -334,7 +334,7 @@ new_position = min(new_position, handles.data.audiodata.Duration - handles.data.
 new_position = max(new_position, handles.data.settings.focus_window_size ./ 2);
 handles.data.focusCenter = new_position;
 
-if new_position >= handles.data.windowposition + handles.data.settings.pageSize
+if new_position > handles.data.windowposition + handles.data.settings.pageSize
     forwardButton_Callback(hObject, eventdata, handles);
 elseif new_position < handles.data.windowposition
     backwardButton_Callback(hObject, eventdata, handles);
@@ -916,10 +916,10 @@ Keyboard_Shortcuts = [
     "Previous call", "q, left arrow"
     "Accept call", "a"
     "Reject call", "r"
-    "Delete call", "delete"
+    "Delete call", "delete, right click"
     "Redraw box", "d"
     "Play call audio", "p"
-    "Set call label", "See ""Add Custom Labels"""
+    "Set call label", "See ""Add Custom Labels"", double click"
     "Slide foucs forward", "up arrow"
     "Slide foucs back", "down arrow"
     "Next page", "space"
