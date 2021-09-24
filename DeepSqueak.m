@@ -282,6 +282,42 @@ handles.data.current_call_valid = true;
 update_fig(hObject, eventdata, handles);
 
 
+% --- Executes on button press in NextFile.
+function NextFile_Callback(hObject, eventdata, handles)
+numfiles = length(handles.detectionfiles);
+%Make sure we actually have an active Detections folder
+if numfiles > 0
+    handles.current_file_id = get(handles.popupmenuDetectionFiles,'Value');
+    % Check for a next file
+    if handles.current_file_id < numfiles
+        % If confirmed possible, increment to next file
+        handles.current_file_id = handles.current_file_id + 1;
+        % Make sure the drop-down matches what's happening internally
+        handles.popupmenuDetectionFiles.Value = handles.current_file_id;
+        handles.current_detection_file = handles.detectionfiles(handles.current_file_id).name;
+        % Last argument (1) bypasses the behavior of pressing the LoadCalls button
+        loadcalls_Callback(hObject, eventdata, handles, 1);
+    end
+end
+
+% --- Executes on button press in PrevFile.
+function PrevFile_Callback(hObject, eventdata, handles)
+numfiles = length(handles.detectionfiles);
+%Make sure we actually have an active Detections folder
+if numfiles > 0
+    handles.current_file_id = get(handles.popupmenuDetectionFiles,'Value');
+    % Check for a previous file
+    if handles.current_file_id > 1
+        % If confirmed possible, decrement file
+        handles.current_file_id = handles.current_file_id - 1;
+        % Make sure the drop-down matches what's happening internally
+        handles.popupmenuDetectionFiles.Value = handles.current_file_id;
+        handles.current_detection_file = handles.detectionfiles(handles.current_file_id).name;
+        % Last argument (1) bypasses the behavior of pressing the LoadCalls button
+        loadcalls_Callback(hObject, eventdata, handles, 1);
+    end
+end
+
 % --- Executes on selection change in Networks Folder Pop up.
 function neuralnetworkspopup_Callback(hObject, eventdata, handles)
 guidata(hObject, handles);
@@ -697,12 +733,22 @@ handles.data.focusCenter = max(0, handles.data.windowposition - handles.data.set
 jumps = floor(handles.data.focusCenter / handles.data.settings.pageSize);
 handles.data.windowposition = jumps*handles.data.settings.pageSize;
 
-calls_within_window = find(handles.data.calls.Box(:,1) < handles.data.windowposition + handles.data.settings.pageSize, 1, 'last');
-if ~isempty(calls_within_window)
-    handles.data.currentcall = calls_within_window;
-    handles.data.current_call_valid = true;
+% if we can't page because we're at the beg of the file, make the first call
+% the current call
+if jumps == 0
+    if ~isempty(handles.data.calls)
+        handles.data.currentcall = 1;
+        handles.data.current_call_valid = true;
+    end
+% Otherwise make the last call in the new page window the current call
+% (will not necessarily be in focusWindow)
+else
+    calls_within_window = find(handles.data.calls.Box(:,1) < handles.data.windowposition + handles.data.settings.pageSize, 1, 'last');
+    if ~isempty(calls_within_window)
+        handles.data.currentcall = calls_within_window;
+        handles.data.current_call_valid = true;
+    end
 end
-
 update_fig(hObject, eventdata, handles);
 
 
@@ -718,10 +764,21 @@ handles.data.windowposition = jumps*handles.data.settings.pageSize;
 % handles.data.focusCenter = max(0, handles.data.windowposition - handles.data.settings.focus_window_size ./ 2);
 % get_closest_call_to_focus(hObject, eventdata, handles);
 
-calls_within_window = find(handles.data.calls.Box(:,1) > handles.data.windowposition, 1);
-if ~isempty(calls_within_window)
-    handles.data.currentcall = calls_within_window;
-    handles.data.current_call_valid = true;
+% if we can't page because we're at the end of the file, make the last call
+% the current call
+if jumps == 0
+    if ~isempty(handles.data.calls)
+        handles.data.currentcall = height(handles.data.calls);
+        handles.data.current_call_valid = true;
+    end
+% Otherwise make the first call in the new page window the current call
+% (will not necessarily be in focusWindow)
+else
+    calls_within_window = find(handles.data.calls.Box(:,1) > handles.data.windowposition, 1);
+    if ~isempty(calls_within_window)
+        handles.data.currentcall = calls_within_window;
+        handles.data.current_call_valid = true;
+    end
 end
 
 update_fig(hObject, eventdata, handles);
