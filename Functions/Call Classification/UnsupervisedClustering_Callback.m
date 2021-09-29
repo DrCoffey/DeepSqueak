@@ -36,7 +36,7 @@ while ~finished
                     end
                     
                     % Make a k-means model and return the centroids
-                    C = get_kmeans_centroids(data);
+                    [clustAssign,C] = get_kmeans_centroids(data);
                     if isempty(C); return; end
                     
                 case 'Yes'
@@ -58,30 +58,26 @@ while ~finished
                             
                             % If the model was created through create_tsne_Callback, C won't exist, so make it.
                             if isempty(C)
-                                C = get_kmeans_centroids(data);
+                                [clustAssign,C] = get_kmeans_centroids(data);
                             end
                     end
             end
-            [clustAssign,D] = knnsearch(C,data,'Distance','seuclidean');
             
             %% Sort the calls by how close they are to the cluster center
-            [~,idx] = sort(D);
-            clustAssign = clustAssign(idx);
-            ClusteringData = ClusteringData(idx,:);
+            [centAssign,~] = knnsearch(data,C,'Distance','seuclidean');
+            
             %% Make a montage with the top calls in each class
             try
                 % Find the median call length
-                [~, i] = unique(clustAssign,'sorted');
-                maxlength = cellfun(@(spect) size(spect,2), ClusteringData.Spectrogram(i));
+                maxlength = cellfun(@(spect) size(spect,2), ClusteringData.Spectrogram(centAssign));
                 maxlength = round(prctile(maxlength,75));
-                maxBandwidth = cellfun(@(spect) size(spect,1), ClusteringData.Spectrogram(i));
+                maxBandwidth = cellfun(@(spect) size(spect,1), ClusteringData.Spectrogram(centAssign));
                 maxBandwidth = round(prctile(maxBandwidth,75));
                 
                 % Make the image stack
                 montageI = [];
-                for i = unique(clustAssign)'
-                    index = find(clustAssign==i,1);
-                    tmp = ClusteringData.Spectrogram{index,1};
+                for i = 1:length(centAssign)
+                    tmp = ClusteringData.Spectrogram{centAssign(i),1};
                     tmp = padarray(tmp,[0,max(maxlength-size(tmp,2),0)],'both');
                     tmp = rescale(tmp,1,256);
                     montageI(:,:,i) = floor(imresize(tmp,[maxBandwidth,maxlength]));
@@ -214,7 +210,7 @@ data = [
     ];
 end
 
-function C = get_kmeans_centroids(data)
+function [clustAssign,C] = get_kmeans_centroids(data)
 % Make a k-means model and return the centroids
 optimize = questdlg('Optimize Cluster Number?','Cluster Optimization','Elbow Optimized','User Defined','Elbow Optimized');
 C = [];
@@ -227,12 +223,12 @@ switch optimize
         if size(data,1) < str2double(opt_options{1})
             opt_options{1} = num2str(size(data,1));
         end
-        [~,C] = kmeans_opt(data, str2double(opt_options{1}), 0, str2double(opt_options{2}));
+        [clustAssign,C] = kmeans_opt(data, str2double(opt_options{1}), 0, str2double(opt_options{2}));
         
     case 'User Defined'
         k = inputdlg({'Choose number of k-means:'},'Cluster with k-means',1,{'15'});
         if isempty(k); return; end
         k = str2double(k{1});
-        [~, C] = kmeans(data,k,'Distance','sqeuclidean','Replicates',10);
+        [clustAssign, C] = kmeans(data,k,'Distance','sqeuclidean','Replicates',10);
 end
 end
