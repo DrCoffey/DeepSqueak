@@ -292,11 +292,13 @@ if numfiles > 0
     if handles.current_file_id < numfiles
         % If confirmed possible, increment to next file
         handles.current_file_id = handles.current_file_id + 1;
-        % Make sure the drop-down matches what's happening internally
-        handles.popupmenuDetectionFiles.Value = handles.current_file_id;
         filename = fullfile(handles.detectionfiles(handles.current_file_id).folder, handles.detectionfiles(handles.current_file_id).name);
         % filename argument bypasses the behavior of pressing the LoadCalls button
-        loadcalls_Callback(hObject, eventdata, handles, filename);
+        cancelled = loadcalls_Callback(hObject, eventdata, handles, 'filename', filename);
+        % Make sure the drop-down matches what's happening internally
+        if ~cancelled
+            handles.popupmenuDetectionFiles.Value = handles.current_file_id;
+        end
     end
 end
 
@@ -310,11 +312,13 @@ if numfiles > 0
     if handles.current_file_id > 1
         % If confirmed possible, decrement file
         handles.current_file_id = handles.current_file_id - 1;
-        % Make sure the drop-down matches what's happening internally
-        handles.popupmenuDetectionFiles.Value = handles.current_file_id;
         filename = fullfile(handles.detectionfiles(handles.current_file_id).folder, handles.detectionfiles(handles.current_file_id).name);
         % filename argument bypasses the behavior of pressing the LoadCalls button
-        loadcalls_Callback(hObject, eventdata, handles, filename);
+        cancelled = loadcalls_Callback(hObject, eventdata, handles, 'filename', filename);
+        % Make sure the drop-down matches what's happening internally
+        if ~cancelled
+            handles.popupmenuDetectionFiles.Value = handles.current_file_id;
+        end
     end
 end
 

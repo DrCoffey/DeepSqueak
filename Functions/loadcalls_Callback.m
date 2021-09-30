@@ -1,8 +1,21 @@
 % --- Executes on button press in LOAD CALLS.
-function success = loadcalls_Callback(hObject, eventdata, handles, filename)
-% If filename is not given, load the file selected in the dropdown menu.
+function cancelled = loadcalls_Callback(hObject, eventdata, handles, varargin)
+% Inputs:
+%     filename - full path of the file to load. If filename is not given, load the file selected in the dropdown menu.
+%     checkForChanges - If true, check if the current session matches the saved file
+% Outputs
+%     cancelled - true if the user pressed cancel when prompted to save changes, else false
 
-cancelled = checkForUnsavedChanges(hObject, eventdata, handles);
+p = inputParser;
+addParameter(p, 'filename', []);
+addParameter(p, 'checkForChanges', true);
+parse(p, varargin{:});
+
+
+cancelled = false; 
+if p.Results.checkForChanges
+    cancelled = checkForUnsavedChanges(hObject, eventdata, handles);
+end
 if cancelled
     return
 end
@@ -10,7 +23,7 @@ end
 h = waitbar(0,'Loading Calls Please wait...');
 update_folders(hObject, eventdata, handles);
 handles = guidata(hObject);
-if nargin == 3 % if "Load Calls" button pressed, load the selected file, else reload the current file
+if isempty(p.Results.filename) % if "Load Calls" button pressed, load the selected file, else reload the current file
     if isempty(handles.detectionfiles)
         close(h);
         errordlg(['No valid detection files in current folder. Select a folder containing detection files with '...
@@ -19,8 +32,8 @@ if nargin == 3 % if "Load Calls" button pressed, load the selected file, else re
     end
     handles.current_file_id = get(handles.popupmenuDetectionFiles,'Value');
     handles.current_detection_file = fullfile(handles.detectionfiles(handles.current_file_id).folder,  handles.detectionfiles(handles.current_file_id).name);
-elseif isfile(filename)
-    handles.current_detection_file = filename;
+elseif isfile(p.Results.filename)
+    handles.current_detection_file = p.Results.filename;
 end
 
 handles.data.calls = [];

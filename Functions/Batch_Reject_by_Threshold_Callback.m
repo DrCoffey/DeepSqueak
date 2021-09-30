@@ -159,5 +159,5 @@ close(h);
 
 % reload the file if the currently loaded file was modified
 if isfield(handles,'current_detection_file') && any(ismember(fullfile(handles.detectionfiles(1).folder,handles.detectionfilesnames(selections)),handles.current_detection_file))
-    loadcalls_Callback(hObject, eventdata, handles, handles.current_detection_file)
+    loadcalls_Callback(hObject, eventdata, handles, 'filename', handles.current_detection_file, 'checkForChanges', false)
 end
