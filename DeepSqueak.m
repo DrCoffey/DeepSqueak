@@ -294,9 +294,9 @@ if numfiles > 0
         handles.current_file_id = handles.current_file_id + 1;
         % Make sure the drop-down matches what's happening internally
         handles.popupmenuDetectionFiles.Value = handles.current_file_id;
-        handles.current_detection_file = handles.detectionfiles(handles.current_file_id).name;
-        % Last argument (1) bypasses the behavior of pressing the LoadCalls button
-        loadcalls_Callback(hObject, eventdata, handles, 1);
+        filename = fullfile(handles.detectionfiles(handles.current_file_id).folder, handles.detectionfiles(handles.current_file_id).name);
+        % filename argument bypasses the behavior of pressing the LoadCalls button
+        loadcalls_Callback(hObject, eventdata, handles, filename);
     end
 end
 
@@ -312,9 +312,9 @@ if numfiles > 0
         handles.current_file_id = handles.current_file_id - 1;
         % Make sure the drop-down matches what's happening internally
         handles.popupmenuDetectionFiles.Value = handles.current_file_id;
-        handles.current_detection_file = handles.detectionfiles(handles.current_file_id).name;
-        % Last argument (1) bypasses the behavior of pressing the LoadCalls button
-        loadcalls_Callback(hObject, eventdata, handles, 1);
+        filename = fullfile(handles.detectionfiles(handles.current_file_id).folder, handles.detectionfiles(handles.current_file_id).name);
+        % filename argument bypasses the behavior of pressing the LoadCalls button
+        loadcalls_Callback(hObject, eventdata, handles, filename);
     end
 end
 
@@ -530,11 +530,11 @@ for i = 1:height(handles.data.calls)
     end
 end
 a  = cell2table(raventable);
-handles.current_file_id = get(handles.popupmenuDetectionFiles,'Value');
-current_detection_file = handles.detectionfiles(handles.current_file_id).name;
-ravenname=[strtok(current_detection_file,'.') '_Raven.txt'];
-[FileName,PathName] = uiputfile(ravenname,'Save Raven Truth Table (.txt)');
-writetable(a,[PathName FileName],'delimiter','\t','WriteVariableNames',false);
+% Get the name of the output file and save the table
+[PathName, FileName, ~] = fileparts(handles.current_detection_file);
+ravenName = fullfile(PathName, [FileName '_Raven.txt']);
+[FileName,PathName] = uiputfile(ravenName,'Save Raven Truth Table (.txt)');
+writetable(a, fullfile(PathName, FileName), 'delimiter', '\t', 'WriteVariableNames', false);
 guidata(hObject, handles);
 
 % --------------------------------------------------------------------
@@ -877,30 +877,32 @@ function topRightButton_Callback(hObject, eventdata, handles)
 
 % --- Executes on button press in loadAudioFile.
 function loadAudioFile_Callback(hObject, eventdata, handles)
+cancelled = checkForUnsavedChanges(hObject, eventdata, handles);
+if cancelled
+    return
+end
+
 h = waitbar(0,'Loading Audio Please wait...');
 update_folders(hObject, eventdata, handles);
 handles = guidata(hObject);
 
-if nargin == 3 % if "Load Calls" button pressed
-    if isempty(handles.audiofiles)
-        close(h);
-        errordlg(['No valid audio files in current audio folder. Select a folder containing audio with '...
-            '"File -> Select Audio Folder", then choose the desired file in the "Audio Files" dropdown box.'])
-        return
-    end
-    handles.current_file_id = get(handles.AudioFilespopup,'Value');
-    handles.current_audio_file = handles.audiofiles(handles.current_file_id).name;
+if isempty(handles.audiofiles)
+    close(h);
+    errordlg(['No valid audio files in current audio folder. Select a folder containing audio with '...
+        '"File -> Select Audio Folder", then choose the desired file in the "Audio Files" dropdown box.'])
+    return
 end
 
-handles.data.audiodata = audioinfo(fullfile(handles.data.settings.audiofolder,handles.current_audio_file));
+current_file_id = get(handles.AudioFilespopup,'Value');
+handles.data.audiodata = audioinfo(fullfile(handles.data.settings.audiofolder, handles.audiofiles(current_file_id).name));
 
-Calls = table(zeros(0,4),[],[],[], 'VariableNames', {'Box', 'Score', 'Type', 'Accept'});
-% Calls.Box = [0 0 1 1];
-% Calls.Score = 0;
-% Calls.Type = categorical({'NA'});
-% Calls.Power = 1;
-% Calls.Accept = false;
-handles.data.calls = Calls;
+% Create a filename for the new detection file
+[~, filename, ~] = fileparts(handles.data.audiodata.Filename);
+handles.current_detection_file = fullfile(handles.data.settings.detectionfolder, [filename '.mat']);
+
+% Initialize the empty calls variable
+handles.data.calls = table(zeros(0,4),[],[],[], 'VariableNames', {'Box', 'Score', 'Type', 'Accept'});
+
 % Position of the focus window
 handles.data.focusCenter = handles.data.settings.focus_window_size ./ 2;
 initialize_display(hObject, eventdata, handles);

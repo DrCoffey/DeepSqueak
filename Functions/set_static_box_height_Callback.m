@@ -54,6 +54,6 @@ update_fig(hObject, eventdata, handles);
 guidata(hObject, handles);
 
 %% Update display
-if isfield(handles,'current_detection_file') && any(contains(fname, handles.current_detection_file))
-    loadcalls_Callback(hObject, eventdata, handles, true)
+if isfield(handles,'current_detection_file') && any(ismember(fullfile(fpath, fname), handles.current_detection_file))
+    loadcalls_Callback(hObject, eventdata, handles, handles.current_detection_file)
 end

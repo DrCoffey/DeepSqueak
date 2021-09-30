@@ -157,7 +157,7 @@ for currentfile = selections % Do this for each file
 end
 close(h);
 
-%update the display
-if isfield(handles,'current_detection_file') && any(ismember(handles.detectionfilesnames(selections),handles.current_detection_file))
-    loadcalls_Callback(hObject, eventdata, handles, handles.current_file_id)
+% reload the file if the currently loaded file was modified
+if isfield(handles,'current_detection_file') && any(ismember(fullfile(handles.detectionfiles(1).folder,handles.detectionfilesnames(selections)),handles.current_detection_file))
+    loadcalls_Callback(hObject, eventdata, handles, handles.current_detection_file)
 end
