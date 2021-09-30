@@ -158,6 +158,7 @@ end
 close(h);
 
 %update the display
-if isfield(handles,'current_detection_file') && any(ismember(handles.detectionfilesnames(selections),handles.current_detection_file))
-    loadcalls_Callback(hObject, eventdata, handles, handles.current_file_id)
+update_folders(hObject, eventdata, handles);
+if isfield(handles,'current_detection_file')
+    loadcalls_Callback(hObject, eventdata, handles, true)
 end

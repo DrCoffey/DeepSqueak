@@ -48,7 +48,7 @@ while ~finished
                             load(fullfile(PathName,FileName),'C','freq_weight','slope_weight','duration_weight','clusterName','spectrogramOptions');
                             ClusteringData = CreateClusteringData(handles, 'forClustering', true, 'spectrogramOptions', spectrogramOptions, 'save_data', true);
                             if isempty(ClusteringData); return; end
-                            data = get_kmeans_data(ClusteringData, slope_weight, freq_weight, duration_weight)
+                            data = get_kmeans_data(ClusteringData, slope_weight, freq_weight, duration_weight);
                         case 'Variational Autoencoder'
                             C = [];
                             load(fullfile(PathName,FileName),'C','encoderNet','decoderNet','options');
@@ -62,7 +62,7 @@ while ~finished
                             end
                     end
             end
-            [clustAssign,D] = knnsearch(C,data,'Distance','seuclidean');
+            [clustAssign,D] = knnsearch(C,data,'Distance','euclidean');
             
             %% Sort the calls by how close they are to the cluster center
             [~,idx] = sort(D);
@@ -184,6 +184,10 @@ saveChoice =  questdlg('Update files with new clusters?','Save clusters','Yes','
 switch saveChoice
     case 'Yes'
         UpdateCluster(ClusteringData, clustAssign, clusterName, rejected)
+        update_folders(hObject, eventdata, handles);
+        if isfield(handles,'current_detection_file')
+            loadcalls_Callback(hObject, eventdata, handles, true)
+        end
     case 'No'
         return
 end
