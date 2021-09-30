@@ -1,28 +1,22 @@
-function savesession_Callback(hObject, eventdata, handles)
+function cancelled = savesession_Callback(hObject, eventdata, handles)
+% cancelled = false if saved successfully, else success = true
+cancelled = false;
 
-handles.v_det = get(handles. popupmenuDetectionFiles,'Value');
-if isfield(handles,'current_detection_file')
-    handles.SaveFile = handles.detectionfiles(handles.v_det).name;
-    handles.SaveFile = handles.current_detection_file;
-else
-    handles.SaveFile = [strtok(handles.audiofiles(handles.v_det).name,'.') '.mat'];
+if isempty(handles.data.calls)
+    disp('Can''t save session, no calls are loaded')
+    return
 end
-
-% temp = handles.data.audiodata.samples;
-% handles.data.audiodata.samples = [];
-guidata(hObject, handles);
 
 Calls = handles.data.calls;
 audiodata = handles.data.audiodata;
-[FileName, PathName] = uiputfile(fullfile(handles.data.settings.detectionfolder, handles.SaveFile), 'Save Session (.mat)');
+[FileName, PathName] = uiputfile(handles.current_detection_file, 'Save Session (.mat)');
 if FileName == 0
+    cancelled = true;
     return
 end
+
 h = waitbar(0.5, 'saving');
-
-
-save(fullfile(PathName, FileName), 'Calls','audiodata', '-v7.3');
-% handles.data.audiodata.samples = temp;
+save(fullfile(PathName, FileName), 'Calls','audiodata', '-append');
 update_folders(hObject, eventdata, handles);
-guidata(hObject, handles);
 close(h);
+

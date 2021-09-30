@@ -9,6 +9,10 @@ ClusteringData = table();
 %% Unpack the data
 if isfield(data, 'Calls')
     Calls = data.Calls;
+    % Back Compatability for Files with Power in The Detection File.
+    if ismember('Power',Calls.Properties.VariableNames)
+        Calls = removevars(Calls, 'Power');
+    end
 elseif nargout < 3 % If ClusteringData is requested, we don't need Calls
     error('This doesn''t appear to be a detection file!')
 end
