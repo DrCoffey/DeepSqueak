@@ -35,8 +35,8 @@ stats.Entropy = smooth(stats.Entropy,0.1,'rlowess')';
 if AmplitudeThreshold > .001 & AmplitudeThreshold < .999
     brightThreshold=prctile(I(:),AmplitudeThreshold*100);
 else
-    %disp('Warning! Amplitude Percentile Threshold Must be (0 > 1), Reverting to Default (.825)');
-    brightThreshold=prctile(I(:),.825);
+    disp('Warning! Amplitude Percentile Threshold Must be (0 > 1), Reverting to Default (.825)');
+    brightThreshold=prctile(I(:),825);
 end
 
 if EntropyThreshold < .001 | EntropyThreshold > .999 
