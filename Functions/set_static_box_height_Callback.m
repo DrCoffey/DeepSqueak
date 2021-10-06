@@ -50,10 +50,10 @@ for i = 1:length(fname)
 end
 
 close(h);
-update_fig(hObject, eventdata, handles);
 guidata(hObject, handles);
 
 %% Update display
-if isfield(handles,'current_detection_file') && any(contains(fname, handles.current_detection_file))
+update_folders(hObject, eventdata, handles);
+if isfield(handles,'current_detection_file')
     loadcalls_Callback(hObject, eventdata, handles, true)
 end

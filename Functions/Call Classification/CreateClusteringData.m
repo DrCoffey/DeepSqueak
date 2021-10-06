@@ -64,7 +64,7 @@ for j = 1:length(fileName)
 end
 
 % Optimize the window size so that the pixels are square on average
-if isempty(spectrogramOptions)
+if isempty(spectrogramOptions) && ~isempty(Calls)
     yRange = mean(Calls.Box(:,4));
     xRange = mean(Calls.Box(:,3));
     noverlap = .5;
