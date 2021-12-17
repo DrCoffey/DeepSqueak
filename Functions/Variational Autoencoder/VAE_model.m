@@ -1,8 +1,8 @@
 function [encoderNet, decoderNet] = VAE_model()
 
-
+%encoding size (compressed representation
 latentDim = 32;
-imageSize = [128, 128, 1];
+imageSize = [128, 128, 1]; %input image size
 
 encoderLG = layerGraph([
     imageInputLayer(imageSize,'Name','input_encoder','Normalization','none')

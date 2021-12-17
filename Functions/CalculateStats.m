@@ -3,7 +3,7 @@ if nargin <= 8
     verbose = 1;
 end
 
-%% Ridge Detection
+%% Ridge Detection (original approach)
 % Calculate entropy at each time point
 stats.Entropy = geomean(I,1) ./ mean(I,1);
 stats.Entropy = smooth(stats.Entropy,0.1,'rlowess')';
@@ -45,17 +45,24 @@ while sum(greaterthannoise)<5
 end
 
 % index of time points
-stats.ridgeTime = find(greaterthannoise);
-stats.ridgeFreq = ridgeFreq(greaterthannoise);
-% Smoothed frequency of the call contour
+stats.ridgeTime = find(greaterthannoise); %clrdg
+stats.ridgeFreq = ridgeFreq(greaterthannoise); %rwrdg
+%% Ridge Detection (approach 2 - combining Kevin's CntMap func with max in col)
+rt = stats.ridgeTime;
+rf = stats.ridgeFreq;
+[ClRdg,RwRdg] = e_CntMap(I, rt, rf); %rt, rf
+%% Assign new ridgeTime and ridgeFreq
+stats.ridgeTime =  ClRdg';
+stats.ridgeFreq =  RwRdg';
+
+%% Smoothed frequency of the call contour
 try
-    stats.ridgeFreq_smooth = smooth(stats.ridgeTime,stats.ridgeFreq,0.1,'rlowess');
+    stats.ridgeFreq_smooth = smooth(stats.ridgeTime,stats.ridgeFreq,0.01,'rlowess');
     %stats.ridgeFreq_smooth = stats.ridgeFreq;
 catch
     disp('Cannot apply smoothing. The line is probably too short');
     stats.ridgeFreq_smooth=stats.ridgeFreq';
 end
-
 
 %% Calculate the scaling factors of the spectrogram
 spectrange = SampleRate / 2000; % get frequency range of spectrogram in KHz

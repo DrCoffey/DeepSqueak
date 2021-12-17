@@ -1,4 +1,6 @@
 function [zSampled, zMean, zLogvar] = sampling(encoderNet, x)
+%obtains encodings from input images
+
 compressed = forward(encoderNet, x);
 d = size(compressed,1)/2;
 zMean = compressed(1:d,:);
