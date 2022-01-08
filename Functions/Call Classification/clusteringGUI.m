@@ -24,7 +24,7 @@ classdef clusteringGUI < handle
     end
     
     methods
-        function [obj, NewclusterName, NewRejected, NewFinished, NewClustAssign] = clusteringGUI(clustAssign, ClusteringData, JustLooking)
+        function [obj, NewclusterName, NewRejected, NewFinished, NewClustAssign] = clusteringGUI(clustAssign, ClusteringData)
             
             
             
@@ -33,8 +33,14 @@ classdef clusteringGUI < handle
             obj.ClusteringData = ClusteringData;
             obj.rejected = zeros(1,length(obj.clustAssign));
             
-            obj.minfreq = prctile(ClusteringData.MinFreq, 5);
-            obj.maxfreq = prctile(ClusteringData.MinFreq + ClusteringData.Bandwidth, 95);
+%             obj.minfreq = prctile(ClusteringData.MinFreq, 5);
+%             obj.maxfreq = prctile(ClusteringData.MinFreq + ClusteringData.Bandwidth, 95);
+            %This is going to be scaled from 0 to the Nyquist, not the
+            %boxed call
+            obj.minfreq = 0;
+            %Assumes all calls in ClusteringData were recorded at the same
+            %SR
+            obj.maxfreq = size(ClusteringData.Spectrogram{1},1)*ClusteringData.FreqScale(1);
             obj.ColorData = jet(256); % Color by mean frequency
             % obj.ColorData = HSLuv_to_RGB(256, 'H',  [270 0], 'S', 100, 'L', 75, 'type', 'HSL'); % Make a color map for each category
             obj.ColorData = reshape(obj.ColorData,size(obj.ColorData,1),1,size(obj.ColorData,2));
@@ -231,9 +237,12 @@ classdef clusteringGUI < handle
             rel_x = [rel_size(2), 1-rel_size(2)];
             rel_y = [rel_size(1), 1-rel_size(1)];
             
-            % Apply color to the greyscale images
-            freqRange = [ClusteringData.MinFreq(clustIndex(callID)),...
-                ClusteringData.MinFreq(clustIndex(callID)) + ClusteringData.Bandwidth(clustIndex(callID))];
+%             % Apply color to the greyscale images
+                %this type of color scaling isn't applicable as is because
+                %all call images have the same frequency span
+%             freqRange = [ClusteringData.MinFreq(clustIndex(callID)),...
+%                 ClusteringData.MinFreq(clustIndex(callID)) + ClusteringData.Bandwidth(clustIndex(callID))];
+            freqRange = [obj.minfreq, obj.maxfreq];
             % Account for any padding on the y axis
             freqRange = freqRange + range(freqRange) .* rel_y(1) .* [-1, 1];
 
@@ -249,14 +258,16 @@ classdef clusteringGUI < handle
             x_lim = xlim(axis_handles);
             x_span = x_lim(2) - x_lim(1);
             xtick_positions = linspace(x_span*rel_x(1)+x_lim(1), x_span*rel_x(2)+x_lim(1),4);
-            x_ticks = linspace(0,obj.ClusteringData.Duration(i),4);
+            %x_ticks = linspace(0,obj.ClusteringData.Duration(i),4);
+            x_ticks = linspace(0,size(obj.ClusteringData.Spectrogram{i},2)*obj.ClusteringData.TimeScale(i),4);
             x_ticks = arrayfun(@(x) sprintf('%.3f',x),x_ticks(2:end),'UniformOutput',false);
             
             y_lim = ylim(axis_handles);
             y_span = y_lim(2) - y_lim(1);
-            ytick_positions = linspace(y_span*rel_y(1)+y_lim(1), y_span*rel_y(2)+y_lim(1),3);            
+            ytick_positions = linspace(y_span*rel_y(1)+y_lim(1), y_span*rel_y(2)+y_lim(1),4);            
             
-            y_ticks = linspace(obj.ClusteringData.MinFreq(i),obj.ClusteringData.MinFreq(i)+obj.ClusteringData.Bandwidth(i),3);
+            %y_ticks = linspace(obj.ClusteringData.MinFreq(i),obj.ClusteringData.MinFreq(i)+obj.ClusteringData.Bandwidth(i),3);
+            y_ticks = linspace(obj.minfreq,obj.maxfreq,4);
             y_ticks = arrayfun(@(x) sprintf('%.1f',x),y_ticks(1:end),'UniformOutput',false);
             y_ticks = flip(y_ticks);
             
