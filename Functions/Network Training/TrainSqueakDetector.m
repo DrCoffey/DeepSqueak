@@ -45,6 +45,12 @@ options = trainingOptions('sgdm',...
           'Plots','training-progress');
 
 % Train the YOLO v2 network.
-[detector,info] = trainYOLOv2ObjectDetector(TrainingTables,lgraph,options);
+if nargin == 1
+    [detector,info] = trainYOLOv2ObjectDetector(TrainingTables,lgraph,options);
+elseif nargin == 2
+    [detector,info] = trainYOLOv2ObjectDetector(TrainingTables,layers,options);
+else
+     error('This should not happen')   
+end
 end
 
