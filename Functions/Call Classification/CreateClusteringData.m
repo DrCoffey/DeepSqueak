@@ -151,13 +151,15 @@ for i = 1:height(Calls)
         {perFileCallID} % Call ID in file
         {stats.Power}
         {box(4)}
+        {FreqScale}
+        {TimeScale}
         ]'];
     
     clustAssign = [clustAssign; Calls.Type(i)];
 end
 
 
-ClusteringData = cell2table(ClusteringData, 'VariableNames', {'Spectrogram', 'MinFreq', 'Duration', 'xFreq', 'xTime', 'Filename', 'callID', 'Power', 'Bandwidth'});
+ClusteringData = cell2table(ClusteringData, 'VariableNames', {'Spectrogram', 'MinFreq', 'Duration', 'xFreq', 'xTime', 'Filename', 'callID', 'Power', 'Bandwidth','FreqScale','TimeScale'});
 
 close(h)
 
