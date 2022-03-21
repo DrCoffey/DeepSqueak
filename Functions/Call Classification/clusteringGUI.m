@@ -24,7 +24,7 @@ classdef clusteringGUI < handle
     end
     
     methods
-        function [obj, NewclusterName, NewRejected, NewFinished, NewClustAssign] = clusteringGUI(clustAssign, ClusteringData, JustLooking)
+        function [obj, NewclusterName, NewRejected, NewFinished, NewClustAssign] = clusteringGUI(clustAssign, ClusteringData)
             
             
             

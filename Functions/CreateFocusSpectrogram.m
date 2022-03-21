@@ -52,5 +52,5 @@ max_freq = find(fr./1000 <= box(4) + box(2) + options.frequency_padding, 1, 'las
 max_freq = min(round(max_freq), length(fr));
 
 I=abs(s(min_freq:max_freq,x1:x2));
-
+p=p(min_freq:max_freq,x1:x2);
 end

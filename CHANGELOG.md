@@ -1,4 +1,9 @@
-# Changelog
+﻿# Changelog
+## 3.0.2 2022-03-21
+## v3 More Bug Fixes
+- Fixed automatic spectrogram scaling issues
+- Fixed GUI Axes
+
 ## 3.0.1 2021-08-08
 ## v3 Bug Fixes
 - Batch Reject By Threshold Fix
