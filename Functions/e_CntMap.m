@@ -101,9 +101,9 @@ Mriv      	= bwmorph(Mriv, 'clean'); Mrdg = bwmorph(Mrdg, 'clean');
 % [RwRiv ClRiv]   = find(Mriv);
 % [RwEdg ClEdg]   = find(Medg);
 
-figure(1); clf;
-imagesc(I); hold on;
-plot(ClRdg,RwRdg,'g.');
+% figure(1); clf;
+% imagesc(I); hold on;
+% plot(ClRdg,RwRdg,'g.');
 % plot(ClRiv,RwRiv,'b.');
 % plot(ClEdg,RwEdg,'c.');
 end

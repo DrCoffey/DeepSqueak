@@ -52,8 +52,8 @@ rt = stats.ridgeTime;
 rf = stats.ridgeFreq;
 [ClRdg,RwRdg] = e_CntMap(I, rt, rf); %rt, rf
 %% Assign new ridgeTime and ridgeFreq
-stats.ridgeTime =  ClRdg';
-stats.ridgeFreq =  RwRdg';
+stats.ridgeTime = unique(ClRdg)';
+stats.ridgeFreq = splitapply(@mean,RwRdg,findgroups(ClRdg))';
 
 %% Smoothed frequency of the call contour
 try
