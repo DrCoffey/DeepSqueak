@@ -13,8 +13,6 @@ if ~isempty(eventdata)
     end
 end
 
-
-
 handles.data.settings.spectrogramContrast = handles.data.settings.spectrogramContrast + range(handles.data.settings.spectrogramContrast) .* clim_change;
 
 % Don't let the clim go below zero if using amplitude
@@ -22,9 +20,7 @@ if strcmp(handles.data.settings.spect.type, 'Amplitude')
     handles.data.settings.spectrogramContrast(1) = max(handles.data.settings.spectrogramContrast(1), -mean(handles.data.clim) ./ range(handles.data.clim));
 end
 
-
 clim = mean(handles.data.clim) + range(handles.data.clim) .* handles.data.settings.spectrogramContrast;
-
 set(handles.spectogramWindow,'Clim',clim)
 set(handles.focusWindow,'Clim',clim)
 % handles.data.saveSettings();
