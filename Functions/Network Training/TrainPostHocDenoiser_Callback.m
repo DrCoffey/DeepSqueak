@@ -13,9 +13,9 @@ images = zeros([options.imageSize, size(ClusteringData, 1)]);
 for i = 1:size(ClusteringData, 1)
     images(:,:,:,i) = imresize(ClusteringData.Spectrogram{i}, options.imageSize(1:2));
 end
-wind=options.spectrogram.windowsize;
-noverlap=options.spectrogram.overlap;
-nfft=options.spectrogram.nfft;
+% wind=options.spectrogram.windowsize;
+% noverlap=options.spectrogram.overlap;
+% nfft=options.spectrogram.nfft;
 imageSize=options.imageSize;
 
 %% Make all categories 'Title Case'
