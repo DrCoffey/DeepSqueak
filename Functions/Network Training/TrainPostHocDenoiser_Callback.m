@@ -111,7 +111,7 @@ h.ColorbarVisible = 'off';
 colormap(inferno);
 
 [FileName, PathName] = uiputfile(fullfile(handles.data.squeakfolder,'Denoising Network', 'CleaningNet.mat'),'Save Denoising Network');
-save(fullfile(PathName,FileName),'DenoiseNet','wind','noverlap','nfft','imageSize','layers');
+save(fullfile(PathName,FileName),'DenoiseNet','imageSize','layers');
 msgbox('The new network is now saved.','Saved','help')
 
 end
