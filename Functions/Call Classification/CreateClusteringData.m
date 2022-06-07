@@ -54,7 +54,7 @@ for j = 1:length(fileName)
     else
         % Remove calls that aren't accepted
         if ~p.Results.for_denoise
-        Calls_tmp = Calls_tmp(Calls_tmp.Accept == 1 & ~ismember(Calls_tmp.Type,'Noise'), :);
+        % Calls_tmp = Calls_tmp(Calls_tmp.Accept == 1 & ~ismember(Calls_tmp.Type,'Noise'), :);
         end
         % Create a variable that contains the index of audiodata to use
         Calls_tmp.audiodata_index = repmat(j, height(Calls_tmp), 1);

@@ -1,4 +1,10 @@
 ﻿# Changelog
+## 3.0.3 2022-06-07
+## MAJOR BUG FIX - PLEASE DOWNLOAD
+- Temporary fix to a bug where cluster assignments weren't correct when clustering files with rejected calls.
+- If you want to cluster all calls except rejected calls, be sure to delete rejected calls before clustering.
+- Permanent fix incoming, but for now saved cluster assignments will at least match up with the clustering window.
+
 ## 3.0.2 2022-03-21
 ## v3 More Bug Fixes
 - Fixed automatic spectrogram scaling issues
