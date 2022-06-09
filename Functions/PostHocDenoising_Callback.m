@@ -6,7 +6,7 @@ function PostHocDenoising_Callback(hObject, eventdata, handles)
 % Load the network
 [FileName,PathName] = uigetfile(fullfile(handles.data.squeakfolder,'Denoising Network','*.mat'),'Select Denoising Network');
 try
-    net=load(fullfile(PathName,FileName),'DenoiseNet','wind','noverlap','nfft','imageSize');
+    net=load(fullfile(PathName,FileName),'DenoiseNet','imageSize');
 catch
     errordlg(sprintf('Denoising network not found'))
     return
@@ -27,9 +27,9 @@ images = zeros([options.imageSize, size(ClusteringData, 1)]);
 for i = 1:size(ClusteringData, 1)
     images(:,:,:,i) = imresize(ClusteringData.Spectrogram{i}, options.imageSize(1:2));
 end
-wind=options.spectrogram.windowsize;
-noverlap=options.spectrogram.overlap;
-nfft=options.spectrogram.nfft;
+% wind=options.spectrogram.windowsize;
+% noverlap=options.spectrogram.overlap;
+% nfft=options.spectrogram.nfft;
 imageSize=options.imageSize;
 
 h = waitbar(0,'Initializing');

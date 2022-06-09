@@ -6,20 +6,14 @@ ti_f = handles.data.page_spect.t(handles.data.page_spect.t > handles.current_foc
 fr_f = handles.data.page_spect.f;
 
 % Plot Spectrogram
-% set(handles.focusWindow,'YDir', 'normal','YColor',[1 1 1],'XColor',[1 1 1],'Clim',prctile(s_f,[1,99.9],'all'))
 set(handles.spect,'CData',s_f,'XData', ti_f,'YData',fr_f/1000);
 set(handles.focusWindow,...
     'Xlim', [handles.current_focus_position(1), handles.current_focus_position(1) + handles.current_focus_position(3)],...
     'Ylim',[handles.data.settings.LowFreq, min(handles.data.settings.HighFreq, handles.data.audiodata.SampleRate/2000)]);
-%     'YDir', 'normal',...
-%     'YColor',[1 1 1],...
-%     'XColor',[1 1 1]);
 
 %Update spectogram ticks and transform labels to
 %minutes:seconds.milliseconds
 set_tick_timestamps(handles.focusWindow, true);
-
-% set(handles.focusWindow,'ylim',[spectogram_y_lims(1)/1000 spectogram_y_lims(2)/1000]);
 
 % Don't update the call info the there aren't any calls in the page view
 if isempty(handles.data.calls) || ~any(handles.data.calls.Box(handles.data.currentcall,1) > ti_f(1) &...
@@ -27,7 +21,7 @@ if isempty(handles.data.calls) || ~any(handles.data.calls.Box(handles.data.curre
     return
 end
 
-[I,windowsize,noverlap,nfft,rate,box,~,~,~] = CreateFocusSpectrogram(handles.data.calls(handles.data.currentcall,:),handles,false, [], handles.data);
+[I,windowsize,noverlap,nfft,rate,box,~,~,~] = CreateFocusSpectrogram(handles.data.calls(handles.data.currentcall,:),handles,true, [], handles.data);
 stats = CalculateStats(I,windowsize,noverlap,nfft,rate,box,handles.data.settings.EntropyThreshold,handles.data.settings.AmplitudeThreshold);
 
 % plot Ridge Detection
@@ -70,9 +64,6 @@ set(handles.Waveform,...
 y = 0-stats.Entropy;
 x = 1:length(stats.Entropy);
 z = zeros(size(x));
-% col = double(stats.Entropy < 1-handles.data.settings.EntropyThreshold);  % This is the color, vary with x in this case.
-% set(handles.SNR, 'XData', [x;x], 'YData', [y;y], 'ZData', [z;z], 'CData', [col;col]);
 set(handles.waveformWindow, 'XLim', [x(1), x(end)]);
-% guidata(hObject, handles);
 end
 

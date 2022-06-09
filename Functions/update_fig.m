@@ -8,7 +8,9 @@ end
 % focus to the main figure window
 if strcmp(get(handles.figure1.CurrentObject,'type'), 'uicontrol')
     set(handles.figure1.CurrentObject, 'Enable', 'off');
+    try
     drawnow nocallbacks
+    end
     set(handles.figure1.CurrentObject, 'Enable', 'on');
     handles.figure1.CurrentObject = handles.figure1;
 end

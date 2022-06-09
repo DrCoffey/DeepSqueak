@@ -13,9 +13,9 @@ images = zeros([options.imageSize, size(ClusteringData, 1)]);
 for i = 1:size(ClusteringData, 1)
     images(:,:,:,i) = imresize(ClusteringData.Spectrogram{i}, options.imageSize(1:2));
 end
-wind=options.spectrogram.windowsize;
-noverlap=options.spectrogram.overlap;
-nfft=options.spectrogram.nfft;
+% wind=options.spectrogram.windowsize;
+% noverlap=options.spectrogram.overlap;
+% nfft=options.spectrogram.nfft;
 imageSize=options.imageSize;
 
 %% Make all categories 'Title Case'
@@ -111,7 +111,7 @@ h.ColorbarVisible = 'off';
 colormap(inferno);
 
 [FileName, PathName] = uiputfile(fullfile(handles.data.squeakfolder,'Denoising Network', 'CleaningNet.mat'),'Save Denoising Network');
-save(fullfile(PathName,FileName),'DenoiseNet','wind','noverlap','nfft','imageSize','layers');
+save(fullfile(PathName,FileName),'DenoiseNet','imageSize','layers');
 msgbox('The new network is now saved.','Saved','help')
 
 end

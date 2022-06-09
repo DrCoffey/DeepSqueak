@@ -40,7 +40,6 @@ if isnumeric(fileName); ClusteringData = {}; return;end
 % If one file is selected, turn it into a cell
 fileName = cellstr(fileName);
 
-
 h = waitbar(0,'Initializing');
 audioReader = squeakData([]);
 %% Load the data
@@ -55,25 +54,12 @@ for j = 1:length(fileName)
     else
         % Remove calls that aren't accepted
         if ~p.Results.for_denoise
-        Calls_tmp = Calls_tmp(Calls_tmp.Accept == 1 & ~ismember(Calls_tmp.Type,'Noise'), :);
+        % Calls_tmp = Calls_tmp(Calls_tmp.Accept == 1 & ~ismember(Calls_tmp.Type,'Noise'), :);
         end
         % Create a variable that contains the index of audiodata to use
         Calls_tmp.audiodata_index = repmat(j, height(Calls_tmp), 1);
         Calls = [Calls; Calls_tmp];
     end
-end
-
-% Optimize the window size so that the pixels are square on average
-if isempty(spectrogramOptions) && ~isempty(Calls)
-    yRange = mean(Calls.Box(:,4));
-    xRange = mean(Calls.Box(:,3));
-    noverlap = .5;
-    optimalWindow = sqrt(xRange/(2000*yRange));
-    optimalWindow = optimalWindow + optimalWindow.*noverlap;
-    spectrogramOptions.windowsize = optimalWindow;
-    spectrogramOptions.overlap = optimalWindow .* noverlap;
-    spectrogramOptions.nfft = optimalWindow;
-    spectrogramOptions.frequency_padding = 0;
 end
 
 %% Stretch the duration of calls by a factor of sqrt(t_max / t)
@@ -115,7 +101,7 @@ for i = 1:height(Calls)
     end
     perFileCallID = perFileCallID + 1;
         
-    [I,wind,noverlap,nfft,rate,box,~,~,~,~,pow] = CreateFocusSpectrogram(Calls(i,:), handles, true, p.Results.spectrogramOptions, audioReader);
+    [I,wind,noverlap,nfft,rate,box,~,~,~,~,pow] = CreateFocusSpectrogram(Calls(i,:), handles, true, [], audioReader);
     % im = mat2gray(flipud(I),[0 max(max(I))/4]); % Set max brightness to 1/4 of max
     % im = mat2gray(flipud(I), prctile(I, [1 99], 'all')); % normalize brightness
     pow(pow==0)=.01;
