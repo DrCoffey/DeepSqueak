@@ -226,8 +226,8 @@ classdef clusteringGUI < handle
             % Resize the image while maintaining the aspect ratio by
             % padding with zeros
             im_size = size(ClusteringData.Spectrogram{clustIndex(callID)}) ;
-            new_size = floor(im_size .* min(obj.thumbnail_size ./ im_size));
-            im = double(imresize(ClusteringData.Spectrogram{clustIndex(callID)}, new_size));
+            new_size = obj.thumbnail_size;
+            im = double(imresize(ClusteringData.Spectrogram{clustIndex(callID)}, obj.thumbnail_size));
             pad = (obj.thumbnail_size - size(im)) / 2;
             im = padarray(im, floor(pad), 'pre');
             im = padarray(im, ceil(pad), 'post');
