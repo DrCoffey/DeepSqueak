@@ -26,6 +26,8 @@ maxDuration = [];
 freqRange = [];
 xFreq = [];
 xTime = [];
+FreqScale = [];
+TimeScale = [];
 stats.Power = [];
 
 % Select the files
@@ -94,7 +96,7 @@ for i = 1:height(Calls)
     waitbar(i/height(Calls),h, sprintf('Loading File %u of %u', Calls.audiodata_index(i), length(fileName)));
     
     % Change the audio file if needed
-    if Calls.audiodata_index(i) ~= currentAudioFile;
+    if Calls.audiodata_index(i) ~= currentAudioFile
         audioReader.audiodata = audiodata{Calls.audiodata_index(i)};
         currentAudioFile = Calls.audiodata_index(i);
         perFileCallID = 0;
@@ -139,13 +141,14 @@ for i = 1:height(Calls)
         {box(4)}
         {FreqScale}
         {TimeScale}
+        {Calls.CallID(i)}
         ]'];
     
     clustAssign = [clustAssign; Calls.Type(i)];
 end
 
 
-ClusteringData = cell2table(ClusteringData, 'VariableNames', {'Spectrogram', 'MinFreq', 'Duration', 'xFreq', 'xTime', 'Filename', 'callID', 'Power', 'Bandwidth','FreqScale','TimeScale'});
+ClusteringData = cell2table(ClusteringData(:,1:12), 'VariableNames', {'Spectrogram', 'MinFreq', 'Duration', 'xFreq', 'xTime', 'Filename', 'callID', 'Power', 'Bandwidth','FreqScale','TimeScale','UserID'});
 
 close(h)
 
