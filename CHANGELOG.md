@@ -1,4 +1,8 @@
 ﻿# Changelog
+## 3.0.4 2022-07-27
+## Supervised Clustering Bug Fix
+- Fixed an issue where supervised clustering was crashing
+
 ## 3.0.3 2022-06-07
 ## MAJOR BUG FIX - PLEASE DOWNLOAD
 - Temporary fix to a bug where cluster assignments weren't correct when clustering files with rejected calls.
