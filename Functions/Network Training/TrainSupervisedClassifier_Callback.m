@@ -13,9 +13,9 @@ images = zeros([options.imageSize, size(ClusteringData, 1)]);
 for i = 1:size(ClusteringData, 1)
     images(:,:,:,i) = imresize(ClusteringData.Spectrogram{i}, options.imageSize(1:2));
 end
-wind=options.spectrogram.windowsize;
-noverlap=options.spectrogram.overlap;
-nfft=options.spectrogram.nfft;
+% wind=options.spectrogram.windowsize;
+% noverlap=options.spectrogram.overlap;
+% nfft=options.spectrogram.nfft;
 imageSize=options.imageSize;
 
 %% Make all categories 'Title Case'
@@ -111,5 +111,5 @@ h.ColorbarVisible = 'off';
 colormap(inferno);
 
 [FileName,PathName] = uiputfile('ClassifierNet.mat','Save Network');
-save([PathName FileName],'ClassifyNet','wind','noverlap','nfft','imageSize','layers');
+save([PathName FileName],'ClassifyNet','imageSize','layers');
 end
