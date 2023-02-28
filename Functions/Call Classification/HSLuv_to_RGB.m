@@ -22,7 +22,7 @@ RGB = HSLuv_to_RGB(___, 'type', 'HPL')
 2013 Marc van Wanrooij (marcvanwanrooij@neural-code.com)
 modified by Pierre Morel 2016
 
-modified by Russell Marx 2019, Based on http://www.hsluv.org/
+modified by Ruby Marx 2019, Based on http://www.hsluv.org/
 %}
 
 p = inputParser;

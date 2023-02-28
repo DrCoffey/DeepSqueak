@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DeepSqueak 2.7.0                                                        %
-% Copyright (c) 2021 Kevin Coffey , Russell Marx, & Robert Ciszek         %
+% Copyright (c) 2021 Kevin Coffey , Ruby Marx, & Robert Ciszek         %
 %                                                                         %
 % Licensed under the BSD 3-Clause Licence:                                %
 % https://opensource.org/licenses/BSD-3-Clause                            %
