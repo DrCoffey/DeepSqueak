@@ -38,7 +38,8 @@ else
     s  = handles.data.page_spect.s(:,handles.data.page_spect.t > call.Box(1) & handles.data.page_spect.t < sum(call.Box([1,3])));
     ti = handles.data.page_spect.t(  handles.data.page_spect.t > call.Box(1) & handles.data.page_spect.t < sum(call.Box([1,3])));
     fr = handles.data.page_spect.f;
-
+    p = (1/(rate*(hamming(nfft)'*hamming(nfft))))*abs(s).^2;
+    p(2:end-1,:) = p(2:end-1,:).*2;
 end
     
 %% Get the part of the spectrogram within the box

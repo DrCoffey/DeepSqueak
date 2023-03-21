@@ -29,8 +29,13 @@ for i = 1:length(files)
     % Find the index of the clustering data that belongs to the file
     cluster_idx = find(file_idx == i);
 
-    % Find the index of the calls in the file that correspond the the clustering data
-    call_idx = [ClusteringData{cluster_idx, 7}];
+    if ismember('UserID',obj.ClusteringData.Properties.VariableNames)
+        % Find the index of the calls in the file that correspond the the clustering data
+        [~,call_idx] = ismember(ClusteringData{cluster_idx, 'UserID'},Calls.CallID);
+    else
+        warning('This will not assign clusters correctly if rejected Calls were not removed from your detections file.')
+        [~,call_idx] = ismember(ClusteringData{cluster_idx, 'callID'},Calls.CallID);
+    end
 
     % Update call type with cluster names
     Calls.Type(call_idx) = clustAssign(cluster_idx);

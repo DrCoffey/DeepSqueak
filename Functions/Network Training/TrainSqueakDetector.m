@@ -49,7 +49,7 @@ if nargin == 1
     [detector,info] = trainYOLOv2ObjectDetector(TrainingTables,lgraph,options);
 elseif nargin == 2
     [detector,info] = trainYOLOv2ObjectDetector(TrainingTables,layers,options);
-else
+else 
     error('This should not happen');   
 end
 end

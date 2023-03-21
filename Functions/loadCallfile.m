@@ -13,6 +13,13 @@ elseif nargout < 3 % If ClusteringData is requested, we don't need Calls
     error('This doesn''t appear to be a detection file!')
 end
 
+if ~any(strcmp('CallID', Calls.Properties.VariableNames)) || length(unique(Calls.CallID)) ~= height(Calls)
+    if length(unique(Calls.CallID)) ~= height(Calls)
+        warning('CallID not unique - replacing with 1:height(Calls)')
+    end
+    Calls.CallID = categorical(1:height(Calls))';
+end
+
 if isfield(data, 'audiodata')
     audiodata = data.audiodata;
 end
