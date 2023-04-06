@@ -40,7 +40,7 @@ if eventdata.Source.Value==1
         set(handles.slope,'String','Slope: ');
         set(handles.duration,'String','Duration: ');
         set(handles.sinuosity,'String','Sinuosity: ');
-        set(handles.powertext,'String','Power: ')
+        set(handles.powertext,'String','Power: ');
         set(handles.tonalitytext,'String','Tonality: ');
     end
     hObject.String='Recording';

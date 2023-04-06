@@ -1,4 +1,22 @@
 ﻿# Changelog
+## 3.1.0 2023-04-04
+## MANY UPDATES & FIXES
+Improved Default Clustering
+- Default Variational Autoencoder Embeddings + Contour
+- Countour parameters only still available (was called: k-means)
+- Improved image normalization
+- Fixed Cluster Label Issue
+
+Updated Clustering Window
+- Removed frequency visualization
+- Right click to change clusters
+
+Improved TSNE/UMAp visualization
+
+Added File Name to Excel Batch Output
+
+Checks for File Changes Before Save
+
 ## 3.0.4 2022-07-27
 ## Supervised Clustering Bug Fix
 - Fixed an issue where supervised clustering was crashing

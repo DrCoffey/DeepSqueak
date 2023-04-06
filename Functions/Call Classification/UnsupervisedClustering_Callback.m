@@ -3,7 +3,7 @@ function UnsupervisedClustering_Callback(hObject, eventdata, handles)
 
 finished = 0; % Repeated until
 while ~finished
-    choice = questdlg('Choose clustering method:','Cluster','ARTwarp','K-means (recommended)', 'Variational Autoencoder','K-means (recommended)');
+    choice = questdlg('Choose clustering method:','Cluster','ARTwarp','Auto Encoder + Contour (recommended)', 'Contour Parameters','Auto Encoder + Contour (recommended)');
     
     % Get the data
     %     [ClusteringData] = CreateClusteringData(handles, 'forClustering', true, 'save_data', true);
@@ -15,13 +15,13 @@ while ~finished
         case []
             return
             
-        case {'K-means (recommended)', 'Variational Autoencoder'}
+        case {'Contour Parameters', 'Auto Encoder + Contour (recommended)'}
             FromExisting = questdlg('From existing model?','Cluster','Yes','No','No');
             switch FromExisting % Load Model
                 case 'No'
                     % Get parameter weights
                     switch choice
-                        case 'K-means (recommended)'
+                        case 'Contour Parameters'
                             [ClusteringData, ~, ~, ~, spectrogramOptions] = CreateClusteringData(handles, 'forClustering', true, 'save_data', true);
                             if isempty(ClusteringData); return; end
                             clusterParameters= inputdlg({'Shape weight','Frequency weight','Duration weight'},'Choose cluster parameters:',1,{'3','2','1'});
@@ -30,9 +30,13 @@ while ~finished
                             freq_weight = str2double(clusterParameters{2});
                             duration_weight = str2double(clusterParameters{3});
                             data = get_kmeans_data(ClusteringData, slope_weight, freq_weight, duration_weight);
-                        case 'Variational Autoencoder'
+                        case 'Auto Encoder + Contour (recommended)'
                             [encoderNet, decoderNet, options, ClusteringData] = create_VAE_model(handles);
                             data = extract_VAE_embeddings(encoderNet, options, ClusteringData);
+                            freq  = cell2mat(cellfun(@(x) imresize(x',[1 16]) ,ClusteringData.xFreq,'UniformOutput',0));
+                            freq=zscore(freq,0,'all');
+                            data=zscore(data,0,'all');
+                            data=[data freq];
                     end
                     
                     % Make a k-means model and return the centroids
@@ -43,19 +47,22 @@ while ~finished
                     [FileName,PathName] = uigetfile(fullfile(handles.data.squeakfolder,'Clustering Models','*.mat'));
                     if isnumeric(FileName); return;end
                     switch choice
-                        case 'K-means (recommended)'
+                        case 'Contour Parameters'
                             spectrogramOptions = [];
                             load(fullfile(PathName,FileName),'C','freq_weight','slope_weight','duration_weight','clusterName','spectrogramOptions');
                             ClusteringData = CreateClusteringData(handles, 'forClustering', true, 'spectrogramOptions', spectrogramOptions, 'save_data', true);
                             if isempty(ClusteringData); return; end
                             data = get_kmeans_data(ClusteringData, slope_weight, freq_weight, duration_weight);
-                        case 'Variational Autoencoder'
+                        case 'Auto Encoder + Contour (recommended)'
                             C = [];
                             load(fullfile(PathName,FileName),'C','encoderNet','decoderNet','options');
-                            [ClusteringData] = CreateClusteringData(handles, 'spectrogramOptions', options.spectrogram, 'scale_duration', options.maxDuration, 'freqRange', options.freqRange, 'save_data', true);
+                            [ClusteringData, ~, options.freqRange, options.maxDuration, options.spectrogram] = CreateClusteringData(handles, 'scale_duration', true, 'fixed_frequency', true,'forClustering', true, 'save_data', true);
                             if isempty(ClusteringData); return; end
                             data = extract_VAE_embeddings(encoderNet, options, ClusteringData);
-                            
+                            freq  = cell2mat(cellfun(@(x) imresize(x',[1 16]) ,ClusteringData.xFreq,'UniformOutput',0));
+                            freq=zscore(freq,0,'all');
+                            data=zscore(data,0,'all');
+                            data=[data freq];
                             % If the model was created through create_tsne_Callback, C won't exist, so make it.
                             if isempty(C)
                                 C = get_kmeans_centroids(data);
@@ -150,8 +157,12 @@ while ~finished
     
     %% Assign Names
     % If the
-    if strcmp(choice, 'K-means (recommended)') && strcmp(FromExisting, 'Yes')
+    if strcmp(FromExisting, 'Yes')
+        try
         clustAssign = categorical(clustAssign, 1:size(C,1), cellstr(clusterName));
+        catch
+            disp('No Centroids Available');
+        end
     end
     
     [~, clusterName, rejected, finished, clustAssign] = clusteringGUI(clustAssign, ClusteringData);
@@ -161,7 +172,7 @@ end
 % Save the clustering model
 if FromExisting(1) == 'N'
     switch choice
-        case 'K-means (recommended)'
+        case 'Contour Parameters'
             [FileName, PathName] = uiputfile(fullfile(handles.data.squeakfolder, 'Clustering Models', 'K-Means Model.mat'), 'Save clustering model');
             if ~isnumeric(FileName)
                 save(fullfile(PathName, FileName), 'C', 'freq_weight', 'slope_weight', 'duration_weight', 'clusterName', 'spectrogramOptions');
@@ -171,7 +182,7 @@ if FromExisting(1) == 'N'
             if ~isnumeric(FileName)
                 save(fullfile(PathName, FileName), 'ARTnet', 'settings');
             end
-        case 'Variational Autoencoder'
+        case 'Auto Encoder + Contour (recommended)'
             [FileName, PathName] = uiputfile(fullfile(handles.data.squeakfolder, 'Clustering Models', 'Variational Autoencoder Model.mat'), 'Save clustering model');
             if ~isnumeric(FileName)
                 save(fullfile(PathName, FileName), 'C', 'encoderNet', 'decoderNet', 'options', 'clusterName');

@@ -3,7 +3,7 @@ function create_tsne_Callback(hObject, eventdata, handles)
 
 
 padding = 1000; % Pad the temp image by this amount, so that calls near the border still fit.
-blackLevel = 10; % Subtract this value from each call image to make a nicer picture.
+blackLevel = 80; % Subtract this value from each call image to make a nicer picture.
 
 % Select embedding type
 embeddingType = questdlg('Embed with UMAP or t-SNE?', 'Embedding Method', 't-SNE' , 'UMAP', 't-SNE');
@@ -78,8 +78,10 @@ switch inputParameters
                 if isempty(ClusteringData); return; end
         end
         data = extract_VAE_embeddings(encoderNet, options, ClusteringData);
-        
-        
+        freq  = cell2mat(cellfun(@(x) imresize(x',[1 16]) ,ClusteringData.xFreq,'UniformOutput',0));
+        freq=zscore(freq,0,'all');
+        data=zscore(data,0,'all');
+        data=[data freq];
 end
 
 imsize = str2double(clusterParameters(1:2))';

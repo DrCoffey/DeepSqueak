@@ -5,9 +5,9 @@ numTrainImages = size(XTrain, 4);
 executionEnvironment = "auto";
 
 
-numEpochs = 200;
+numEpochs = 250;
 miniBatchSize = 128;
-lr = 1e-3;
+lr = .25e-3;
 numIterations = floor(numTrainImages/miniBatchSize);
 iteration = 0;
 

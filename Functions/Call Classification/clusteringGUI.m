@@ -3,7 +3,7 @@ classdef clusteringGUI < handle
     properties
         currentCluster = 1
         page = 1
-        thumbnail_size = [200 200]
+        thumbnail_size = [50 100]
         clustAssign
         clusters
         rejected
@@ -169,12 +169,12 @@ classdef clusteringGUI < handle
         function render_GUI(obj)
             
             %% Colormap
-            xdata = obj.minfreq:obj.maxfreq;
-            caxis = axes(obj.fig,'Units','Normalized','Position',[.88 .05 .04 .8]);
-            image(1,xdata,obj.ColorData,'parent',caxis)
-            caxis.YDir = 'normal';
-            set(caxis,'YColor','w','box','off','YAxisLocation','right');
-            ylabel(caxis, 'Frequency (kHz)')
+%             xdata = obj.minfreq:obj.maxfreq;
+%             caxis = axes(obj.fig,'Units','Normalized','Position',[.88 .05 .04 .8]);
+%             image(1,xdata,obj.ColorData,'parent',caxis)
+%             caxis.YDir = 'normal';
+%             set(caxis,'YColor','w','box','off','YAxisLocation','right');
+%             ylabel(caxis, 'Frequency (kHz)')
             
             %% Make the axes
             aspectRatio = median(cellfun(@(im) size(im,1) ./ size(im,2), obj.ClusteringData.Spectrogram));
@@ -191,8 +191,8 @@ classdef clusteringGUI < handle
 
             axes_spacing = .70; % Relative width of each image
             y_range = [.05, .75]; % [Start, End] of the grid
-            x_range = [.05, .85];
-            x_grids = 9; % Number of x grids
+            x_range = [.05, .95];
+            x_grids = 8; % Number of x grids
             y_grids = 3; % Number of y grids
 
             ypos = linspace(y_range(1), y_range(2) - axes_spacing * range(y_range) / y_grids, y_grids );
@@ -238,8 +238,11 @@ classdef clusteringGUI < handle
             freqRange = freqRange + range(freqRange) .* rel_y(1) .* [-1, 1];
 
             freqdata = linspace(freqRange(2) ,freqRange(1), obj.thumbnail_size(1));
-            colorMask = interp1(linspace(obj.minfreq, obj.maxfreq, size(obj.ColorData,1)), obj.ColorData, freqdata, 'nearest', 'extrap');
-            colorIM = im .* colorMask ./ 255;
+            %colorMask = interp1(linspace(obj.minfreq, obj.maxfreq, size(obj.ColorData,1)), obj.ColorData, freqdata, 'nearest', 'extrap');
+            
+            % colorIM = im .* colorMask ./ 255;
+            Map       = inferno(255);
+            colorIM      = ind2rgb(im, Map);
         end
         
         function obj = config_axis(obj, axis_handles,i, rel_x, rel_y)

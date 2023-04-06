@@ -11,23 +11,31 @@ if nargin == 3 % if "Load Calls" button pressed, load the selected file, else re
     end
     
     %Check if detection file has changed to save file before loading a new one.
+    try
     if ~isempty(handles.data.calls)
-        [tmpcalls, ~] = loadCallfile(fullfile(handles.detectionfiles(handles.current_file_id).folder,  handles.current_detection_file), handles);
-        if ismember('Power',tmpcalls.Properties.VariableNames)
-            tmpcalls = removevars(tmpcalls,'Power');
-        end
-        if ~isequal(tmpcalls, handles.data.calls)
-            opts.Interpreter = 'tex';
-            opts.Default='Yes';
-            saveChanges = questdlg('\color{red}\bf WARNING! \color{black} Detection file has been modified. Would you like to save changes?','Save Detection File?','Yes','No',opts);
-            switch saveChanges
-                case 'Yes'
-                    savesession_Callback(hObject, eventdata, handles);
-                case 'No'
+        if ~isfield(handles,'current_detection_file')
+            savesession_Callback(hObject, eventdata, handles);
+        else
+            [tmpcalls, ~] = loadCallfile(fullfile(handles.detectionfiles(handles.current_file_id).folder,  handles.current_detection_file), handles);
+            if ismember('Power',tmpcalls.Properties.VariableNames)
+                tmpcalls = removevars(tmpcalls,'Power');
+            end
+            if ~isequal(tmpcalls, handles.data.calls)
+                opts.Interpreter = 'tex';
+                opts.Default='Yes';
+                saveChanges = questdlg('\color{red}\bf WARNING! \color{black} Detection file has been modified. Would you like to save changes?','Save Detection File?','Yes','No',opts);
+                switch saveChanges
+                    case 'Yes'
+                        savesession_Callback(hObject, eventdata, handles);
+                    case 'No'
+                end
             end
         end
     end
-    
+    catch
+    disp('Detection folder has changed. Cannot autodetect file changes');
+    end
+
     handles.current_file_id = get(handles.popupmenuDetectionFiles,'Value');
     handles.current_detection_file = handles.detectionfiles(handles.current_file_id).name;
 end

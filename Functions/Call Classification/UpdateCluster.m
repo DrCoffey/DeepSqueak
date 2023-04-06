@@ -30,7 +30,8 @@ for i = 1:length(files)
     cluster_idx = find(file_idx == i);
 
     % Find the index of the calls in the file that correspond the the clustering data
-    call_idx = [ClusteringData{cluster_idx, 7}];
+    %call_idx = [ClusteringData{cluster_idx, 7}];
+    call_idx = [ClusteringData.callID(cluster_idx)];
 
     % Update call type with cluster names
     Calls.Type(call_idx) = clustAssign(cluster_idx);

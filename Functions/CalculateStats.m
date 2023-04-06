@@ -5,7 +5,13 @@ end
 
 %% Ridge Detection
 % Calculate entropy at each time point
+try
+stats.Entropy = geo_mean(I,1) ./ mean(I,1);
+catch
+warning('The function "geomean" has been renamed "geo_mean". Please update MATLAB to before it is deiscontinued');
 stats.Entropy = geomean(I,1) ./ mean(I,1);
+end
+
 stats.Entropy = smooth(stats.Entropy,0.1,'rlowess')';
 
 if AmplitudeThreshold > .001 & AmplitudeThreshold < .999
@@ -49,7 +55,7 @@ stats.ridgeTime = find(greaterthannoise);
 stats.ridgeFreq = ridgeFreq(greaterthannoise);
 % Smoothed frequency of the call contour
 try
-    stats.ridgeFreq_smooth = smooth(stats.ridgeTime,stats.ridgeFreq,0.05,'rlowess');
+    stats.ridgeFreq_smooth = smooth(stats.ridgeTime,stats.ridgeFreq,0.025,'rlowess');
     %stats.ridgeFreq_smooth = stats.ridgeFreq;
 catch
     disp('Cannot apply smoothing. The line is probably too short');

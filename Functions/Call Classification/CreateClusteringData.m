@@ -71,9 +71,14 @@ if ~isempty(Calls)
         else
             maxDuration = p.Results.scale_duration;
         end
-        time_padding = maxDuration  - sqrt(maxDuration ./ Calls.Box(:,3)) .* Calls.Box(:,3);
-        Calls.Box(:,3) = Calls.Box(:,3) + time_padding;
-        Calls.Box(:,1) = Calls.Box(:,1) - time_padding/2;
+        %time_padding = maxDuration  - sqrt(maxDuration ./ Calls.Box(:,3)) .* Calls.Box(:,3);
+        % time_padding = maxDuration  - Calls.Box(:,3);
+        time_padding = Calls.Box(:,3)*.25;
+        %Calls.Box(:,3) = Calls.Box(:,3) + time_padding;
+%         Calls.Box(:,3) = maxDuration;
+%         Calls.Box(:,1) = Calls.Box(:,1) - time_padding/2;
+        Calls.Box(:,3) =  Calls.Box(:,3) + time_padding*2;
+        Calls.Box(:,1) = Calls.Box(:,1) - time_padding;
     end
     % Use the box, or a fixed frequency range?
     if p.Results.fixed_frequency || ~isempty(p.Results.freqRange)
@@ -83,8 +88,11 @@ if ~isempty(Calls)
             freqRange(1) = prctile(Calls.Box(:,2), 5);
             freqRange(2) = prctile(Calls.Box(:,4) + Calls.Box(:,2), 95);
         end
-        Calls.Box(:,2) = freqRange(1);
-        Calls.Box(:,4) = freqRange(2) - freqRange(1);
+%         Calls.Box(:,2) = freqRange(1);
+%         Calls.Box(:,4) = freqRange(2) - freqRange(1);
+          freq_padding = Calls.Box(:,4)*.25;
+          Calls.Box(:,2) = Calls.Box(:,2) - freq_padding;
+          Calls.Box(:,4) = Calls.Box(:,4) + freq_padding*2;
     end
 end
 %% for each call in the file, calculate stats for clustering
@@ -101,7 +109,7 @@ for i = 1:height(Calls)
     end
     perFileCallID = perFileCallID + 1;
         
-    [I,wind,noverlap,nfft,rate,box,~,~,~,~,pow] = CreateFocusSpectrogram(Calls(i,:), handles, true, [], audioReader);
+    [I,wind,noverlap,nfft,rate,box,s,fr,ti,~,pow] = CreateFocusSpectrogram(Calls(i,:), handles, true, [], audioReader);
     % im = mat2gray(flipud(I),[0 max(max(I))/4]); % Set max brightness to 1/4 of max
     % im = mat2gray(flipud(I), prctile(I, [1 99], 'all')); % normalize brightness
     pow(pow==0)=.01;
@@ -129,6 +137,7 @@ for i = 1:height(Calls)
     
     ClusteringData = [ClusteringData
         [{uint8(im .* 256)} % Image
+        {box}
         {box(2)} % Lower freq
         {stats.DeltaTime} % Delta time
         {xFreq} % Time points
@@ -143,7 +152,7 @@ for i = 1:height(Calls)
 end
 
 
-ClusteringData = cell2table(ClusteringData, 'VariableNames', {'Spectrogram', 'MinFreq', 'Duration', 'xFreq', 'xTime', 'Filename', 'callID', 'Power', 'Bandwidth'});
+ClusteringData = cell2table(ClusteringData, 'VariableNames', {'Spectrogram', 'Box','MinFreq', 'Duration', 'xFreq', 'xTime', 'Filename', 'callID', 'Power', 'Bandwidth'});
 
 close(h)
 
