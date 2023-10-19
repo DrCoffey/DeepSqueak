@@ -21,4 +21,4 @@ Follow](https://camo.githubusercontent.com/51e14ceb3b49e0fb9965a09148568d11ec4ba
 -   Contour Invarient Clustering With Variational Auto Encoders
 -   Brand New Clustering GUI
 
-Copyright © 2021 by Ruby Marx, Kevin Coffey, Robert Ciszek, & Lara Valderrabano All Rights Reserved.
+Copyright © 2021 by Ruby Marx, Kevin Coffey, Robert Ciszek, & Leonardo Lara-Valderrábano All Rights Reserved.
