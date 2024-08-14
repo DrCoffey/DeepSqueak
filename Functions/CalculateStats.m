@@ -5,12 +5,8 @@ end
 
 %% Ridge Detection
 % Calculate entropy at each time point
-try
-stats.Entropy = geo_mean(I,1) ./ mean(I,1);
-catch
-warning('The function "geomean" has been renamed "geo_mean". Please update MATLAB to before it is deiscontinued');
 stats.Entropy = geomean(I,1) ./ mean(I,1);
-end
+
 
 stats.Entropy = smooth(stats.Entropy,0.1,'rlowess')';
 
