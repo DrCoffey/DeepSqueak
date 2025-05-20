@@ -1,4 +1,10 @@
 ﻿# Changelog
+## 3.2.0 2025-05-20
+## Image Scaling Update
+-   New High Precision Neural Networks
+-   Automatic Removal of Horizontal Noise Bands
+-   Improved Image Scaling that is Bound to Trained Networks
+
 ## 3.1.0 2023-04-04
 ## MANY UPDATES & FIXES
 Improved Default Clustering

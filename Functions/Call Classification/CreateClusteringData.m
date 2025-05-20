@@ -110,19 +110,26 @@ for i = 1:height(Calls)
     perFileCallID = perFileCallID + 1;
         
     [I,wind,noverlap,nfft,rate,box,s,fr,ti,~,pow] = CreateFocusSpectrogram(Calls(i,:), handles, true, [], audioReader);
-    % im = mat2gray(flipud(I),[0 max(max(I))/4]); % Set max brightness to 1/4 of max
-    % im = mat2gray(flipud(I), prctile(I, [1 99], 'all')); % normalize brightness
+    
+    % -- convert power spectral density to [0 1]
     pow(pow==0)=.01;
     pow = log10(pow);
     pow = rescale(imcomplement(abs(pow)));
-    % Create Adjusted Image for Identification
-    xTile=ceil(size(pow,1)/10);
-    yTile=ceil(size(pow,2)/10);
-    if xTile>1 && yTile>1
-    im = adapthisteq(flipud(pow),'NumTiles',[xTile yTile],'ClipLimit',.005,'Distribution','rayleigh','Alpha',.4);
-    else
-    im = adapthisteq(flipud(pow),'NumTiles',[2 2],'ClipLimit',.005,'Distribution','rayleigh','Alpha',.4);    
-    end
+    pow = flipud(pow);
+    im = imadjust(pow,[.5 .9]);
+    % im = mat2gray(flipud(I),[0 max(max(I))/4]); % Set max brightness to 1/4 of max
+    % im = mat2gray(flipud(I), prctile(I, [1 99], 'all')); % normalize brightness
+    % pow(pow==0)=.01;
+    % pow = log10(pow);
+    % pow = rescale(imcomplement(abs(pow)));
+    % % Create Adjusted Image for Identification
+    % xTile=ceil(size(pow,1)/10);
+    % yTile=ceil(size(pow,2)/10);
+    % if xTile>1 && yTile>1
+    % im = adapthisteq(flipud(pow),'NumTiles',[xTile yTile],'ClipLimit',.005,'Distribution','rayleigh','Alpha',.4);
+    % else
+    % im = adapthisteq(flipud(pow),'NumTiles',[2 2],'ClipLimit',.005,'Distribution','rayleigh','Alpha',.4);    
+    % end
 
     if p.Results.forClustering
         stats = CalculateStats(I,wind,noverlap,nfft,rate,box,handles.data.settings.EntropyThreshold,handles.data.settings.AmplitudeThreshold);

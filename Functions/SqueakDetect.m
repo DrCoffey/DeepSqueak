@@ -15,6 +15,13 @@ network=networkfile.detector;
 wind=networkfile.wind;
 noverlap=networkfile.noverlap;
 nfft=networkfile.nfft;
+try
+    disp('Using Network Defined Image Scaling')
+    imScale=networkfile.imScale;
+catch
+    disp('Using Original DeepSqueak v3 Image Scaling')
+    imScale=@oldScale;
+end
 
 % Adjust settings, so spectrograms are the same for different sample rates
 wind = round(wind * audio_info.SampleRate);
@@ -33,10 +40,12 @@ else
 end
 
 %Detection chunk size (s)
-chunksize=networkfile.imLength*.8;
+% chunksize=networkfile.imLength*.8;
+chunksize=networkfile.imLength*.75;
 
 %Overlap between chucks (s)
-overlap=networkfile.imLength*.2;
+%overlap=networkfile.imLength*.2;
+overlap=networkfile.imLength*.25;
 
 % (2) High frequency cutoff (kHz)
 if audio_info.SampleRate < (Settings(2)*1000)*2
@@ -90,23 +99,15 @@ for i = 1:length(chunks)-1
         [~,fr,ti,p] = spectrogram(audio(:,1),wind,noverlap,nfft,audio_info.SampleRate,'yaxis'); % Just use the first audio channel
         upper_freq = find(fr<=HighCutoff*1000,1,'last');
         lower_freq = find(fr>=LowCutoff*1000,1,'first');
-        pow = p(lower_freq:upper_freq,:);
-        pow(pow==0)=.01;
-        pow = log10(pow);
-        pow = rescale(imcomplement(abs(pow)));
-        
-        % Create Adjusted Image for Identification
-        xTile=ceil(size(pow,1)/50);
-        yTile=ceil(size(pow,2)/50);
-        if xTile>1 && yTile>1
-        im = adapthisteq(flipud(pow),'NumTiles',[xTile yTile],'ClipLimit',.005,'Distribution','rayleigh','Alpha',.4);
-        else
-        im = adapthisteq(flipud(pow),'NumTiles',[2 2],'ClipLimit',.005,'Distribution','rayleigh','Alpha',.4);    
-        end
+        p = p(lower_freq:upper_freq,:);
+
+        % Use Old DeepSqueak v3 image scaling or new flexible scaling function
+        im = imScale(p);
 
         % Detect!
-        [bboxes, scores, Class] = detect(network, im2uint8(im), 'ExecutionEnvironment','auto','SelectStrongest',1);
-        
+        [bboxes, scores, Class] = detect(network, im,'SelectStrongest',false);
+        bboxes=round(bboxes);
+
         % Convert boxes from pixels to time and kHz
         bboxes(:,1) = ti(bboxes(:,1)) + (windL ./ audio_info.SampleRate);
         bboxes(:,2) = fr(upper_freq - (bboxes(:,2) + bboxes(:,4))) ./ 1000;
@@ -152,6 +153,21 @@ if contains(networkname,'long','IgnoreCase',true) & ~isempty(Calls)
 end
 
 close(h);
+end
+
+function [im] = oldScale(p)
+            p(p==0)=.01;
+            p = log10(p);
+            p = rescale(imcomplement(abs(p)));
+
+            % Create Adjusted Image for Identification
+            xTile=ceil(size(p,1)/50);
+            yTile=ceil(size(p,2)/50);
+            if xTile>1 && yTile>1
+                im = adapthisteq(flipud(p),'NumTiles',[xTile yTile],'ClipLimit',.005,'Distribution','rayleigh','Alpha',.4);
+            else
+                im = adapthisteq(flipud(p),'NumTiles',[2 2],'ClipLimit',.005,'Distribution','rayleigh','Alpha',.4);
+            end
 end
 
 

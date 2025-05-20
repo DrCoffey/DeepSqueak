@@ -15,7 +15,7 @@ trainingdata = cellstr(trainingdata);
 %% Load the data into a single table
 AllSettings = [];
 for i = 1:length(trainingdata)
-    load([trainingpath trainingdata{i}],'TTable','wind','noverlap','nfft','imLength');
+    load([trainingpath trainingdata{i}],'TTable','wind','noverlap','nfft','imLength','imScale');
     TrainingTables = [TrainingTables; TTable];
     AllSettings = [AllSettings; wind noverlap nfft];
 end
@@ -47,7 +47,7 @@ noverlap = max(AllSettings(:,2));
 nfft = max(AllSettings(:,3));
 
 version = handles.DSVersion;
-save(fullfile(PathName,FileName),'detector','layers','options','wind','noverlap','nfft','version','imLength');
+save(fullfile(PathName,FileName),'detector','layers','options','wind','noverlap','nfft','version','imLength','imScale');
 
 %% Update the menu
 update_folders(hObject, eventdata, handles);

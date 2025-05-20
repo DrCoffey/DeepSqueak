@@ -65,7 +65,7 @@ for k = 1:length(trainingdata)
     
     G = graph(Distance,'upper');
     bins = conncomp(G);
-    
+
     for bin = 1:length(unique(bins))
         BoutCalls = Calls(bins == bin, :);
         
@@ -102,12 +102,13 @@ for k = 1:length(trainingdata)
         waitbar(bin/length(unique(bins)), h, sprintf('Processing File %g of %g', k, length(trainingdata)));        
         
     end
-    save(fullfile(handles.data.squeakfolder,'Training',[filename '.mat']),'TTable','wind','noverlap','nfft','imLength');
+    % Save AutoScaling Function
+    imScale = @autoScale;
+    save(fullfile(handles.data.squeakfolder,'Training',[filename '.mat']),'TTable','wind','noverlap','nfft','imLength','imScale');
     disp(['Created ' num2str(height(TTable)) ' Training Images']);
 end
 close(h)
 end
-
 
 % Create training images and boxes
 function [im, box] = CreateTrainingData(audio,rate,Calls,wind,noverlap,nfft,freqCutoff,filename,AmplitudeRange,replicatenumber,StretchRange)
@@ -138,33 +139,8 @@ lowCut=(min(Calls.Box(:,2))-(min(Calls.Box(:,2))*.75))*1000;
 min_freq  = find(fr>lowCut);
 p = p(min_freq,:);
 
-% % Add brown noise to adjust the amplitude
-% if replicatenumber > 1
-%     AmplitudeFactor = spatialPattern(size(p), -3);
-%     AmplitudeFactor = AmplitudeFactor ./ std(AmplitudeFactor, [], 'all');
-%     AmplitudeFactor = AmplitudeFactor .* range(AmplitudeRange) ./ 2 + mean(AmplitudeRange);
-% end
-% im = log10(p);
-% im = (im - mean(im, 'all')) * std(im, [],'all');
-% im = rescale(im + AmplitudeFactor .* im.^3 ./ (im.^2+2), 'InputMin',-1 ,'InputMax', 5);
-
-
-% -- convert power spectral density to [0 1]
-p(p==0)=.01;
-p = log10(p);
-p = rescale(imcomplement(abs(p)));
-
-% Create adjusted image from power spectral density
-alf=.4*AmplitudeFactor;
-
-% Create Adjusted Image for Identification
-xTile=ceil(size(p,1)/50);
-yTile=ceil(size(p,2)/50);
-if xTile>1 && yTile>1
-im = adapthisteq(flipud(p),'NumTiles',[xTile yTile],'ClipLimit',.005,'Distribution','rayleigh','Alpha',alf);
-else
-im = adapthisteq(flipud(p),'NumTiles',[2 2],'ClipLimit',.005,'Distribution','rayleigh','Alpha',alf);    
-end
+% -- Auto Scale (p)
+im=autoScale(p);
 
 % Find the box within the spectrogram
 x1 = axes2pix(length(ti), ti, Calls.Box(:,1));
@@ -175,12 +151,36 @@ box = ceil([x1, length(fr)-y1-y2, x2, y2]);
 box = box(Calls.Accept == 1, :);
 
 % resize images for 300x300 YOLO Network (Could be bigger but works nice)
-targetSize = [300 300];
+targetSize = [413 413];
 sz=size(im);
 im = imresize(im,targetSize);
 box = bboxresize(box,targetSize./sz);
 
 % Insert box for testing
 % im = insertShape(im, 'rectangle', box);
+% figure; imshow(im);
 imwrite(im, filename, 'BitDepth', 8);
+end
+
+function [im] = autoScale(p)
+% -- convert power spectral density to [0 1]
+p(p==0)=.01;
+p = log10(p);
+p = rescale(imcomplement(abs(p)));
+p = flipud(p);
+
+% Calculate Horizontal Noise
+rowFifth = prctile(p,5,2); % Lowest Fifth Percentile of Eack Row
+highLows = prctile(rowFifth,90); % Top 10% of lowest 5th Percentiles
+sDev = std(p,0,2); % Standard Deviation of Rows
+lowDevs = prctile(sDev,10); % Lowest 10% of Standard Deviations
+idx = rowFifth>highLows & sDev<lowDevs; % Rows with very high fifth percentile brightness and low standard deviation - AKA Solid Lines...
+
+% Remove Horizontal Noise from lines, add back the fifth percentile of the
+% entire spectrogram
+p(idx,:) = p(idx,:) - prctile(p(idx,:),5,2) + repmat(prctile(p,5,"all"),sum(idx),1);
+
+% Save Image
+%im = p;
+im = imadjust(p,[.5 .9]);
 end
