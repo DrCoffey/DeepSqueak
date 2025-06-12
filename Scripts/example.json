@@ -1,0 +1,42 @@
+{
+    "audiodata": {
+        "Filename": "..\\Annotated audio files\\example\\audio.wav",
+        "CompressionMethod": "NONE",
+        "NumChannels": 2,
+        "SampleRate": 48000,
+        "TotalSamples": 140393039,
+        "Duration": 2924.8549791666665,
+        "Title": "audio.wav",
+        "Comment": "",
+        "Artist": "",
+        "BitsPerSample": 16
+    },
+    "Calls": {
+        "Box": [
+            [
+                1801.644187,
+                0.0,
+                0.14722299999993993,
+                60.0
+            ],
+            [
+                1801.79141,
+                0.0,
+                0.2024309999999332,
+                60.0
+            ]
+        ],
+        "Score": [
+            1.0,
+            1.0
+        ],
+        "Type": [
+            "Call",
+            "Call"
+        ],
+        "Accept": [
+            true,
+            true
+        ]
+    }
+}
