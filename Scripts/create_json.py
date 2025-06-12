@@ -10,6 +10,7 @@ import wave
 import csv
 import json
 import pathlib
+import shutil
 
 def get_audio_data(audio_path:pathlib.Path) -> dict:
     """!
@@ -76,13 +77,21 @@ def get_calls(labels_csv:pathlib.Path) -> dict:
 
 if __name__ == "__main__":
     source_folder = pathlib.Path("../Annotated audio files")
-    destination_folder = pathlib.Path("./json")
+    json_destination_folder = pathlib.Path("./json")
+    # Deep Squeak needs its audio data in one folder
+    audio_destination_folder = pathlib.Path("./audio")
+    json_destination_folder.mkdir(parents=True, exist_ok=True)
+    audio_destination_folder.mkdir(parents=True, exist_ok=True)
     delimiter = "\t"
     for folder in source_folder.iterdir():
         if folder.is_dir():
-            json_file_path = destination_folder / (folder.name + ".json")
+            json_file_path = json_destination_folder / (folder.name + ".json")
             with json_file_path.open("w") as json_file:
-                audio = get_audio_data(folder / "audio.wav")
+                # Copy audio file
+                old_audio_path = folder / "audio.wav"
+                new_audio_path = audio_destination_folder / (folder.name + ".wav")
+                shutil.copy2(old_audio_path, new_audio_path)
+                audio = get_audio_data(new_audio_path)
                 calls = get_calls(folder / "audio_labels.txt")
                 to_save = {
                     "audiodata": audio,
