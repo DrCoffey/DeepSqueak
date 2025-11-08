@@ -216,7 +216,6 @@ set(handles.detectionAxes,'XTick',[]);
 set(handles.detectionAxes,'YTick',[]);
 set(handles.spectogramWindow,'Parent',handles.hFig);
 
-
 % Set the list of colormaps
 handles.popupmenuColorMap.String = {
     'inferno'
@@ -376,9 +375,9 @@ function figure1_WindowKeyPressFcn(hObject, eventdata, handles)
 switch eventdata.Character
     case 'p'
         PlayCall_Callback(hObject, eventdata, handles)
-    case {'e', 29} % char(29) is right arrow key
+    case {'e', 29, '→'} % char(29) is right arrow key
         NextCall_Callback(hObject, eventdata, handles)
-    case {'q', 28} % char(28) is left arrow key
+    case {'q', 28, '←'} % char(28) is left arrow key
         PreviousCall_Callback(hObject, eventdata, handles)
     case 'a'
         AcceptCall_Callback(hObject, eventdata, handles)
@@ -389,11 +388,11 @@ switch eventdata.Character
     case 127 % Delete key
         handles.data.calls(handles.data.currentcall,:) = [];
         SortCalls(hObject, [], handles, 'time', 0, handles.data.currentcall - 1);
-    case 30 % char(30) is up arrow key
+    case {30, '↑'} % char(30) is up arrow key
         slide_focus(+ handles.data.settings.focus_window_size, hObject, eventdata, handles)
-    case 31 % char(31) is down arrow key
+    case {31, '↓'} % char(31) is down arrow key
         slide_focus(- handles.data.settings.focus_window_size, hObject, eventdata, handles)
-    case 32 % 'space'
+    case {32, ' '} % 'space'
         forwardButton_Callback(hObject, eventdata, handles);
     case handles.data.labelShortcuts
         %% Update the call labels
@@ -402,6 +401,7 @@ switch eventdata.Character
         handles.data.calls.Type(handles.data.currentcall) = categorical(handles.data.settings.labels(idx));
         update_fig(hObject, eventdata, handles);
 end
+disp(eventdata.Character);
 % drawnow
 
 function figure1_KeyPressFcn(hObject, eventdata, handles)

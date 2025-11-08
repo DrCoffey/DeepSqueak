@@ -1,4 +1,11 @@
 ﻿# Changelog
+## 3.2.1 2025-11-07
+## Important Bug Fixes 
+-   Fixed issue where clustering GUI was loosing track of cluster assignment when changing names
+-   Was particularly an issue when there were same name clusters and multiple new names
+-   Fixed supervised clustering
+
+
 ## 3.2.0 2025-05-20
 ## Image Scaling Update
 -   New High Precision Neural Networks

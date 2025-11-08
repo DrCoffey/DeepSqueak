@@ -27,7 +27,6 @@ classdef clusteringGUI < handle
         function [obj, NewclusterName, NewRejected, NewFinished, NewClustAssign] = clusteringGUI(clustAssign, ClusteringData)
             
             
-            
             obj.clustAssign = clustAssign;
             %Image, Lower freq, delta time, Time points, Freq points, File path, Call ID in file, power, RelBox
             obj.ClusteringData = ClusteringData;
@@ -52,7 +51,7 @@ classdef clusteringGUI < handle
             set(obj.fig,'color',[.1, .1, .1]);
             
             movegui(obj.fig,'center');
-            %             set(obj.fig,'WindowButtonMotionFcn', @(hObject, eventdata) mouse_over_Callback(obj, hObject, eventdata));
+            %set(obj.fig,'WindowButtonMotionFcn', @(hObject, eventdata) mouse_over_Callback(obj, hObject, eventdata));
             
             txt = uicontrol('Parent',obj.fig,...
                 'BackgroundColor',[.1 .1 .1],...
@@ -138,7 +137,6 @@ classdef clusteringGUI < handle
                 'Position',[118 509 80 30],...
                 'HorizontalAlignment','center');
             
-            
             obj.call_id_text = uicontrol('Parent',obj.fig,...
                 'BackgroundColor',[.1 .1 .1],...
                 'ForegroundColor','w',...
@@ -148,16 +146,13 @@ classdef clusteringGUI < handle
                 'Position',[100 470 400 30],...
                 'HorizontalAlignment','center');
             
-            
             obj.render_GUI();
-            
             % Wait for d to close before running to completion
             set( findall(obj.fig, '-property', 'Units' ), 'Units', 'Normalized');
             obj.fig.Visible = 'on';
             
             % Enable pointer management for the figure for mouse hover over
             iptPointerManager(obj.fig, 'enable');
-                    
             uiwait(obj.fig);
             NewclusterName = obj.clusterName;
             NewRejected = obj.rejected;
@@ -169,12 +164,12 @@ classdef clusteringGUI < handle
         function render_GUI(obj)
             
             %% Colormap
-%             xdata = obj.minfreq:obj.maxfreq;
-%             caxis = axes(obj.fig,'Units','Normalized','Position',[.88 .05 .04 .8]);
-%             image(1,xdata,obj.ColorData,'parent',caxis)
-%             caxis.YDir = 'normal';
-%             set(caxis,'YColor','w','box','off','YAxisLocation','right');
-%             ylabel(caxis, 'Frequency (kHz)')
+%           xdata = obj.minfreq:obj.maxfreq;
+%           caxis = axes(obj.fig,'Units','Normalized','Position',[.88 .05 .04 .8]);
+%           image(1,xdata,obj.ColorData,'parent',caxis)
+%           caxis.YDir = 'normal';
+%           set(caxis,'YColor','w','box','off','YAxisLocation','right');
+%           ylabel(caxis, 'Frequency (kHz)')
             
             %% Make the axes
             aspectRatio = median(cellfun(@(im) size(im,1) ./ size(im,2), obj.ClusteringData.Spectrogram));
@@ -188,13 +183,11 @@ classdef clusteringGUI < handle
             % y_grids = ceil(nFrames / x_grids);
         
             obj.thumbnail_size = round(sqrt(20000 .* [aspectRatio, 1/aspectRatio]));
-
             axes_spacing = .70; % Relative width of each image
             y_range = [.05, .75]; % [Start, End] of the grid
             x_range = [.05, .95];
             x_grids = 8; % Number of x grids
             y_grids = 3; % Number of y grids
-
             ypos = linspace(y_range(1), y_range(2) - axes_spacing * range(y_range) / y_grids, y_grids );
             xpos = linspace(x_range(1), x_range(2) - axes_spacing * range(x_range) / x_grids, x_grids );
             xpos = fliplr(xpos);
@@ -233,16 +226,15 @@ classdef clusteringGUI < handle
             
             % Apply color to the greyscale images
             freqRange = [ClusteringData.MinFreq(clustIndex(callID)),...
-                ClusteringData.MinFreq(clustIndex(callID)) + ClusteringData.Bandwidth(clustIndex(callID))];
+            ClusteringData.MinFreq(clustIndex(callID)) + ClusteringData.Bandwidth(clustIndex(callID))];
             % Account for any padding on the y axis
             freqRange = freqRange + range(freqRange) .* rel_y(1) .* [-1, 1];
-
             freqdata = linspace(freqRange(2) ,freqRange(1), obj.thumbnail_size(1));
             %colorMask = interp1(linspace(obj.minfreq, obj.maxfreq, size(obj.ColorData,1)), obj.ColorData, freqdata, 'nearest', 'extrap');
             
             % colorIM = im .* colorMask ./ 255;
-            Map       = inferno(255);
-            colorIM      = ind2rgb(im, Map);
+            Map = inferno(255);
+            colorIM = ind2rgb(im, Map);
         end
         
         function obj = config_axis(obj, axis_handles,i, rel_x, rel_y)
@@ -273,7 +265,7 @@ classdef clusteringGUI < handle
         
         function obj = plotimages(obj)
             % Number of calls in each cluster
-            for cl = 1:length(obj.clusterName)
+            for cl = 1:length(obj.clusters) % cl = 1:length(obj.clusterName)
                 obj.count(cl) = sum(obj.clustAssign==obj.clusters(cl));
             end
             
@@ -282,24 +274,19 @@ classdef clusteringGUI < handle
             for i=1:length(obj.image_axes)
                 if i <= length(clustIndex) - (obj.page - 1)*length(obj.image_axes)
                     % set(image_axes(i),'Visible','off')
-                    
                     set(get(obj.image_axes(i),'children'),'Visible','on');
-                    
                     callID = i + (obj.page - 1)*length(obj.image_axes);
                     [colorIM, rel_x, rel_y] = obj.create_thumbnail(obj.ClusteringData,clustIndex,callID);
                     set(obj.handle_image(i), 'ButtonDownFcn',@(src,event) clicked(obj,src,event,clustIndex(callID),i,callID));
                     obj.add_cluster_context_menu(obj.handle_image(i),clustIndex(callID));
-                    
-                    
+                   
                     % Display the file ID and call number on mouse hover
                     [~,call_file,~] = fileparts(obj.ClusteringData.Filename(clustIndex(callID)));
                     call_id = sprintf('Call: %u', obj.ClusteringData.callID(clustIndex(callID)));                   
-                    pointerBehavior.enterFcn = @(~,~) set(obj.call_id_text, 'string', {call_id, call_file});
+                    pointerBehavior.enterFcn = @(~,~) set(obj.call_id_text, 'string', {call_id, call_file{:}});
                     pointerBehavior.traverseFcn = [];
                     pointerBehavior.exitFcn = @(~,~) set(obj.call_id_text, 'string', '');
                     iptSetPointerBehavior(obj.handle_image(i), pointerBehavior);
-
-
 
                     % Make the image red if the call is rejected
                     if obj.rejected(clustIndex(callID))
@@ -307,9 +294,7 @@ classdef clusteringGUI < handle
                     end
                     
                     set(obj.handle_image(i),'CData',colorIM, 'XData', []);
-                    
                     obj.config_axis(obj.image_axes(i),clustIndex(callID), rel_x, rel_y);
-                    
                     set(obj.image_axes(i),'Visible','on')
                     
                 else
@@ -328,18 +313,18 @@ classdef clusteringGUI < handle
         end
         
         function obj = add_cluster_context_menu(obj, hObject, i)
-            unique_clusters = unique(obj.clusterName);
-            
+            % unique_clusters = unique(obj.clusterName);
+            unique_clusters = obj.clusters;
             c = uicontextmenu(obj.fig);
             for ci=1:length(unique_clusters)
                 uimenu(c,'text',string(obj.clusterName(ci)),'Callback',@(src,event) assign_cluster(obj, src, event,i,unique_clusters(ci)));
-            end
-            
+            end  
             set(hObject, 'UIContextMenu',c);
         end
         
-        function obj = assign_cluster(obj, hObject,eventdata,i, clusterLabel)
-            obj.clustAssign(i) = clusterLabel;
+        function obj = assign_cluster(obj, hObject,eventdata,i, cluster)
+            %obj.clustAssign(i) = obj.currentCluster;
+            obj.clustAssign(i) = cluster;
             obj.plotimages();
         end
         
@@ -347,13 +332,9 @@ classdef clusteringGUI < handle
             if( eventdata.Button ~= 1 ) % Return if not left clicked
                 return
             end
-            
             clustIndex = find(obj.clustAssign == obj.clusters(obj.currentCluster));
-            
             obj.rejected(i) = ~obj.rejected(i);
-            
             [colorIM, ~, ~] = obj.create_thumbnail(obj.ClusteringData,clustIndex,callID);
-           
             if obj.rejected(i)
                 colorIM(:,:,1) = colorIM(:,:,1) + .5;
             end            

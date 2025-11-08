@@ -82,6 +82,11 @@ switch inputParameters
         freq=zscore(freq,0,'all');
         data=zscore(data,0,'all');
         data=[data freq];
+        % if ~exist('clustAssign')
+        % C = get_kmeans_centroids(data);
+        % [clustAssign,D] = knnsearch(C,data,'Distance','euclidean');
+        % end
+
 end
 
 imsize = str2double(clusterParameters(1:2))';
