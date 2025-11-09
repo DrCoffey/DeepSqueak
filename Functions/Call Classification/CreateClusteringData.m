@@ -49,6 +49,9 @@ for j = 1:length(fileName)
     [Calls_tmp,  audiodata{j}, loaded_ClusteringData] = loadCallfile(fullfile(filePath,fileName{j}),handles);
     % If the files is extracted contours, rather than a detection file
     if ~isempty(loaded_ClusteringData)
+        if ismember('Type', loaded_ClusteringData.Properties.VariableNames)
+        clustAssign = loaded_ClusteringData.Type;
+        end
         ClusteringData = [ClusteringData; table2cell(loaded_ClusteringData)];
         continue
     else
@@ -145,11 +148,15 @@ for i = 1:height(Calls)
     clustAssign = [clustAssign; Calls.Type(i)];
 end
 
+try
 spectrogramOptions.windowsize=wind;
 spectrogramOptions.overlap=noverlap;
 spectrogramOptions.nfft=nfft;
+catch
+disp('Clustering from Previous Clustering Save File')    
+end
 
-ClusteringData = cell2table(ClusteringData, 'VariableNames', {'Spectrogram', 'Box','MinFreq', 'Duration', 'xFreq', 'xTime', 'Filename', 'callID', 'Power', 'Bandwidth'});
+ClusteringData = cell2table(ClusteringData(:,1:10), 'VariableNames', {'Spectrogram', 'Box','MinFreq', 'Duration', 'xFreq', 'xTime', 'Filename', 'callID', 'Power', 'Bandwidth'});
 
 close(h)
 
