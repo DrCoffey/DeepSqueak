@@ -160,8 +160,10 @@ FigWidth=300;FigHeight=100;
 FigPos(3:4)=[FigWidth FigHeight];
 FigColor=get(0,'Defaultuicontrolbackgroundcolor');
 TextForeground = Black;
-if sum(abs(TextForeground - FigColor)) < 1
-    TextForeground = White;
+LabelTextForeground = Black;
+
+if sum(abs(LabelTextForeground - FigColor)) < 1
+    LabelTextForeground = White;
 end
 InputFig=dialog(                               ...
                'Visible'         ,'off'      , ...
@@ -354,7 +356,7 @@ for lp=1:NumQuest,
         TextInfo     , ...
         'Position'   ,[ TxtXOffset QuestYOffset(lp)], ...
         'String'     ,WrapQuest{lp}                 , ...
-        'Color'      ,TextForeground                , ...
+        'Color'      ,LabelTextForeground                , ...
         'Interpreter',Interpreter                   , ...
         'Tag'        ,QuestTag                        ...
     );
@@ -439,6 +441,8 @@ Data.ButtonHeight = BtnHeight;
 Data.EditHeight = TxtHeight+4;
 Data.Offset = DefOffset;
 set(InputFig ,'Visible','on','UserData',Data);
+set(OKHandle,'ForegroundColor','green');
+set(CancelHandle,'ForegroundColor','red');
 % This drawnow is a hack to work around a bug
 drawnow
 %set(findall(InputFig),'Units','normalized','HandleVisibility','callback');

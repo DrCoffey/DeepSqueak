@@ -401,7 +401,6 @@ switch eventdata.Character
         handles.data.calls.Type(handles.data.currentcall) = categorical(handles.data.settings.labels(idx));
         update_fig(hObject, eventdata, handles);
 end
-disp(eventdata.Character);
 % drawnow
 
 function figure1_KeyPressFcn(hObject, eventdata, handles)
