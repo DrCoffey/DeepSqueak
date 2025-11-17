@@ -65,7 +65,7 @@ switch inputParameters
         if isempty(FromExisting); return; end
         switch FromExisting % Load Model
             case 'No'
-                [encoderNet, decoderNet, options, ClusteringData] = create_VAE_model(handles);
+                [encoderNet, decoderNet, options, ClusteringData, clustAssign] = create_VAE_model(handles);
                 [FileName, PathName] = uiputfile(fullfile(handles.data.squeakfolder, 'Clustering Models', 'Variational Autoencoder Model.mat'), 'Save clustering model (optional)');
                 if ~isnumeric(FileName) % Save the new model
                     save(fullfile(PathName, FileName), 'encoderNet', 'decoderNet', 'options');
@@ -82,11 +82,6 @@ switch inputParameters
         freq=zscore(freq,0,'all');
         data=zscore(data,0,'all');
         data=[data freq];
-        % if ~exist('clustAssign')
-        % C = get_kmeans_centroids(data);
-        % [clustAssign,D] = knnsearch(C,data,'Distance','euclidean');
-        % end
-
 end
 
 imsize = str2double(clusterParameters(1:2))';
@@ -125,8 +120,10 @@ switch colorType
         ColorData = HSLuv_to_RGB(256, 'H',  [0 270], 'S', 100, 'L', 75); % Make a color map for each category
         ColorData = reshape(ColorData,size(ColorData,1),1,size(ColorData,2));
     case 'Cluster'
+        if ~isempty(clustAssign)
         [clustAssignID, cName] = findgroups(clustAssign); % Convert categories into numbers
         ClusteringData.Cluster = clustAssignID; % Append the category number to clustering data
+        ClusteringData.Type = clustAssign;
         
         % make it so that adjacent clusters are generally different colors.
         % it turns out that this isn't trivial, so try 200 different color
@@ -159,6 +156,14 @@ switch colorType
         h = image(reshape(cMap,[],1,3));
         yticklabels(h.Parent, cellstr(cName));
         yticks(h.Parent,1:length(cName));
+        else
+        disp('No Cluster Assignments in File/s: Switching to Frequency Mapping')    
+        minfreq = prctile(ClusteringData.MinFreq, 1);
+        maxfreq = prctile(ClusteringData.MinFreq + ClusteringData.Bandwidth, 99);
+        ColorData = HSLuv_to_RGB(256, 'H',  [0 270], 'S', 100, 'L', 75); % Make a color map for each category
+        ColorData = reshape(ColorData,size(ColorData,1),1,size(ColorData,2));
+        colorType='Frequency';
+        end
 end
 
 
@@ -187,7 +192,7 @@ for i = calls2plot'
         case 'Cluster'
             colorMask = reshape(cMap(call.Cluster,:),1,1,3);
     end
-    im(iy,ix,:) = max(im(iy,ix,:),uint8(single(call.Spectrogram{:}) .* colorMask - blackLevel));
+    im(iy,ix,:) = max(im(iy,ix,:),uint8(single(imreducehaze(uint8(call.Spectrogram{:}))) .* colorMask));
 end
 
 
@@ -201,6 +206,11 @@ end
 
 [fname,fpath] = uiputfile({'*.jpg'; '*.png'},'Save image', 'embeddings');
 imwrite(im2uint8(im(y1:y2,x1:x2,:)),fullfile(fpath,fname))
+
+[FileName,PathName] = uiputfile('Extracted Contours.mat','Save Clustering Data with VAE/UMAP Embeddings (optional)');
+if FileName ~= 0
+   save(fullfile(PathName,FileName),'ClusteringData','-v7.3');
+end
 
 % Open the image in a file manager
 if ispc % Open the file in windows explorer

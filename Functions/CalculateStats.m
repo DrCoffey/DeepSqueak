@@ -5,7 +5,7 @@ end
 
 %% Ridge Detection
 % Calculate entropy at each time point
-stats.Entropy = geomean(I,1) ./ mean(I,1);
+stats.Entropy = geo_mean(I,1) ./ mean(I,1);
 
 
 stats.Entropy = smooth(stats.Entropy,0.1,'rlowess')';

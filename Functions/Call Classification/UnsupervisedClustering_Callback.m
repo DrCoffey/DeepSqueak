@@ -138,23 +138,7 @@ while ~finished
             end
             [clustAssign] = GetARTwarpClusters(ClusteringData.xFreq,ARTnet,settings);
     end
-    
-    %     data = freq;
-    %         epsilon = 0.0001;
-    % mu = mean(data);
-    % data = data - mean(data)
-    % A = data'*data;
-    % [V,D,~] = svd(A);
-    % whMat = sqrt(size(data,1)-1)*V*sqrtm(inv(D + eye(size(D))*epsilon))*V';
-    % Xwh = data*whMat;
-    % invMat = pinv(whMat);
-    %
-    % data = Xwh
-    %
-    % data  = (freq-mean(freq)) ./ std(freq)
-    % [clustAssign, C]= kmeans(data,10,'Distance','sqeuclidean','Replicates',10);
-    
-    
+  
     %% Assign Names
     % If the
     if strcmp(FromExisting, 'Yes')
@@ -198,6 +182,13 @@ switch saveChoice
         update_folders(hObject, eventdata, handles);
         if isfield(handles,'current_detection_file')
             loadcalls_Callback(hObject, eventdata, handles, true)
+        end
+        [clustAssignID, ~] = findgroups(clustAssign); % Convert categories into numbers
+        ClusteringData.Cluster = clustAssignID; % Append the category number to clustering data
+        ClusteringData.Type = clustAssign;
+        [FileName,PathName] = uiputfile('Extracted Contours.mat','Save Clustering Data with Updated Cluster Assignments (Optional)');
+        if FileName ~= 0
+        save(fullfile(PathName,FileName),'ClusteringData','-v7.3');
         end
     case 'No'
         return

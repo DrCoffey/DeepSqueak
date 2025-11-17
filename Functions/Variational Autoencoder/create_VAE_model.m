@@ -1,9 +1,9 @@
-function [encoderNet, decoderNet, options, ClusteringData] = create_VAE_model(handles)
+function [encoderNet, decoderNet, options, ClusteringData, clustAssign] = create_VAE_model(handles)
 
 options.imageSize = [128, 128, 1];
 
 % Creates fixed frequency spectrograms
-[ClusteringData, ~, options.freqRange, options.maxDuration, options.spectrogram] = CreateClusteringData(handles, 'scale_duration', true, 'fixed_frequency', true,'forClustering', true, 'save_data', true);
+[ClusteringData, clustAssign, options.freqRange, options.maxDuration, options.spectrogram] = CreateClusteringData(handles, 'scale_duration', true, 'fixed_frequency', true,'forClustering', true, 'save_data', true);
 
 % Creates spectrograms only within the box
 %[ClusteringData, ~, options.freqRange, options.maxDuration, options.spectrogram] = CreateClusteringData(handles, 'forClustering', true, 'save_data', true);
