@@ -154,8 +154,15 @@ switch colorType
         cMap = cMap(colorOrder,:);
         figure('Color','w') % Display the colors
         h = image(reshape(cMap,[],1,3));
+        if isa(cName,'double')
+        yticklabels(h.Parent, cName);
+        yticks(h.Parent,1:length(cName));
+        else
         yticklabels(h.Parent, cellstr(cName));
         yticks(h.Parent,1:length(cName));
+        end
+        ax=gca;
+        ax.Color = 'k';
         else
         disp('No Cluster Assignments in File/s: Switching to Frequency Mapping')    
         minfreq = prctile(ClusteringData.MinFreq, 1);

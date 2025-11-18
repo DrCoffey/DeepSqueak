@@ -10,7 +10,7 @@ ClusteringData = table();
 if isfield(data, 'Calls')
     Calls = data.Calls;
 elseif nargout < 3 % If ClusteringData is requested, we don't need Calls
-    error('This doesn''t appear to be a detection file!')
+    warning('This doesn''t appear to be a detection file!')
 end
 
 if isfield(data, 'audiodata')
