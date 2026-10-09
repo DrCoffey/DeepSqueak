@@ -178,6 +178,10 @@ set(handles.focusWindow,'YTick',[]);
 update_folders(hObject, eventdata, handles);
 handles = guidata(hObject);  % Get newest version of handles
 
+% Background subtraction menu items
+handles = addBackgroundMenu(handles);
+updateBackgroundIndicator(handles);
+
 % Set the sliders to the saved values
 % set(handles.TonalitySlider, 'Value', handles.data.settings.EntropyThreshold);
 

@@ -14,11 +14,31 @@ trainingdata = cellstr(trainingdata);
 
 %% Load the data into a single table
 AllSettings = [];
+AllBackgrounds = [];
 for i = 1:length(trainingdata)
     load([trainingpath trainingdata{i}],'TTable','wind','noverlap','nfft','imLength','imScale');
     TrainingTables = [TrainingTables; TTable];
     AllSettings = [AllSettings; wind noverlap nfft];
+    % Were these images made from background subtracted spectrograms?
+    if ismember('background', who('-file', [trainingpath trainingdata{i}]))
+        tmp = load([trainingpath trainingdata{i}], 'background');
+        AllBackgrounds = [AllBackgrounds; tmp.background];
+    else
+        AllBackgrounds = [AllBackgrounds; backgroundInfo([])];
+    end
 end
+
+%% Create a warning if only some images were background subtracted
+if length(unique([AllBackgrounds.used])) > 1
+    mixed = questdlg({'Some images were made with background subtraction and some without','Network may not work as expected'}, ...
+        'Warning','Train anyway','Cancel','Cancel');
+    if ~strcmp(mixed,'Train anyway'); return; end
+end
+background = backgroundInfo([]);
+background.used = any([AllBackgrounds.used]);
+background.id = strjoin(unique({AllBackgrounds.id}), ', ');
+background.name = strjoin(unique({AllBackgrounds.name}), ', ');
+background.file = strjoin(unique({AllBackgrounds.file}), ', ');
 
 %% Create a warning if training files were created with different parameters
 warningmsg = 'Train anyway';
@@ -47,7 +67,7 @@ noverlap = max(AllSettings(:,2));
 nfft = max(AllSettings(:,3));
 
 version = handles.DSVersion;
-save(fullfile(PathName,FileName),'detector','layers','options','wind','noverlap','nfft','version','imLength','imScale');
+save(fullfile(PathName,FileName),'detector','layers','options','wind','noverlap','nfft','version','imLength','imScale','background');
 
 %% Update the menu
 update_folders(hObject, eventdata, handles);

@@ -8,6 +8,10 @@ function create_training_images_Callback(hObject, eventdata, handles)
 if isnumeric(trainingdata); return; end
 trainingdata = cellstr(trainingdata);
 
+% If any of these recordings has a background assigned, ask whether to apply it
+applyBackground = askApplyBackground(fullfile(trainingpath, trainingdata), handles.data.settings.backgroundfolder, 'training images');
+if isempty(applyBackground); return; end
+
 % Get training settings
 prompt = {'Window Length (s)','Overlap (%)','NFFT (s)','Image Length (s)',...
     'Number of augmented duplicates'};
@@ -31,6 +35,11 @@ for k = 1:length(trainingdata)
     % Load the detection and audio files
     audioReader = squeakData();
     [Calls, audioReader.audiodata] = loadCallfile([trainingpath trainingdata{k}],handles);
+    if applyBackground
+        audioReader.background = backgroundForAudio(audioReader.audiodata, handles.data.settings.backgroundfolder);
+    else
+        audioReader.background = [];
+    end
     
     % Make a folder for the training images
     [~, filename] = fileparts(trainingdata{k});
@@ -93,7 +102,8 @@ for k = 1:length(trainingdata)
                 fullfile(fname,IMname),...
                 AmplitudeRange,...
                 replicatenumber,...
-                StretchRange);
+                StretchRange,...
+                audioReader.background);
             TTable = [TTable;{fullfile('Training','Images',filename,IMname), box}];
         end
         catch
@@ -104,14 +114,20 @@ for k = 1:length(trainingdata)
     end
     % Save AutoScaling Function
     imScale = @autoScale;
-    save(fullfile(handles.data.squeakfolder,'Training',[filename '.mat']),'TTable','wind','noverlap','nfft','imLength','imScale');
-    disp(['Created ' num2str(height(TTable)) ' Training Images']);
+    % Record whether the images were made from background subtracted spectrograms
+    background = backgroundInfo(audioReader.background);
+    save(fullfile(handles.data.squeakfolder,'Training',[filename '.mat']),'TTable','wind','noverlap','nfft','imLength','imScale','background');
+    if background.used
+        disp(['Created ' num2str(height(TTable)) ' Training Images, with background "' background.name '" (' background.id(1:12) ') removed']);
+    else
+        disp(['Created ' num2str(height(TTable)) ' Training Images, without background removal']);
+    end
 end
 close(h)
 end
 
 % Create training images and boxes
-function [im, box] = CreateTrainingData(audio,rate,Calls,wind,noverlap,nfft,freqCutoff,filename,AmplitudeRange,replicatenumber,StretchRange)
+function [im, box] = CreateTrainingData(audio,rate,Calls,wind,noverlap,nfft,freqCutoff,filename,AmplitudeRange,replicatenumber,StretchRange,Background)
 
 % Augment by adjusting the gain
 % The first training image should not be augmented
@@ -133,6 +149,7 @@ end
     round(rate * nfft*StretchFactor),...
     rate,...
     'yaxis');
+[~, p] = applyBackgroundSubtraction(Background, [], p, round(rate * wind*StretchFactor), round(rate * nfft*StretchFactor), rate);
 
 % -- remove frequencies bellow well outside of the box
 lowCut=(min(Calls.Box(:,2))-(min(Calls.Box(:,2))*.75))*1000;

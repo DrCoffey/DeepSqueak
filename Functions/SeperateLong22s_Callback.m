@@ -1,5 +1,8 @@
-function NewCalls = SeperateLong22s_Callback(hObject, eventdata, handles, inputfile, Calls)
+function NewCalls = SeperateLong22s_Callback(hObject, eventdata, handles, inputfile, Calls, Background)
 %% Get if clicked through menu, or using the long call network
+if nargin < 6
+    Background = [];
+end
 if nargin == 3
     [trainingdata, trainingpath] = uigetfile([handles.data.settings.detectionfolder '/*.mat'],'Select Detection File','MultiSelect', 'off');
     [audioname, audiopath] = uigetfile({
@@ -15,6 +18,13 @@ if nargin == 3
         }, ['Select Corresponding Audio File for ' trainingdata], handles.data.settings.audiofolder);
 
     inputfile = fullfile(audiopath, audioname);
+    applyBackground = askApplyBackground(inputfile, handles.data.settings.backgroundfolder, 'the spectrograms that calls are split on');
+    if isempty(applyBackground); return; end
+    if applyBackground
+        Background = backgroundForAudio(inputfile, handles.data.settings.backgroundfolder);
+    else
+        Background = [];
+    end
     hc = waitbar(0,'Loading File');
     Calls = loadCallfile([trainingpath trainingdata],handles);
 
@@ -86,6 +96,7 @@ for i=1:length(begin_time)
     nfft = round(audiodata.SampleRate * 0.02);
 
     [s, fr, ti] = spectrogram(audio,windowsize,noverlap,nfft,audiodata.SampleRate,'yaxis');
+    s = applyBackgroundSubtraction(Background, s, [], windowsize, nfft, audiodata.SampleRate);
 
     % Get the part of the spectrogram within the frequency bandwidth
     x1 = axes2pix(length(ti),ti,call_duration(i));

@@ -34,6 +34,7 @@ nfft = round(rate * options.nfft);
 if make_spectrogram
     audio = audioReader.AudioSamples(box(1), box(1) + box(3));
     [s, fr, ti, p] = spectrogram(audio,windowsize,noverlap,nfft,rate,'yaxis');
+    [s, p] = applyBackgroundSubtraction(audioReader.background, s, p, windowsize, nfft, rate);
 else
     s  = handles.data.page_spect.s(:,handles.data.page_spect.t > call.Box(1) & handles.data.page_spect.t < sum(call.Box([1,3])));
     ti = handles.data.page_spect.t(  handles.data.page_spect.t > call.Box(1) & handles.data.page_spect.t < sum(call.Box([1,3])));

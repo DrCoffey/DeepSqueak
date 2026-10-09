@@ -1,5 +1,10 @@
-function  Calls=SqueakDetect(inputfile,networkfile,fname,Settings,currentFile,totalFiles,networkname)
+function  Calls=SqueakDetect(inputfile,networkfile,fname,Settings,currentFile,totalFiles,networkname,Background)
 % Find Squeaks
+% Background is an optional background definition (see "Background
+% Subtraction"). If omitted or empty, spectrograms are not altered.
+if nargin < 8
+    Background = [];
+end
 Calls = table();
 h = waitbar(0,'Initializing');
 
@@ -27,6 +32,26 @@ end
 wind = round(wind * audio_info.SampleRate);
 noverlap = round(noverlap * audio_info.SampleRate);
 nfft = round(nfft * audio_info.SampleRate);
+
+%% Check the background before starting
+% Errors inside the detection loop are caught and the chunk skipped, so a
+% background that can't be applied must stop detection here instead.
+if ~isempty(Background)
+    try
+        backgroundSpectrum(Background, wind, nfft, audio_info.SampleRate);
+    catch ME
+        close(h);
+        rethrow(ME);
+    end
+end
+% A network should see the kind of images it was trained on
+if isfield(networkfile, 'background') && networkfile.background.used ~= ~isempty(Background)
+    if networkfile.background.used
+        warning('DeepSqueak:background:networkMismatch', '%s was trained on background subtracted images, but no background definition is active.', networkname);
+    else
+        warning('DeepSqueak:background:networkMismatch', '%s was trained without background subtraction, but a background definition is active.', networkname);
+    end
+end
 
 %% Get settings
 % (1) Detection length (s)
@@ -97,6 +122,7 @@ for i = 1:length(chunks)-1
         end
         
         [~,fr,ti,p] = spectrogram(audio(:,1),wind,noverlap,nfft,audio_info.SampleRate,'yaxis'); % Just use the first audio channel
+        [~, p] = applyBackgroundSubtraction(Background, [], p, wind, nfft, audio_info.SampleRate);
         upper_freq = find(fr<=HighCutoff*1000,1,'last');
         lower_freq = find(fr>=LowCutoff*1000,1,'first');
         p = p(lower_freq:upper_freq,:);
@@ -146,7 +172,7 @@ Calls = merge_boxes(AllBoxes, AllScores, AllClass, audio_info, 1, score_cuttoff,
 % Merge long 22s if detected with a long 22 network
 if contains(networkname,'long','IgnoreCase',true) & ~isempty(Calls)
     try
-        Calls = SeperateLong22s_Callback([],[],[],inputfile,Calls);
+        Calls = SeperateLong22s_Callback([],[],[],inputfile,Calls,Background);
     catch ME
         disp(ME)
     end

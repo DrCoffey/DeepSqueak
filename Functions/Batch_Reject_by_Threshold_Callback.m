@@ -76,6 +76,11 @@ clear d
 
 if cancelled; return; end
 
+% If any of these recordings has a background assigned, ask whether to apply it
+applyBackground = askApplyBackground(fullfile({handles.detectionfiles(selections).folder}, {handles.detectionfiles(selections).name}), ...
+    handles.data.settings.backgroundfolder, 'the statistics that calls are accepted or rejected on');
+if isempty(applyBackground); return; end
+
 % Select rules were accept or reject is chosen
 rules = rules(~cellfun(@isempty,rules(:,1)),:);
 rules(:,1) = num2cell(contains(rules(:,1),'Accept'));
@@ -89,6 +94,11 @@ for currentfile = selections % Do this for each file
     accept = false(height(Calls),1);
     audioReader = squeakData([]);
     audioReader.audiodata = audiodata;
+    if applyBackground
+        audioReader.background = backgroundForAudio(audiodata, handles.data.settings.backgroundfolder);
+    else
+        audioReader.background = [];
+    end
         
     for i = 1:height(Calls)
         waitbar(i ./ height(Calls), h, ['Processing file ' num2str(find(selections == currentfile)) ' of ' num2str(length(selections))]);

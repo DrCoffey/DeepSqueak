@@ -1,7 +1,15 @@
 function excel_Callback(hObject, eventdata, handles)
 
     function t = loop_calls(Calls, hc,includereject,waitbar_text,handles,call_file, audioReader)
-            exceltable = [{'File'} {'ID'} {'Label'} {'Accepted'} {'Score'} {'Begin Time (s)'} {'End Time (s)'} {'Call Length (s)'} {'Principal Frequency (kHz)'} {'Low Freq (kHz)'} {'High Freq (kHz)'} {'Delta Freq (kHz)'} {'Frequency Standard Deviation (kHz)'} {'Slope (kHz/s)'} {'Sinuosity'} {'Mean Power (dB/Hz)'} {'Tonality'} {'Peak Freq (kHz)'}];        for i = 1:height(Calls) % Do this for each call
+            exceltable = [{'File'} {'ID'} {'Label'} {'Accepted'} {'Score'} {'Begin Time (s)'} {'End Time (s)'} {'Call Length (s)'} {'Principal Frequency (kHz)'} {'Low Freq (kHz)'} {'High Freq (kHz)'} {'Delta Freq (kHz)'} {'Frequency Standard Deviation (kHz)'} {'Slope (kHz/s)'} {'Sinuosity'} {'Mean Power (dB/Hz)'} {'Tonality'} {'Peak Freq (kHz)'} {'Background Definition'}];
+            % Statistics depend on whether a background was subtracted, so say which
+            background = backgroundInfo(audioReader.background);
+            if background.used
+                background = sprintf('%s (%s)', background.name, background.id(1:12));
+            else
+                background = 'none';
+            end
+            for i = 1:height(Calls) % Do this for each call
             waitbar(i/height(Calls),hc,waitbar_text);
 
             if includereject || Calls.Accept(i)
@@ -25,12 +33,12 @@ function excel_Callback(hObject, eventdata, handles)
                 Score = Calls.Score(i);
                 accepted = Calls.Accept(i);
                 File = call_file;
-                exceltable = [exceltable; {File} {ID} {Label} {accepted} {Score} {stats.BeginTime} {stats.EndTime} {stats.DeltaTime} {stats.PrincipalFreq} {stats.LowFreq} {stats.HighFreq} {stats.DeltaFreq} {stats.stdev} {stats.Slope} {stats.Sinuosity} {stats.MeanPower} {stats.SignalToNoise} {stats.PeakFreq}];            end
+                exceltable = [exceltable; {File} {ID} {Label} {accepted} {Score} {stats.BeginTime} {stats.EndTime} {stats.DeltaTime} {stats.PrincipalFreq} {stats.LowFreq} {stats.HighFreq} {stats.DeltaFreq} {stats.stdev} {stats.Slope} {stats.Sinuosity} {stats.MeanPower} {stats.SignalToNoise} {stats.PeakFreq} {background}];            end
 
         end
         t = cell2table(exceltable);
 
     end
 
-    export_Calls(@loop_calls,'_Stats.xlsx',hObject, eventdata, handles);
+    export_Calls(@loop_calls,'_Stats.xlsx',hObject, eventdata, handles, true);
 end

@@ -13,6 +13,7 @@ audio = handles.data.AudioSamples(window_start, window_stop);
 
 %% Make the spectrogram
 [s, f, t] = spectrogram(audio,windowsize,noverlap,nfft,handles.data.audiodata.SampleRate,'yaxis');
+s = applyBackgroundSubtraction(handles.data.background, s, [], windowsize, nfft, handles.data.audiodata.SampleRate);
 t = t + window_start; % Add the start of the window the time units
 s_display = scaleSpectogram(s, handles.data.settings.spect.type, windowsize, handles.data.audiodata.SampleRate);
 

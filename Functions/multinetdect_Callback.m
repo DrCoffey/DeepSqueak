@@ -35,6 +35,11 @@ elseif SingleDetect
     networkselections = get(handles.neuralnetworkspopup,'Value');
 end
 
+% If any of these recordings has a background assigned, ask whether to apply it
+applyBackground = askApplyBackground(fullfile({handles.audiofiles(audioselections).folder}, {handles.audiofiles(audioselections).name}), ...
+    handles.data.settings.backgroundfolder, 'detections');
+if isempty(applyBackground); return; end
+
 Settings = [];
 for k=1:length(networkselections)
     prompt = {'Total Analysis Length (Seconds; 0 = Full Duration)','Frequency Cut Off High (kHZ)','Frequency Cut Off Low (kHZ)','Score Threshold (0-1)','Append Date to FileName (1 = yes)'};
@@ -65,6 +70,12 @@ handles = guidata(hObject);  % Get newest version of handles
 %% For Each File
 for j = 1:length(audioselections)
     CurrentAudioFile = audioselections(j);
+    % The background definition assigned to this recording, if any
+    if applyBackground
+        Background = backgroundForAudio(fullfile(handles.audiofiles(CurrentAudioFile).folder,handles.audiofiles(CurrentAudioFile).name), handles.data.settings.backgroundfolder);
+    else
+        Background = [];
+    end
     % For Each Network
     Calls = [];
     for k=1:length(networkselections)
@@ -77,7 +88,7 @@ for j = 1:length(audioselections)
         NeuralNetwork=load(networkpath);%get currently selected option from menu
         close(h);
         
-        Calls = [Calls; SqueakDetect(AudioFile,NeuralNetwork,handles.audiofiles(CurrentAudioFile).name,Settings(:,k),j,length(audioselections),networkname)];
+        Calls = [Calls; SqueakDetect(AudioFile,NeuralNetwork,handles.audiofiles(CurrentAudioFile).name,Settings(:,k),j,length(audioselections),networkname,Background)];
 
     end
     
@@ -109,7 +120,8 @@ for j = 1:length(audioselections)
         detection_metadata = struct(...
             'Settings', Settings,...
             'detectiontime', detectiontime,...
-            'networkselections', {handles.networkfiles(networkselections).name});
+            'networkselections', {handles.networkfiles(networkselections).name},...
+            'background', backgroundInfo(Background));
         audiodata = audioinfo(AudioFile);
         save(fname,'Calls', 'detection_metadata', 'audiodata' ,'-v7.3', '-mat');
     end

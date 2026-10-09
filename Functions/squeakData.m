@@ -18,6 +18,14 @@ classdef squeakData < handle
         pageSizes = [2, 3, 5, 10, 30] % List of page size values in the dropdown box
         focusSizes = [.25, .5, 1, 2, 5] % List of focus size values in the dropdown box
         clim = [0 1];
+        % Background definition removed from this recording's spectrograms.
+        % [] = none. 'unresolved' = not looked up yet; computing a
+        % spectrogram is then an error.
+        background = [];
+        % In the main window: the definition assigned to the open recording,
+        % and whether removal is switched on for it
+        backgroundAssigned = [];
+        applyBackground = true;
     end
     properties (Access = private)
         AudioStartSample = 0;
@@ -52,6 +60,8 @@ classdef squeakData < handle
             obj.defaultSettings.spect.noverlap = 0.0016;
             obj.defaultSettings.spect.nfft = 0.0032;
             obj.defaultSettings.spect.type = 'Amplitude';
+            % Folder of background definitions and per-recording assignments
+            obj.defaultSettings.backgroundfolder = fullfile(obj.squeakfolder, 'Backgrounds/');
         end
         
         
@@ -81,6 +91,13 @@ classdef squeakData < handle
             obj.AudioStartSample = 0;
             obj.AudioStopSample = 0;
             obj.audiodata = audiodata;
+            % A new recording: its background must be looked up again
+            obj.backgroundAssigned = [];
+            if isempty(audiodata)
+                obj.background = [];
+            else
+                obj.background = 'unresolved';
+            end
         end
         
         

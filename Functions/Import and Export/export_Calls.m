@@ -1,4 +1,6 @@
-function export_Calls(loop_function, file_postfix, hObject, eventdata, handles)
+function export_Calls(loop_function, file_postfix, hObject, eventdata, handles, usesSpectrograms)
+% usesSpectrograms is true for exports whose values are measured from
+% spectrograms. Those ask whether to apply background removal.
 % hObject    handle to excel (see GCBO)
 % This function xports selected call files to excel sheets with stats for each call
 
@@ -22,6 +24,13 @@ end
 PathName = uigetdir(handles.data.settings.detectionfolder,'Select Output Folder');
 if isnumeric(PathName); return; end
 
+% If any of these recordings has a background assigned, ask whether to apply it
+applyBackground = false;
+if nargin > 5 && usesSpectrograms
+    applyBackground = askApplyBackground(fullfile(fpath, fname), handles.data.settings.backgroundfolder, 'call statistics');
+    if isempty(applyBackground); return; end
+end
+
 t_merged = [];
 
 %% Make the output tables
@@ -30,6 +39,11 @@ for j = 1:length(fname) % Do this for each file
     currentfile = fullfile(fpath,fname{j});
     audioReader = squeakData([]);
     [Calls, audioReader.audiodata] = loadCallfile(currentfile,handles);
+    if applyBackground
+        audioReader.background = backgroundForAudio(audioReader.audiodata, handles.data.settings.backgroundfolder);
+    else
+        audioReader.background = [];
+    end
     
     % Name the output file. If the file already exists, delete it so that
     % writetable overwrites the data instead of appending it to the table.    

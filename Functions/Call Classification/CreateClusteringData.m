@@ -40,6 +40,10 @@ if isnumeric(fileName); ClusteringData = {}; return;end
 % If one file is selected, turn it into a cell
 fileName = cellstr(fileName);
 
+% If any of these recordings has a background assigned, ask whether to apply it
+applyBackground = askApplyBackground(fullfile(filePath, fileName), handles.data.settings.backgroundfolder, 'call images and contours');
+if isempty(applyBackground); ClusteringData = {}; return; end
+
 h = waitbar(0,'Initializing');
 audioReader = squeakData([]);
 %% Load the data
@@ -107,6 +111,11 @@ for i = 1:height(Calls)
     % Change the audio file if needed
     if Calls.audiodata_index(i) ~= currentAudioFile;
         audioReader.audiodata = audiodata{Calls.audiodata_index(i)};
+        if applyBackground
+            audioReader.background = backgroundForAudio(audioReader.audiodata, handles.data.settings.backgroundfolder);
+        else
+            audioReader.background = [];
+        end
         currentAudioFile = Calls.audiodata_index(i);
         perFileCallID = 0;
     end
@@ -163,6 +172,18 @@ close(h)
 if p.Results.save_data && ~all(cellfun(@(x) isempty(fields(x)), audiodata)) % If audiodata has no fields, then only extracted contours were used, so don't ask to save them again
     [FileName,PathName] = uiputfile('Extracted Contours.mat','Save extracted data for faster loading (optional)');
     if FileName ~= 0
-        save(fullfile(PathName,FileName),'ClusteringData','-v7.3');
+        % Record, for each detection file, whether its images and contours are background subtracted
+        background = [];
+        for j = 1:length(fileName)
+            if isfield(audiodata{j}, 'Filename')
+                info = backgroundInfo([]);
+                if applyBackground
+                    info = backgroundInfo(backgroundForAudio(audiodata{j}, handles.data.settings.backgroundfolder));
+                end
+                info.detectionFile = fileName{j};
+                background = [background; info];
+            end
+        end
+        save(fullfile(PathName,FileName),'ClusteringData','background','-v7.3');
     end
 end

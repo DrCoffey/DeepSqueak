@@ -1,5 +1,18 @@
 function initialize_display(hObject, eventdata, handles)
 
+% Find the background definition assigned to this recording, if any.
+% Removal starts switched on for a recording that has one.
+try
+    assigned = backgroundForAudio(handles.data.audiodata, handles.data.settings.backgroundfolder);
+catch ME
+    errordlg(ME.message, 'Background Subtraction');
+    rethrow(ME);
+end
+handles.data.applyBackground = true;
+handles.data.backgroundAssigned = assigned;
+handles.data.background = assigned;
+updateBackgroundIndicator(handles);
+
 % Remove anything currently in the axes
 cla(handles.contourWindow);
 cla(handles.detectionAxes);
